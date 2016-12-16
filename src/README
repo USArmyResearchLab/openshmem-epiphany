@@ -1,0 +1,38 @@
+KNOWN ISSUES:
+
+ 1) Use COPRTHR host callback API for SHMEM memory routines
+ 2) Fix shmem_info_get_name
+ 3) The [f]collect[32|64] routines are broken
+ 4) For the atomic fetch and set operations, do these need to use locks?
+
+NOTES ON MEMORY MANAGEMENT:
+
+  Within the context of the Epiphany architecture, shmem_malloc(),
+shmem_free(), shmem_realloc(), and shmem_align() should not be used.  Instead,
+the lower-level shmemx_sbrk(), and shmemx_brk() should be used to acquire and
+release memory resources.  The operations should also be symmetric for each
+processing element.
+
+  If you must use the malloc/free/realloc/align routines, you must adhere to
+the following rules:
+ 1) shmem_free must be called in the reverse order of allocation
+ 2) shmem_realloc can only be used on the last (re)allocated pointer
+ 3) shmem_align alignment must be a power of 2 greater than 8 (default is 8)
+Failure to follow these rules will result in undefined behavior.
+
+EXTENSIONS:
+
+ 1) A timing routine, __shmem_get_ctimer(), is used for timing critical
+    sections.  It uses the hardware timer on the Epiphany.  It is initialized
+    within shmem_init().
+ 2) As mentioned above, shmemx_sbrk() and shmemx_brk() should be used for
+    memory management.
+ 3) Optional compile-time #define options include:
+    SHMEM_HEAP_START #     : minimum local address of SHMEM heap
+    SHMEM_USE_WAND_BARRIER : hardware accelerated shmem_barrier_all
+	 SHMEM_USE_IPI_GET      : shmem_*_get routines w/ inter-processor interrupt
+    SHMEM_USE_CTIMER       : __shmem_*_ctimer routines for using CPU timer
+
+BUILDING:
+
+See the INSTALL file
