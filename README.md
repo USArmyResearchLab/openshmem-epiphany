@@ -18,7 +18,7 @@ Prerequisites
 -----
 
 All code has been tested on the [2015.1 Parallella
-image](ftp://ftp.parallella.org/ubuntu/dists/trusty/image/).
+image](http://ftp.parallella.org/ubuntu/dists/trusty/image/).
 
 In order to build and test this repository, at present you need to download and
 install the [COPRTHR-2 SDK](http://www.browndeertechnology.com/coprthr2.htm).
