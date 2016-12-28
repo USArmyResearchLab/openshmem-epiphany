@@ -39,6 +39,7 @@ run "$p1" ./get_nb.x
 run "$p1" ./get_nb_dual.x
 run "$p2" ./inc.x
 run "$p1" ./put.x
+run "$p1" ./put32.x
 run "$p1" ./put64.x
 run "$p1" ./put_nb.x
 run "$p1" ./put_nb_dual.x

@@ -49,12 +49,8 @@ int main (void)
 
 	int nxtpe = (me + 1) % npes;
 
-	char* source = (char*)shmem_malloc(NELEMENT);
-	char* target = (char*)shmem_malloc(NELEMENT);
-	for (int i = 0; i < NELEMENT; i++) {
-		source[i] = i + 1;
-		target[i] = -90;
-	}
+	unsigned char* source = (unsigned char*)shmem_malloc(NELEMENT*sizeof(unsigned char));
+	unsigned char* target = (unsigned char*)shmem_malloc(NELEMENT*sizeof(unsigned char));
 
 	if (me == 0) {
 		printf("# SHMEM PutMem times for variable message size\n" \
@@ -65,6 +61,12 @@ int main (void)
 	thus reducing effects of physical location of PEs */
 	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
+		// reset values for each iteration
+		for (int i = 0; i < NELEMENT; i++) {
+			source[i] = (unsigned char)((i + 1) & 0xff);
+			target[i] = 0xff;
+		}
+
 		shmem_barrier_all();
 		unsigned int t = __shmem_get_ctimer();
 
@@ -85,6 +87,10 @@ int main (void)
 			int nsec = (int)(fcycles * INV_GHZ);
 			printf ("%6d %7d\n", bytes, nsec);
 		}
+		int err = 0;
+		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
+		for (int i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
+		if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 
 	shmem_free(target);

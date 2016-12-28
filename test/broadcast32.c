@@ -48,10 +48,6 @@ int main (void)
 
 	int* source = (int*)shmem_malloc(NELEMENT * sizeof (*source));
 	int* target = (int*)shmem_malloc(NELEMENT * sizeof (*target));
-	for (int i = 0; i < NELEMENT; i++) {
-		source[i] = i + 1;
-		target[i] = -90;
-	}
 
 	if (me == 0) {
 		printf("# SHMEM Broadcast32 times for NPES = %d\n" \
@@ -60,6 +56,12 @@ int main (void)
 
 	for (int elements = 1; elements <= NELEMENT; elements <<= 1)
 	{
+		// reset values for each iteration
+		for (int i = 0; i < NELEMENT; i++) {
+			source[i] = i + 1;
+			target[i] = -90;
+		}
+
 		shmem_barrier_all();
 		unsigned int t = __shmem_get_ctimer();
 		for (int i = 0; i < NLOOP; i += 2) {
@@ -80,9 +82,10 @@ int main (void)
 			printf("%5d %7d\n", bytes, nsec);
 		}
 		else {
-			for (int i = 0; i < elements; i++) {
-				if (target[i] != (i + 1)) printf("# %d: ERROR %d\n", me, target[i]);
-			}
+			int err = 0;
+			for (int i = 0; i < elements; i++) if (target[i] != source[i]) err++;
+			for (int i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
+			if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 		}
 
 		shmem_barrier_all();

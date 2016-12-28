@@ -14,7 +14,7 @@ TARGETS = \
 	collect32.x collect64.x cswap_eq.x cswap_neq.x \
 	fadd.x fcollect32.x fcollect64.x fetch.x \
 	finc.x get.x get_ipi.x get_nb.x get_nb_dual.x hello.x inc.x put.x \
-	put64.x put_nb.x put_nb_dual.x reduce.x set.x \
+	put32.x put64.x put_nb.x put_nb_dual.x reduce.x set.x \
 	swap.x
 
 OBJ_FILES = $(SRC_FILES:.c=.o)

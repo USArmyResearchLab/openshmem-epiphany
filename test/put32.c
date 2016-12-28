@@ -28,17 +28,18 @@
  */
 
 /*
- * Performance test for shmem_broadcast64
+ * Performance test for shmem_put (latency and bandwidth)
+ *
  */
 
 #include <shmem.h>
 
-long pSyncA[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-
-#define NELEMENT 1024
-#define NLOOP 10000
+#define NELEMENT 2048
+#define NLOOP 1//0000
 #define INV_GHZ 1.66666667f // 1/0.6 GHz
+
+long pSync[SHMEM_REDUCE_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
+int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 
 int main (void)
 {
@@ -46,15 +47,19 @@ int main (void)
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
-	long long* source = (long long*)shmem_malloc(NELEMENT * sizeof (*source));
-	long long* target = (long long*)shmem_malloc(NELEMENT * sizeof (*target));
+	int nxtpe = (me + 1) % npes;
+
+	int* source = (int*)shmem_malloc(NELEMENT*sizeof(int));
+	int* target = (int*)shmem_malloc(NELEMENT*sizeof(int));
 
 	if (me == 0) {
-		printf("# SHMEM Broadcast64 times for NPES = %d\n" \
-			"# Bytes\tLatency (nanoseconds)\n", npes);
+		printf("# SHMEM Put32 times for variable message size\n" \
+			"# Bytes\tLatency (nanoseconds)\n");
 	}
 
-	for (int elements = 1; elements <= NELEMENT; elements <<= 1)
+	/* For int put we take average of all the times realized by a pair of PEs,
+	thus reducing effects of physical location of PEs */
+	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
 		// reset values for each iteration
 		for (int i = 0; i < NELEMENT; i++) {
@@ -64,29 +69,28 @@ int main (void)
 
 		shmem_barrier_all();
 		unsigned int t = __shmem_get_ctimer();
-		for (int i = 0; i < NLOOP; i += 2) {
-			/* alternate between 2 pSync arrays to synchronize consequent
-			collectives of even and odd iterations */
-			shmem_broadcast64 (target, source, elements, 0, 0, 0, npes, pSyncA);
-			shmem_broadcast64 (target, source, elements, 0, 0, 0, npes, pSyncB);
+
+		for (int j = 0; j < NLOOP; j++) {
+			shmem_put32(target, source, nelement, nxtpe);
 		}
+
 		t -= __shmem_get_ctimer();
 
+		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
+		t /= npes; /* Average time across all PEs for one put */
 		shmem_barrier_all();
 
 		if (me == 0) {
-			unsigned int bytes = elements * sizeof(*source);
-			unsigned int cycles = t / NLOOP;
+			int bytes = nelement * sizeof(*source);
+			int cycles = t / NLOOP;
 			float fcycles = (float)cycles;
 			int nsec = (int)(fcycles * INV_GHZ);
-			printf("%5d %7d\n", bytes, nsec);
+			printf ("%6d %7d\n", bytes, nsec);
 		}
-		else {
-			int err = 0;
-			for (int i = 0; i < elements; i++) if (target[i] != source[i]) err++;
-			for (int i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
-			if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
-		}
+		int err = 0;
+		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
+		for (int i = nelement; i < NELEMENT; i++) if (target[i] != -90) err++;
+		if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 
 	shmem_free(target);
