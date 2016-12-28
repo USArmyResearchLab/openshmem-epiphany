@@ -33,7 +33,7 @@
 #define SHMEM_X_GET_NBI(N,T,S) \
 void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi(dest, shmem_ptr(src,pe), nelems << S, pe); }
+{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(src,pe), nelems << S, pe); }
 
 #define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
 void \
@@ -48,7 +48,7 @@ void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 { \
 	if ((nelems << S) < 128) { \
-		shmemx_memcpy(dest, shmem_ptr(src,pe), nelems << S); \
+		shmemx_memcpy((void*)dest, shmem_ptr(src,pe), nelems << S); \
 	} \
 	else { \
 		volatile unsigned int* remote_ilatst = shmem_ptr((void*)0xf042c, pe); \
@@ -70,7 +70,7 @@ shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 #define SHMEM_X_GET(N,T,S) \
 void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy(dest, shmem_ptr((void*)src,pe), nelems << S); }
+{ shmemx_memcpy((void*)dest, shmem_ptr((void*)src,pe), nelems << S); }
 
 #endif
 
