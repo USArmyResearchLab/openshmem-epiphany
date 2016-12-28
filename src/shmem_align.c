@@ -30,15 +30,12 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	unsigned int minus1 = alignment - 1;
+	unsigned int mask = ~(minus1);
+	unsigned int x = (unsigned int)shmemx_sbrk(0);
+	unsigned int y = ((x + minus1) & mask) - x;
+	shmemx_sbrk(y); // advance to alignment address
+	return shmemx_sbrk(size);
 }

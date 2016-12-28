@@ -30,15 +30,35 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+#ifdef SHMEM_USE_WAND_BARRIER
+
+void shmem_barrier_all(void)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
+	shmem_quiet();
+	__asm__ __volatile__ (
+		"gid               \n" // disable interrupts
+		"wand              \n" // wait on AND
+		".balignw 8,0x01a2 \n" // nop align gie/idle pair to block
+		"gie               \n" // enable interrupts
+		"idle              \n" // to go sleep
+	);
+	__shmem.dma_used = 0; // reset
 }
 
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
+#else
+
+void shmem_barrier_all(void)
 {
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	shmem_quiet();
+	int c;
+	for (c = 0; c < __shmem.n_pes_log2; c++)
+	{
+		volatile long* lock = (volatile long*)(__shmem.barrier_sync + c);
+		*(__shmem.barrier_psync[c]) = 1;
+		while (*lock == SHMEM_SYNC_VALUE);
+		*lock = SHMEM_SYNC_VALUE;
+	}
+	__shmem.dma_used = 0; // reset
 }
+
+#endif

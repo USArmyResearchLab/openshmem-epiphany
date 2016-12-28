@@ -63,33 +63,11 @@ void shmem_init(void)
 	__shmem_ctimer_start();
 #endif
 #if !defined(__coprthr_device__)
-	__shmem_free_mem = (void*)e_group_config.local_mem_base; // This should already be double-word aligned
+	extern char _end;
+	__shmem.free_mem = (void*)&_end; // This should already be double-word aligned
 #endif
 	__shmem.local_mem_base = (void*)shmemx_sbrk(0);
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
 	shmem_barrier (0, 0, __shmem.n_pes, (long*)__shmem.barrier_sync);
 }
-
-
-void shmem_finalize(void)
-{ shmemx_brk(__shmem.local_mem_base); }
-
-void shmem_global_exit(int status)
-{ exit(status); }
-
-void shmem_info_get_version(int *major, int *minor)
-{
-	*major = SHMEM_MAJOR_VERSION;
-	*minor = SHMEM_MINOR_VERSION;
-}
-
-void shmem_info_get_name(char *name)
-{
-	char* tmp = SHMEM_VENDOR_STRING;
-	name[63] = '\0';
-	while ((*tmp)) (*name++) = (*tmp++);
-//	*name = '\0'; // null terminate
-}
-
-

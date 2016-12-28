@@ -30,15 +30,11 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+void* shmem_ptr(const void* dest, int pe)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	unsigned int row = pe >> SHMEM_ROW_SHIFT;
+	unsigned int col = pe & SHMEM_ROW_MASK;
+	unsigned int coreid = (row*0x40 + col) + e_group_config.group_id;
+	void* remote = (void*)((coreid << 20) | (unsigned int) dest);
+	return remote;
 }

@@ -27,18 +27,12 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
+
 #include "shmem.h"
+#include "internals.h"
 
-int __shmemx_brk(const void* ptr)
+void shmem_info_get_version(int *major, int *minor)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	*major = SHMEM_MAJOR_VERSION;
+	*minor = SHMEM_MINOR_VERSION;
 }

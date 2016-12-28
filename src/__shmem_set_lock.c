@@ -30,15 +30,19 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+void
+__shmem_set_lock (volatile long* x)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	__asm__ __volatile__(
+		"mov r63, #0                 \n" // zero lock pointer offset
+		"mov r62, #1                 \n" // value to write to lock
+		".Loop%=:                    \n"
+		"   mov r61, r62             \n" // copying value to write to lock
+		"   testset r61, [%[x], r63] \n" // test set
+		"   sub r61, r61, #0         \n" // checking result
+		"   bne .Loop%=              \n" // if zero, loop until we acquire lock
+		:
+		: [x] "r" (x)
+		: "r61", "r62", "r63"
+	);
 }

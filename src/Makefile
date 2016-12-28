@@ -1,4 +1,6 @@
-DEFS = -fdynamic-calls -DSHMEM_USE_CTIMER -std=c99
+EPIPHANY_CC = e-gcc
+EPIPHANY_AR = e-ar
+DEFS = -O3 -std=c99 -DSHMEM_USE_CTIMER
 INCS =
 LIBS =
 
@@ -65,7 +67,17 @@ OBJS += shmem_char_iput.o shmem_short_iput.o shmem_int_iput.o \
 	shmem_long_iget.o shmem_longlong_iget.o \
 	shmem_float_iget.o shmem_double_iget.o shmem_longdouble_iget.o
 
-OBJS += shmem_lock.o shmem_barrier.o shmem_aux.o shmem_mman.o
+OBJS += __shmem_lock_ptr.o __shmem_clear_lock.o __shmem_set_lock.o \
+	__shmem_set_lock_self.o __shmem_test_lock.o __shmem_barrier_all.o
+
+OBJS += shmem_set_lock.o shmem_test_lock.o shmem_clear_lock.o \
+	shmem_finalize.o shmem_global_exit.o shmem_info_get_name.o \
+	shmem_info_get_version.o
+
+OBJS += shmem_barrier.o shmem_barrier_all.o shmem_aux.o shmem_mman.o \
+	shmem_align.o shmem_free.o shmem_malloc.o shmem_realloc.o \
+	shmem_ptr.o shmem_finalize.o shmem_global_exit.o \
+	shmem_info_get_version.o shmem_info_get_name.o
 
 OBJS += shmem_char_p.o shmem_short_p.o shmem_int_p.o shmem_long_p.o \
 	shmem_longlong_p.o shmem_float_p.o shmem_double_p.o shmem_longdouble_p.o
@@ -78,10 +90,10 @@ all: $(TARGETS)
 .SUFFIXES: .S .c .o 
 
 .c.o:
-	coprcc -c $(DEFS) $(INCS) $(LIBS) $<
+	$(EPIPHANY_CC) $(DEFS) $(INCS) $(LIBS) -c $<
 
 libshmem.a: $(OBJS)
-	ar rcv libshmem.a $(OBJS)
+	$(EPIPHANY_AR) rcv $@ $(OBJS)
 
 .S.o:
 	e-gcc -c $<
@@ -91,4 +103,3 @@ clean:
 
 distclean: clean 
 	rm -f libshmem.a
-

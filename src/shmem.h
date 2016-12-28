@@ -33,6 +33,26 @@
 #include <stdlib.h>
 #include <complex.h>
 
+#if defined(__coprthr_device__) // Using COPRTHR
+
+#include "esyscall.h"
+#include "host_stdio.h"
+#define SHMEM_LOW_PRIORITY __dynamic_call
+#define shmemx_brk(ptr) coprthr_tls_brk(ptr)
+#define shmemx_sbrk(size) coprthr_tls_sbrk(size)
+
+#else // Using eSDK
+
+#include "e_coreid.h"
+#define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram"))) 
+#define shmemx_brk(ptr) __shmemx_brk(ptr)
+#define shmemx_sbrk(size) __shmemx_sbrk(size)
+
+int __shmemx_brk (const void* ptr);
+void* __attribute__((malloc)) __shmemx_sbrk(size_t size);
+
+#endif
+
 // Values specific to Epiphany-III architecture
 #define SHMEM_MAX_PES      16
 #define SHMEM_MAX_PES_LOG2 4
@@ -42,12 +62,6 @@
 #define SHMEM_HEAP_START   (SHMEM_USE_HEAP_START)
 #else
 #define SHMEM_HEAP_START   0x2000 
-#endif
-
-#if defined(__coprthr_device__)
-#define SHMEM_LOW_PRIORITY __dynamic_call
-#else
-#define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram"))) 
 #endif
 #define SHMEM_INLINE       inline __attribute__((__always_inline__))
 
@@ -123,6 +137,7 @@ typedef struct {
 	unsigned char volatile * volatile cdst1;
 	unsigned int coreid;
 	void* local_mem_base;
+	void* free_mem;
 	volatile long barrier_sync[SHMEM_BARRIER_SYNC_SIZE];
 #ifndef SHMEM_USE_WAND_BARRIER
 	long* barrier_psync[SHMEM_BARRIER_SYNC_SIZE];
@@ -130,68 +145,11 @@ typedef struct {
 	shmem_dma_desc_t dma_desc;
 } shmem_internals_t;
 
-//SHMEM_SCOPE shmem_internals_t __shmem = { 0 };
 extern shmem_internals_t __shmem;
-
-#if !defined(__coprthr_device__)
-typedef enum {
-	E_NULL         = 0,
-	E_EPI_PLATFORM = 1,
-	E_EPI_CHIP     = 2,
-	E_EPI_GROUP    = 3,
-	E_EPI_CORE     = 4,
-	E_EXT_MEM      = 5,
-	E_MAPPING      = 6,
-	E_SHARED_MEM   = 7
-} shmem_objtype_t;
-
-typedef enum {
-	E_E16G301 = 0,
-	E_E64G401 = 1
-} shmem_chiptype_t;
-
-typedef struct {
-	shmem_objtype_t  objtype;        // 0x28
-	shmem_chiptype_t chiptype;       // 0x2c
-	unsigned int     group_id;       // 0x30
-	unsigned int     group_row;      // 0x34
-	unsigned int     group_col;      // 0x38
-	unsigned int     group_rows;     // 0x3c
-	unsigned int     group_cols;     // 0x40
-	unsigned int     core_row;       // 0x44
-	unsigned int     core_col;       // 0x48
-	unsigned int     local_mem_base; // 0x4c
-} shmem_group_config_t;
-
-typedef struct {
-	shmem_objtype_t  objtype;        // 0x50
-	unsigned int     base;           // 0x54
-} shmem_emem_config_t;
-
-#endif
-
-
-
-#if defined(__coprthr_device__)
-#include "esyscall.h"
-#include "host_stdio.h"
-#endif
-
-#if !defined(__coprthr_device__)
-
-shmem_group_config_t 
-e_group_config __attribute__((section("workgroup_config")));
-
-shmem_emem_config_t  
-e_emem_config  __attribute__((section("external_mem_config")));
-
-#endif
-
 
 void __shmem_ctimer_start(void);
 
 #ifdef SHMEM_USE_CTIMER
-
 
 static unsigned int SHMEM_INLINE 
 __shmem_get_ctimer(void)
@@ -216,23 +174,6 @@ unsigned int __log2_ceil16(unsigned int x);
 
 void HOT
 shmemx_memcpy(unsigned char *pdst, unsigned char *psrc, unsigned int nbytes);
-
-
-#if defined(__coprthr_device__)
-
-#define shmemx_brk(ptr) coprthr_tls_brk(ptr)
-#define shmemx_sbrk(size) coprthr_tls_sbrk(size)
-
-#else
-
-#define shmemx_brk(ptr) __shmemx_brk(ptr)
-#define shmemx_sbrk(size) __shmemx_sbrk(size)
-
-__shmemx_brk (const void* ptr);
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size);
-
-#endif
-
 
 void* shmem_ptr(const void* dest, int pe);
 void* __attribute__((malloc)) shmem_malloc(size_t size);
@@ -420,13 +361,11 @@ DECL_SHMEM_X_WAIT_UNTIL(wait_until,long)
 void __attribute__((aligned(8))) __shmem_wand_isr(void);
 void __shmem_wand_barrier_init(void);
 void __shmem_wand_barrier(void);
-void shmem_barrier_all(void);
 
 #else
 
 void __shmem_dissemination_barrier_init(void);
 void __shmem_dissemination_barrier(void);
-void shmem_barrier_all(void);
 
 #endif
 
@@ -434,18 +373,8 @@ void
 __shmem_barrier_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync);
 
 void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
+void shmem_barrier_all(void);
 
-
-
-//#define SUM_OP  += pWrk[j]
-//#define PROD_OP *= pWrk[j]
-//#define AND_OP  &= pWrk[j]
-//#define OR_OP   |= pWrk[j]
-//#define XOR_OP  ^= pWrk[j]
-//#define MAX_OP  = (dest[i+j]>pWrk[j])?dest[i+j]:pWrk[j]
-//#define MIN_OP  = (dest[i+j]<pWrk[j])?dest[i+j]:pWrk[j]
-
-// XXX OP is not needed in decl, remove it -DAR
 
 #define DECL_SHMEM_X_TO_ALL(N,T,OP) \
 void HOT \
@@ -519,7 +448,6 @@ DECL_SHMEM_FCOLLECT_N(32,int)
 DECL_SHMEM_FCOLLECT_N(64,long long)
 
 
-
 #define DECL_SHMEM_COLLECT_N(N,T) \
 void \
 shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
@@ -542,7 +470,6 @@ shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst,
 
 DECL_SHMEM_ALLTOALLS_X(32,int)
 DECL_SHMEM_ALLTOALLS_X(64,long long)
-
 
 
 void shmemx_memcpy_nbi(void *dest, const void *src, int nbytes, int pe);
@@ -576,7 +503,6 @@ _Generic((dest), \
 	long*:        shmem_long_put_nbi, \
 	long long*:   shmem_longlong_put_nbi \
 )(dest,src,nelems,pe)
-
 
 
 #define DECL_SHMEM_X_GET_NBI(N,T,S) \
@@ -790,7 +716,6 @@ _Generic((dest), \
 )(dest,source,dst,sst,nelems,pe)
 
 
-
 void shmem_init(void);
 void shmem_finalize(void);
 void shmem_global_exit(int status);
@@ -817,4 +742,3 @@ static int shmem_addr_accessible(const void *addr, int pe)
 
 
 #endif
-

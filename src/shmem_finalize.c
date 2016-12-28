@@ -27,18 +27,9 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
+
 #include "shmem.h"
+#include "internals.h"
 
-int __shmemx_brk(const void* ptr)
-{
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
-}
+void shmem_finalize(void)
+{ shmemx_brk(__shmem.local_mem_base); }

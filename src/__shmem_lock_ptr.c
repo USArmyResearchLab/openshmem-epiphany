@@ -30,15 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+long*
+__shmem_lock_ptr (const long* p)
 {
-	__shmem.free_mem = (void*)ptr;
-	return 0;
-}
-
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
-{
-	void* ptr = __shmem.free_mem;
-	__shmem.free_mem += (size + 7) & 0xfffffff8; // Double-word alignment
-	return ptr;
+	if ((unsigned int)p <= 0x100000) // addr > 1 MB
+		return (long*)(__shmem.lock_high_bits | (unsigned int)p);
+	return (long*)p;
 }
