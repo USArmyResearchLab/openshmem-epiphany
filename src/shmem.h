@@ -147,30 +147,12 @@ typedef struct {
 
 extern shmem_internals_t __shmem;
 
-void __shmem_ctimer_start(void);
-
-#ifdef SHMEM_USE_CTIMER
-
-static unsigned int SHMEM_INLINE 
-__shmem_get_ctimer(void)
-{
-	register unsigned int tmp;
-	__asm__ __volatile(
-		"movfs %[tmp], CTIMER0 \n"
-		: [tmp] "=r" (tmp)
-	);
-	return tmp;
-}
-
-#endif
-
-
 unsigned int __popcount16(unsigned int x);
 unsigned int __log2_ceil16(unsigned int x);
 
 
-#define HOT __attribute__((hot))
-//#define HOT 
+//#define HOT __attribute__((hot))
+#define HOT 
 
 void HOT
 shmemx_memcpy(unsigned char *pdst, unsigned char *psrc, unsigned int nbytes);

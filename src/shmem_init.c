@@ -59,9 +59,6 @@ void shmem_init(void)
 	__shmem_ipi_get_init();
 #endif
 	__shmem.lock_high_bits = (unsigned int)shmem_ptr(NULL, 0); // using PE 0 for all global locks
-#ifdef SHMEM_USE_CTIMER
-	__shmem_ctimer_start();
-#endif
 #if !defined(__coprthr_device__)
 	extern char _end;
 	__shmem.free_mem = (void*)&_end; // This should already be double-word aligned

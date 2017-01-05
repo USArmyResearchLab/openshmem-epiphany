@@ -30,8 +30,8 @@
 #ifndef _def_shmem_x_to_all_h
 #define _def_shmem_x_to_all_h
 
-#define HOT  __attribute__((hot))
-//#define HOT 
+//#define HOT  __attribute__((hot))
+#define HOT 
 
 #define SUM_OP  += pWrk[j]
 #define PROD_OP *= pWrk[j]

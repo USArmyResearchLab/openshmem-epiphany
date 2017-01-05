@@ -30,8 +30,8 @@
 
 #include "internals.h"
 
-#define HOT __attribute__((hot))
-//#define HOT
+//#define HOT __attribute__((hot))
+#define HOT
 
 void HOT
 shmemx_memcpy(unsigned char *pdst, unsigned char *psrc, unsigned int nbytes)
