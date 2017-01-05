@@ -1,0 +1,32 @@
+CC = coprcc
+AR = e-ar
+DEFS = -std=c99
+INCS =
+LIBS =
+
+TARGETS = libshmem.a
+
+SRC_FILES = $(wildcard *.c)
+OBJS = $(SRC_FILES:.c=.o)
+
+all: $(TARGETS)
+
+.PHONY: clean install uninstall
+
+.SUFFIXES:
+.SUFFIXES: .S .c .o 
+
+.c.o:
+	$(CC) $(DEFS) $(INCS) $(LIBS) -c $<
+
+libshmem.a: $(OBJS)
+	$(AR) rcv $@ $(OBJS)
+
+.S.o:
+	e-gcc -c $<
+
+clean:
+	rm -f *.o
+
+distclean: clean 
+	rm -f $(TARGETS)
