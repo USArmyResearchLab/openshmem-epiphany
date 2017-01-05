@@ -34,27 +34,11 @@
 void \
 shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
-	int j, it, is, nel = dst*nelems; \
-	int dst_offset = ((__shmem.my_pe - PE_start) >> logPE_stride)*nel; \
-	int PE_size_stride = PE_size << logPE_stride; \
-	int step = 1 << logPE_stride; \
-	int PE_end = PE_size_stride + PE_start; \
-	T* psrc = (T*)source; \
-	T* pdsto = (T*)dest + dst_offset; \
-	for (it = 0, is = 0; it < nelems; it += dst, is += sst) { \
-		pdsto[it] = psrc[is]; \
-	} \
-	for (j = 1; j < PE_size; j++) { \
-		int PE_to = __shmem.my_pe + j*step; \
-		if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-		int src_offset = ((PE_to - PE_start) >> logPE_stride)*nel; \
-		T* pdst = (T*)shmem_ptr(pdsto, PE_to); \
-		for (it = 0, is = 0; it < nelems; it += dst, is += sst) { \
-			pdst[it] = psrc[is]; \
-		} \
-	} \
+	const int PE_step = 1 << logPE_stride; \
+	T* pdst = (T*)(dest + sizeof(T) * nelems * dst * __shmem.my_pe); \
+	for (int i = 0, pe = PE_start; i < PE_size; i++, pe += PE_step) \
+		shmem_iput##N(pdst, source + sizeof(T) * nelems * sst * i, dst, sst, nelems, pe); \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 }
 
 #endif
-
