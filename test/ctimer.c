@@ -28,16 +28,8 @@
  */
 
 
-#include "internals.h"
-
-/*
- * SUPPLEMENTAL ROUTINES (non-standard)
- */
-
-//#ifdef SHMEM_USE_CTIMER
-
 void
-__shmem_ctimer_start(void)
+ctimer_start(void)
 {
 	__asm__ __volatile__ (
 		"mov r0, 0xFFFF              \n" // load MAX value
@@ -54,17 +46,3 @@ __shmem_ctimer_start(void)
 		: : : "r0", "r1", "r2", "cc"
 	);
 }
-
-//SHMEM_SCOPE unsigned int SHMEM_INLINE
-//__shmem_get_ctimer(void)
-//{
-//	register unsigned int tmp;
-//	__asm__ __volatile(
-//		"movfs %[tmp], CTIMER0 \n"
-//		: [tmp] "=r" (tmp)
-//	);
-//	return tmp;
-//}
-
-//#endif // SHMEM_USE_CTIMER
-

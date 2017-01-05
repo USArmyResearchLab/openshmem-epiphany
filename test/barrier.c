@@ -33,6 +33,7 @@
 
 #include <host_stdio.h>
 #include <shmem.h>
+#include "ctimer.h"
 
 #define NLOOP 10000
 #define INV_GHZ 1.66666667f // 1/0.6 GHz
@@ -41,6 +42,7 @@ long pSync[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -54,13 +56,13 @@ int main (void)
 
 	for (int npe = 2; npe <= npes; npe++)
 	{
-		unsigned int t = __shmem_get_ctimer();
+		unsigned int t = ctimer();
 		if (me < npe) {
 			for (int i = 0; i < NLOOP; i++) {
 				shmem_barrier(0, 0, npe, pSync);
 			}
 		}
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		if (me == 0) {
 			unsigned int cycles = t / NLOOP;

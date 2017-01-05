@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
 long pSync[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
@@ -42,6 +43,7 @@ int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -65,11 +67,11 @@ int main (void)
 	{
 		shmem_barrier_all();
 
-		unsigned int t = __shmem_get_ctimer();
+		unsigned int t = ctimer();
 		for (int i = 0; i < NLOOP; i++) {
 			shmem_int_sum_to_all(target, source, nelement, 0, 0, npes, pWrk, pSync);
 		}
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		shmem_barrier_all();
 

@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
 long pSyncA[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
@@ -42,6 +43,7 @@ long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -63,14 +65,14 @@ int main (void)
 		}
 
 		shmem_barrier_all();
-		unsigned int t = __shmem_get_ctimer();
+		unsigned int t = ctimer();
 		for (int i = 0; i < NLOOP; i += 2) {
 			/* alternate between 2 pSync arrays to synchronize consequent
 			collectives of even and odd iterations */
 			shmem_broadcast64 (target, source, elements, 0, 0, 0, npes, pSyncA);
 			shmem_broadcast64 (target, source, elements, 0, 0, 0, npes, pSyncB);
 		}
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		shmem_barrier_all();
 

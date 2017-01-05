@@ -29,6 +29,7 @@
 
 #include <host_stdio.h>
 #include <shmem.h>
+#include "ctimer.h"
 
 int main(int argc, char* argv[])
 {
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
 	char name[SHMEM_MAX_NAME_LEN];
 	// Starts/Initializes SHMEM/OpenSHMEM
 	// Some implementations use shmem_start(0)
+	ctimer_start();
 	shmem_init();
 	// Fetch the number or processes
 	// Some implementations use num_pes();

@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
 #define NLOOP 10000
 #define INV_GHZ 1.66666667f // 1/0.6 GHz
@@ -42,6 +43,7 @@ int dest = 0;
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -59,11 +61,11 @@ int main (void)
 		shmem_barrier_all();
 
 		if (me < npe) {
-			t = __shmem_get_ctimer();
+			t = ctimer();
 			for (int i = 0; i < NLOOP; i++) {
 				shmem_int_fetch(&dest, nxtpe);
 			}
-			t -= __shmem_get_ctimer();
+			t -= ctimer();
 		}
 
 		shmem_barrier_all();

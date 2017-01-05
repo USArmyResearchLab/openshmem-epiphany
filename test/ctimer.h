@@ -27,70 +27,20 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-/*
- * Performance test for shmem_int_add
- */
+#ifndef _ctimer_h
+#define _ctimer_h
 
-#include <shmem.h>
-#include "ctimer.h"
+void ctimer_start(void);
 
-#define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
-
-long pSync[SHMEM_REDUCE_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
-int dest;
-
-int main (void)
+static unsigned int inline __attribute__((__always_inline__)) 
+ctimer(void)
 {
-	ctimer_start();
-	shmem_init();
-	int me = shmem_my_pe();
-	int npes = shmem_n_pes();
-
-	if (me == 0) {
-		printf("# SHMEM Atomic Add Performance for variable NPES\n" \
-			"# NPES\tLatency (nanoseconds)\n");
-	}
-
-	for (int npe = 2; npe <= npes; npe++)
-	{
-		dest = 0;
-		int nxtpe = (me + 1) % npe;
-		unsigned int t = 0;
-		shmem_barrier_all();
-
-		if (me < npe) {
-			t = ctimer();
-			for (int i = 0; i < NLOOP; i++) {
-				shmem_int_add(&dest, nxtpe, nxtpe);
-			}
-			t -= ctimer();
-		}
-
-		shmem_barrier_all();
-
-		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
-		t /= npe;
-
-		if (me == 0) {
-			int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf("%5d %7d\n", npe, nsec);
-		}
-
-		if (me < npe) {
-			if (dest != (NLOOP * me)) {
-				printf("# %d: ERROR %d\n", me, dest);
-			}
-		} else {
-			if (dest != 0) {
-				printf("# %d: ERROR %d\n", me, dest);
-			}
-		}
-	}
-	shmem_finalize();
-
-	return 0;
+	register unsigned int tmp;
+	__asm__ __volatile(
+		"movfs %[tmp], CTIMER0 \n"
+		: [tmp] "=r" (tmp)
+	);
+	return tmp;
 }
+
+#endif

@@ -33,6 +33,7 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
 #define NELEMENT 8192
 #define NLOOP 1//0000
@@ -43,6 +44,7 @@ int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -68,7 +70,7 @@ int main (void)
 	{
 		shmem_barrier_all();
 
-		unsigned int t = __shmem_get_ctimer();
+		unsigned int t = ctimer();
 
 		for (int j = 0; j < NLOOP; j++) {
 			shmem_getmem_nbi(target, source, nelement, nxtpe);
@@ -76,7 +78,7 @@ int main (void)
 
 		shmem_quiet();
 
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		shmem_barrier_all();
 

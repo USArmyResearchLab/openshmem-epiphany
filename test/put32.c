@@ -33,6 +33,7 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
 #define NELEMENT 2048
 #define NLOOP 1//0000
@@ -43,6 +44,7 @@ int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -68,13 +70,13 @@ int main (void)
 		}
 
 		shmem_barrier_all();
-		unsigned int t = __shmem_get_ctimer();
+		unsigned int t = ctimer();
 
 		for (int j = 0; j < NLOOP; j++) {
 			shmem_put32(target, source, nelement, nxtpe);
 		}
 
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
 		t /= npes; /* Average time across all PEs for one put */

@@ -32,28 +32,23 @@
  */
 
 #include <shmem.h>
+#include "ctimer.h"
 
-long pSyncA[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
+long pSync[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 
 #define NELEMENT 256
-#define NLOOP 2//0000
+#define NLOOP 1//0000
 #define INV_GHZ 1.66666667f // 1/0.6 GHz
 
 int main (void)
 {
+	ctimer_start();
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
 	int* source = (int*)shmem_malloc(NELEMENT * sizeof (*source));
 	int* target = (int*)shmem_malloc(NELEMENT * sizeof (*target) * npes);
-	for (int i = 0; i < NELEMENT; i++) {
-		source[i] = (i + 1) * 10 + me;
-	}
-	for (int i = 0; i < NELEMENT * npes; i++) {
-		target[i] = -90;
-	}
 
 	if (me == 0) {
 		printf("# SHMEM Collect32 times for NPES = %d\n" \
@@ -62,15 +57,20 @@ int main (void)
 
 	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
+		// wait for 
+		for (int i = 0; i < nelement; i++) {
+			source[i] = (i + 1) * 10 + me;
+		}
+		for (int i = 0; i < nelement * npes; i++) {
+			target[i] = -90;
+		}
 		shmem_barrier_all();
 
-		unsigned int t = __shmem_get_ctimer();
-		for (int i = 0; i < NLOOP; i += 2) {
-			/* alternate between 2 pSync arrays to synchronize consequent collectives of even and odd iterations */
-			shmem_collect32 (target, source, nelement, 0, 0, npes, pSyncA);
-			shmem_collect32 (target, source, nelement, 0, 0, npes, pSyncB);
+		unsigned int t = ctimer();
+		for (int i = 0; i < NLOOP; i++) {
+			shmem_collect32 (target, source, nelement, 0, 0, npes, pSync);
 		}
-		t -= __shmem_get_ctimer();
+		t -= ctimer();
 
 		shmem_barrier_all();
 
@@ -84,10 +84,7 @@ int main (void)
 		int err = 0;
 		for (int j = 0; j < npes; j++) {
 			for (int i = 0; i < nelement; i++) {
-				if (target[j*nelement + i] != ((i + 1) * 10 + j)) {
-					err++;
-			//		if (me == 0) printf("# %d: %d, %d\n", me, target[j*nelement + i], ((i+1)*10 + j));
-				}
+				if (target[j*nelement + i] != ((i + 1) * 10 + j)) err++;
 			}
 		}
 		if (err) printf("# %d: ERRORS %d\n", me, err);
