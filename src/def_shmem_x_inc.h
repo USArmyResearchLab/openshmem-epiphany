@@ -36,7 +36,7 @@ __shmem_##N##_inc (T* ptr, int pe) \
 { \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
 	__shmem_set_lock(x); \
-	*ptr = *ptr + 1; \
+	*ptr += 1; \
 	__shmem_clear_lock(x); \
 } \
 void \

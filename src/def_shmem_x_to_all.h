@@ -67,7 +67,7 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 				nrem = (nrem > nwrk) ? nwrk : nrem; \
 				__shmem_set_lock(remote_lock0); \
 				for (int j = 0; j < nrem; j++) { \
-					remote_work[j] = source[i+j]; \
+					remote_work[j] = dest[i+j]; \
 				} \
 				__shmem_set_lock(remote_lock1); \
 				while (!vSync[1]); \
