@@ -150,12 +150,7 @@ extern shmem_internals_t __shmem;
 unsigned int __popcount16(unsigned int x);
 unsigned int __log2_ceil16(unsigned int x);
 
-
-//#define HOT __attribute__((hot))
-#define HOT 
-
-void HOT
-shmemx_memcpy(unsigned char *pdst, unsigned char *psrc, unsigned int nbytes);
+void shmemx_memcpy(unsigned char *dest, unsigned char *source, unsigned int nbytes);
 
 void* shmem_ptr(const void* dest, int pe);
 void* __attribute__((malloc)) shmem_malloc(size_t size);
@@ -359,8 +354,7 @@ void shmem_barrier_all(void);
 
 
 #define DECL_SHMEM_X_TO_ALL(N,T,OP) \
-void HOT \
-shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
+void shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
 
 DECL_SHMEM_X_TO_ALL(complexd_sum,complex double,SUM_OP)
 DECL_SHMEM_X_TO_ALL(complexf_sum,complex float,SUM_OP)

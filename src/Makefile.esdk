@@ -7,7 +7,9 @@ LIBS =
 TARGETS = libshmem.a
 
 SRC_FILES = $(wildcard *.c)
-OBJS = $(SRC_FILES:.c=.o)
+ASM_FILES = $(wildcard *.S)
+
+OBJS = $(SRC_FILES:.c=.o) $(ASM_FILES:.S=.o)
 
 all: $(TARGETS)
 
