@@ -32,5 +32,5 @@
 
 void* __attribute__((malloc)) shmem_malloc(size_t size)
 {
-	return shmemx_sbrk(size);
+	return shmem_align(8, size);
 }
