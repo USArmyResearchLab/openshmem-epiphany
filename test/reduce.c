@@ -34,28 +34,28 @@
 #include <shmem.h>
 #include "ctimer.h"
 
-long pSync[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
-
 #define NELEMENT 2048
 #define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
 
 int main (void)
 {
-	ctimer_start();
+	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+		pSync[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
-	int pWrk_elems = ( (NELEMENT/2 + 1) > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? (NELEMENT/2 + 1) : SHMEM_REDUCE_MIN_WRKDATA_SIZE;
+	int pWrk_elems = NELEMENT/2 + 1;
+	pWrk_elems = (pWrk_elems > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? pWrk_elems : SHMEM_REDUCE_MIN_WRKDATA_SIZE;
 
 	int* source = (int*)shmem_malloc(NELEMENT * sizeof (*source));
 	int* target = (int*)shmem_malloc(NELEMENT * sizeof (*target));
 	int* pWrk   = (int*)shmem_malloc(pWrk_elems * sizeof(*pWrk));
 	for (int i = 0; i < NELEMENT; i++) {
 		source[i] = i;
-		target[i] = -90;
 	}
 
 	if (me == 0) {
@@ -65,7 +65,12 @@ int main (void)
 
 	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
+		// reset values for each iteration
+		for (int i = 0; i < NELEMENT; i++) {
+			target[i] = -90;
+		}
 		shmem_barrier_all();
+		ctimer_start();
 
 		unsigned int t = ctimer();
 		for (int i = 0; i < NLOOP; i++) {
@@ -73,13 +78,9 @@ int main (void)
 		}
 		t -= ctimer();
 
-		shmem_barrier_all();
-
 		if (me == 0) {
-			int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf ("%5d %7d\n", nelement, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%5d %7u\n", nelement, nsec);
 		}
 
 		int err = 0;

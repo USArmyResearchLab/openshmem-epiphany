@@ -35,16 +35,18 @@
 #include <shmem.h>
 #include "ctimer.h"
 
-long pSyncA[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-
 #define NELEMENT 64
 #define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
 
 int main (void)
 {
-	ctimer_start();
+	static long pSyncA[SHMEM_ALLTOALL_SYNC_SIZE];
+	static long pSyncB[SHMEM_ALLTOALL_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_ALLTOALL_SYNC_SIZE; i++) {
+		pSyncA[i] = SHMEM_SYNC_VALUE;
+		pSyncB[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -64,6 +66,8 @@ int main (void)
 	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
 		shmem_barrier_all();
+		ctimer_start();
+
 		unsigned int t = ctimer();
 		for (int i = 0; i < NLOOP; i += 2) {
 			shmem_alltoall64 (target, source, nelement, 0, 0, npes, pSyncA);
@@ -71,14 +75,10 @@ int main (void)
 		}
 		t -= ctimer();
 
-		shmem_barrier_all();
-
 		if (me == 0) {
 			unsigned int bytes = nelement * sizeof(*source);
-			unsigned int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf ("%5d %7d\n", bytes, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%5d %7u\n", bytes, nsec);
 		}
 		unsigned int err = 0;
 		for (int j = 0; j < npes; j++) {

@@ -31,6 +31,11 @@
 #define _ctimer_h
 
 void ctimer_start(void);
+unsigned int ctimer_nsec(unsigned int);
+
+#ifdef __epiphany__ // Specific to Epiphany
+
+#define INV_GHZ 1.66666667f // 1/0.6 GHz
 
 static unsigned int inline __attribute__((__always_inline__)) 
 ctimer(void)
@@ -42,5 +47,25 @@ ctimer(void)
 	);
 	return tmp;
 }
+
+#else // Generic timer
+
+#include <sys/time.h>
+
+struct timeval t0; // initialized with ctimer_start()
+
+static unsigned int inline __attribute__((__always_inline__)) 
+ctimer(void)
+{
+	const static unsigned int r = 0xffffffff;
+	unsigned int ns; // nanoseconds passed since calling ctimer_start()
+	struct timeval t1;
+	gettimeofday(&t1,0);
+	ns = 1e9 * (t1.tv_sec - t0.tv_sec)
+		+ 1e3 * (t1.tv_usec - t0.tv_usec);
+	return (r - ns); // this counts down from r
+}
+
+#endif
 
 #endif

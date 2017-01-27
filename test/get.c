@@ -36,15 +36,16 @@
 #include "ctimer.h"
 
 #define NELEMENT 8192
-#define NLOOP 1//0000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
-
-long pSync[SHMEM_REDUCE_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
+#define NLOOP 10000
 
 int main (void)
 {
-	ctimer_start();
+	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
+	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+		pSync[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -53,8 +54,7 @@ int main (void)
 	char* source = (char*)shmem_malloc(NELEMENT);
 	char* target = (char*)shmem_malloc(NELEMENT);
 	for (int i = 0; i < NELEMENT; i++) {
-		source[i] = i + 1;
-		target[i] = -90;
+		source[i] = (char)(i + 1);
 	}
 
 	if (me == 0) {
@@ -64,26 +64,34 @@ int main (void)
 
 	/* For int get we take average of all the times realized by a pair of PEs,
 	thus reducing effects of physical location of PEs */
-	for (unsigned int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
+	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
+		// reset values for each iteration
+		for (int i = 0; i < NELEMENT; i++) {
+			target[i] = 0xff;
+		}
 		shmem_barrier_all();
+		ctimer_start();
+
 		unsigned int t = ctimer();
-		for (int j = 0; j < NLOOP; j++) {
+		for (int i = 0; i < NLOOP; i++) {
 			shmem_getmem(target, source, nelement, nxtpe);
 		}
 		t -= ctimer();
 
 		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
 		t /= npes; /* Average time across all PEs for one get */
-		shmem_barrier_all();
 
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
-			int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf ("%6d %7d\n", bytes, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%6d %7u\n", bytes, nsec);
 		}
+
+		int err = 0;
+		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
+		for (int i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
+		if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 
 	shmem_free(target);

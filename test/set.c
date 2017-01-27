@@ -35,20 +35,19 @@
 #include "ctimer.h"
 
 #define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
-
-long pSync[SHMEM_REDUCE_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
-int dest = 0;
 
 int main (void)
 {
-	ctimer_start();
+	static int dest;
+	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
+	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+		pSync[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
-
-	int nxtpe = (me + 1) % npes;
 
 	if (me == 0) {
 		printf("# SHMEM Atomic Set Performance for variable NPES\n" \
@@ -57,27 +56,36 @@ int main (void)
 
 	for (int npe = 2; npe <= npes; npe++)
 	{
+		int nxtpe = (me + 1) % npe;
+		dest = 0;
 		unsigned int t = 0;
 		shmem_barrier_all();
+		ctimer_start();
 
 		if (me < npe) {
 			t = ctimer();
 			for (int i = 0; i < NLOOP; i++) {
-				shmem_int_set(&dest, me, nxtpe);
+				shmem_int_set(&dest, nxtpe, nxtpe);
 			}
 			t -= ctimer();
 		}
-
-		shmem_barrier_all();
 
 		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
 		t /= npe;
 
 		if (me == 0) {
-			int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf("%5d %7d\n", npe, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%5d %7u\n", npe, nsec);
+		}
+
+		if (me < npe) {
+			if (dest != me) {
+				printf("# %d: ERROR %d\n", me, dest);
+			}
+		} else {
+			if (dest != 0) {
+				printf("# %d: ERROR %d\n", me, dest);
+			}
 		}
 	}
 	shmem_finalize();

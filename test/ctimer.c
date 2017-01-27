@@ -27,6 +27,9 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
+#include "ctimer.h"
+
+#ifdef __epiphany__ // Specific to Epiphany
 
 void
 ctimer_start(void)
@@ -46,3 +49,26 @@ ctimer_start(void)
 		: : : "r0", "r1", "r2", "cc"
 	);
 }
+
+unsigned int
+ctimer_nsec(unsigned int cycles)
+{
+	float fcycles = (float)cycles;
+	unsigned int nsec = (unsigned int)(fcycles * INV_GHZ);
+}
+
+#else // Generic timer
+
+void
+ctimer_start(void)
+{
+	gettimeofday(&t0, 0);
+}
+
+unsigned int
+ctimer_nsec(unsigned int t)
+{
+	return t;
+}
+
+#endif

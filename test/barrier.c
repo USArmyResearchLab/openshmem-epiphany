@@ -31,46 +31,47 @@
  * Performance test for shmem_barrier
  */
 
-#include <host_stdio.h>
 #include <shmem.h>
 #include "ctimer.h"
 
 #define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
-
-long pSync[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
 
 int main (void)
 {
-	ctimer_start();
+	static long pSyncA[SHMEM_BARRIER_SYNC_SIZE];
+	static long pSyncB[SHMEM_BARRIER_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_BARRIER_SYNC_SIZE; i++) {
+		pSyncA[i] = SHMEM_SYNC_VALUE;
+		pSyncB[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
 	if (me == 0) {
-		host_printf("# SHMEM Barrier times for variable NPES\n" \
+		printf("# SHMEM Barrier times for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
-	shmem_barrier_all();
-
 	for (int npe = 2; npe <= npes; npe++)
 	{
+		shmem_barrier_all();
+		ctimer_start();
+
 		unsigned int t = ctimer();
 		if (me < npe) {
-			for (int i = 0; i < NLOOP; i++) {
-				shmem_barrier(0, 0, npe, pSync);
+			for (int i = 0; i < NLOOP; i += 2) {
+				shmem_barrier(0, 0, npe, pSyncA);
+				shmem_barrier(0, 0, npe, pSyncB);
 			}
 		}
 		t -= ctimer();
 
 		if (me == 0) {
-			unsigned int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			host_printf("%5d %7d\n", npe, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%5d %7u\n", npe, nsec);
 		}
-		shmem_barrier_all();
 	}
 	shmem_finalize();
 

@@ -27,27 +27,22 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include <host_stdio.h>
 #include <shmem.h>
-#include "ctimer.h"
 
 int main(int argc, char* argv[])
 {
-	int me, n_pes, major, minor;
+	int major, minor;
 	char name[SHMEM_MAX_NAME_LEN];
 	// Starts/Initializes SHMEM/OpenSHMEM
-	// Some implementations use shmem_start(0)
-	ctimer_start();
+	// Some implementations use the deprecated shmem_start(0)
 	shmem_init();
 	// Fetch the number or processes
-	// Some implementations use num_pes();
-	n_pes = shmem_n_pes();
-	/*
-	** Assign my process ID to me
-	*/
-	me = shmem_my_pe();
+	// Some implementations use the deprecated num_pes()
+	int n_pes = shmem_n_pes();
+	// Assign my process ID to me
+	int me = shmem_my_pe();
 	shmem_info_get_name(name);
 	shmem_info_get_version(&major, &minor);
-	phost_printf("Hello World from %d of %d %s (%d.%d)\n", me, n_pes, SHMEM_VENDOR_STRING, major, minor);
+	printf("Hello World from %d of %d %s (%d.%d)\n", me, n_pes, SHMEM_VENDOR_STRING, major, minor);
 	return 0;
 }

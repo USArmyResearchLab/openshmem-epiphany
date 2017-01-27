@@ -23,12 +23,12 @@ OBJ_FILES = $(DEPENDS) $(SRC_FILES:.c=.o)
 
 all: $(TARGETS)
 
-info: all $(TARGETS)
+info: all $(OBJ_FILES)
 
 .PHONY: clean install uninstall
 
 .SUFFIXES:
-.SUFFIXES: .c .o .x
+.SUFFIXES: .c .o .x .S
 
 ctimer.o: ctimer.c
 	e-gcc -c $< -o $@
@@ -42,6 +42,9 @@ ctimer.o: ctimer.c
 %.o: %.x
 	coprcc --extract $< -o $@
 	coprcc-info -j -l 100 $@
+
+.S.o:
+	e-gcc -c $<
 
 clean:
 	rm -f *.o

@@ -34,16 +34,18 @@
 #include <shmem.h>
 #include "ctimer.h"
 
-long pSyncA[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-long pSyncB[SHMEM_BCAST_SYNC_SIZE] = { SHMEM_SYNC_VALUE };
-
-#define NELEMENT 2048 /* Data size chosen to be able to capture time required */
+#define NELEMENT 2048
 #define NLOOP 10000
-#define INV_GHZ 1.66666667f // 1/0.6 GHz
 
 int main (void)
 {
-	ctimer_start();
+	static long pSyncA[SHMEM_BCAST_SYNC_SIZE];
+	static long pSyncB[SHMEM_BCAST_SYNC_SIZE];
+	for (int i = 0; i < SHMEM_BCAST_SYNC_SIZE; i++) {
+		pSyncA[i] = SHMEM_SYNC_VALUE;
+		pSyncB[i] = SHMEM_SYNC_VALUE;
+	}
+
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
@@ -63,25 +65,20 @@ int main (void)
 			source[i] = i + 1;
 			target[i] = -90;
 		}
-
 		shmem_barrier_all();
+		ctimer_start();
+
 		unsigned int t = ctimer();
 		for (int i = 0; i < NLOOP; i += 2) {
-			/* alternate between 2 pSync arrays to synchronize consequent
-			collectives of even and odd iterations */
 			shmem_broadcast32 (target, source, elements, 0, 0, 0, npes, pSyncA);
 			shmem_broadcast32 (target, source, elements, 0, 0, 0, npes, pSyncB);
 		}
 		t -= ctimer();
 
-		shmem_barrier_all();
-
 		if (me == 0) {
 			unsigned int bytes = elements * sizeof(*source);
-			unsigned int cycles = t / NLOOP;
-			float fcycles = (float)cycles;
-			int nsec = (int)(fcycles * INV_GHZ);
-			printf("%5d %7d\n", bytes, nsec);
+			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			printf("%5d %7u\n", bytes, nsec);
 		}
 		else {
 			int err = 0;
@@ -89,8 +86,6 @@ int main (void)
 			for (int i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
 			if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 		}
-
-		shmem_barrier_all();
 	}
 
 	shmem_free(target);
