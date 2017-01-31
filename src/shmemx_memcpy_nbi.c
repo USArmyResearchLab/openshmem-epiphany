@@ -33,13 +33,13 @@
 #include "def_shmem_x_to_all.h"
 
 void
-shmemx_memcpy_nbi(void *dest, const void *src, int nbytes, int pe)
+shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 {
 	static const unsigned char dma_data_shift[8] = { 3,0,1,0,2,0,1,0 };
-	unsigned int data_shift = (unsigned int)dma_data_shift[(((unsigned int)dest) | ((unsigned int)src) | nbytes) & 0x7];
+	unsigned int data_shift = (unsigned int)dma_data_shift[(((unsigned int)dest) | ((unsigned int)src) | (unsigned int)nbytes) & 0x7];
 	unsigned int data_size = (data_shift<<5);
 	unsigned int stride = 0x10001 << data_shift;
-	unsigned int count = 0x10000 | (nbytes >> data_shift);
+	unsigned int count = 0x10000 | ((unsigned int)nbytes >> data_shift);
 	unsigned int config = 0x3 | data_size;
 	unsigned char* csrc = (unsigned char*)src;
 	unsigned char value = ~csrc[nbytes-1];

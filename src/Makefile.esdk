@@ -19,7 +19,7 @@ all: $(TARGETS)
 .SUFFIXES: .S .c .o 
 
 .c.o:
-	$(CC) $(DEFS) $(INCS) $(LIBS) -c $<
+	$(CC) $(CFLAGS) $(DEFS) $(INCS) $(LIBS) -c $<
 
 libshmem.a: $(OBJS)
 	$(AR) rcv $@ $(OBJS)

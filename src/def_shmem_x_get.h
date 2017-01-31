@@ -33,7 +33,7 @@
 #define SHMEM_X_GET_NBI(N,T,S) \
 void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(src,pe), nelems << S, pe); }
+{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(src,pe), nelems << S); }
 
 #define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
 void \
@@ -42,6 +42,18 @@ __attribute__((alias("shmem_" #A "_nbi")));
 
 
 #ifdef SHMEM_USE_IPI_GET
+
+typedef struct
+{
+	volatile long   lock;
+	volatile void*  source;
+	volatile void*  dest;
+	volatile size_t nbytes;
+	volatile int    pe;
+	volatile int    complete;
+} shmem_ipi_args_t;
+
+extern shmem_ipi_args_t shmem_ipi_args;
 
 #define SHMEM_X_GET(N,T,S) \
 void \

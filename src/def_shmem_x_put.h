@@ -33,7 +33,7 @@
 #define SHMEM_X_PUT_NBI(N,T,S) \
 void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi(shmem_ptr(dest,pe), (void*)src, nelems << S, pe); }
+{ shmemx_memcpy_nbi(shmem_ptr(dest,pe), (void*)src, nelems << S); }
 
 #define ALIAS_SHMEM_X_PUT_NBI(N,T,A) \
 void \

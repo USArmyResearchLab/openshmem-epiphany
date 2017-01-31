@@ -34,16 +34,6 @@
 
 #ifdef SHMEM_USE_IPI_GET
 
-typedef struct
-{
-	volatile long   lock;
-	volatile void*  source;
-	volatile void*  dest;
-	volatile size_t nbytes;
-	volatile int    pe;
-	volatile int    complete;
-} shmem_ipi_args_t;
-
 shmem_ipi_args_t shmem_ipi_args = {
 	.lock = 0,
 	.source = 0,
