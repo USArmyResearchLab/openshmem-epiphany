@@ -44,7 +44,12 @@ void shmem_init(void)
 #else
 	__shmem.n_pes = e_group_config.group_rows * e_group_config.group_cols;
 #endif
-	__shmem.n_pes_log2 = __log2_ceil16(__shmem.n_pes);
+	// log2_ceil of n_pes precalculated once
+	unsigned int x = __shmem.n_pes - 1;
+	while (x > 0) {
+		__shmem.n_pes_log2++;
+		x >>= 1;
+	}
 	unsigned int coreid = __shmem.coreid - e_group_config.group_id;
 	unsigned int row = (coreid >> 6) & 0x3f;
 	unsigned int col = (coreid) & 0x3f;
