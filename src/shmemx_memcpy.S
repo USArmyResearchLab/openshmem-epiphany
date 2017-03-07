@@ -9,6 +9,8 @@
  * -JAR
  */
 
+#include "shmem_macros.h"
+
 #define D  r0           // destination
 #define R  r1           // source, which we copy and then use as remainder
 #define B  r2           // bytes and temporary register
@@ -20,13 +22,8 @@
 #define S2 r60          // r60-r61 used as dword source data
 #define S3 r62          // r62-r63 used as dword source data
 
-#if __GNUC__ > 4
-.global shmemx_memcpy
-shmemx_memcpy:
-#else // underscore fix
-.global _shmemx_memcpy
-_shmemx_memcpy:
-#endif
+.global SYM(shmemx_memcpy)
+SYM(shmemx_memcpy):
 	mov S, R             // this saves program space at cost of one instruction
 	mov R, B
 	sub T, B, #15
@@ -42,7 +39,7 @@ _shmemx_memcpy:
 	orr T, T, T2
 	lsl T, T, #29        // Can the array alignment be corrected?
 	beq .LByteHandler
-	mov B, R             // perform full slow copy
+	mov B, R             // perform full misaligned copy (slow)
 
 	.LByteHandler:
 	sub R, R, B
@@ -105,3 +102,4 @@ _shmemx_memcpy:
 
 	.LReturn:
 	rts
+	SIZE(shmemx_memcpy)
