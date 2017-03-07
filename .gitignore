@@ -1,0 +1,9 @@
+# Object files
+*.o
+*.elf
+
+# Libraries
+*.a
+
+# Executables
+*.x

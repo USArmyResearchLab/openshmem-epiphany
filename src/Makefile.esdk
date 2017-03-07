@@ -4,31 +4,34 @@ DEFS = -O3 -std=c11
 INCS =
 LIBS =
 
-TARGETS = libshmem.a
+TARGETS = libshmem_esdk.a libshmem.a
 
 SRC_FILES = $(wildcard *.c)
 ASM_FILES = $(wildcard *.S)
 
-OBJS = $(SRC_FILES:.c=.o) $(ASM_FILES:.S=.o)
+OBJS = $(SRC_FILES:.c=.elf) $(ASM_FILES:.S=.o)
 
 all: $(TARGETS)
 
 .PHONY: clean install uninstall
 
 .SUFFIXES:
-.SUFFIXES: .S .c .o 
+.SUFFIXES: .S .c .o .elf
 
-.c.o:
-	$(CC) $(CFLAGS) $(DEFS) $(INCS) $(LIBS) -c $<
+.c.elf:
+	$(CC) $(CFLAGS) $(DEFS) $(INCS) $(LIBS) -c $< -o $@
 
-libshmem.a: $(OBJS)
+libshmem_esdk.a: $(OBJS)
 	$(AR) rcv $@ $(OBJS)
+
+libshmem.a: libshmem_esdk.a
+	ln -sf $< $@
 
 .S.o:
 	e-gcc -c $<
 
 clean:
-	rm -f *.o
+	rm -f *.elf *.o
 
 distclean: clean 
 	rm -f $(TARGETS)
