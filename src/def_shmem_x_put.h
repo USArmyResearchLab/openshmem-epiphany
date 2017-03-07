@@ -29,6 +29,7 @@
 
 #ifndef _def_shmem_x_put_h
 #define _def_shmem_x_put_h
+#include "shmemx.h"
 
 #define SHMEM_X_PUT_NBI(N,T,S) \
 void \

@@ -32,11 +32,10 @@
 
 #include <stdlib.h>
 #include <complex.h>
+#include <sys/types.h>
 
 #if defined(__coprthr_device__) // Using COPRTHR
 
-#include "esyscall.h"
-#include "host_stdio.h"
 #define SHMEM_LOW_PRIORITY __dynamic_call
 #define shmemx_brk(ptr) coprthr_tls_brk(ptr)
 #define shmemx_sbrk(size) coprthr_tls_sbrk(size)
@@ -44,12 +43,10 @@
 #else // Using eSDK
 
 #include "e_coreid.h"
+#include "shmem_mman.h"
 #define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram"))) 
 #define shmemx_brk(ptr) __shmemx_brk(ptr)
 #define shmemx_sbrk(size) __shmemx_sbrk(size)
-
-int __shmemx_brk (const void* ptr);
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size);
 
 #endif
 
@@ -146,11 +143,6 @@ typedef struct {
 } shmem_internals_t;
 
 extern shmem_internals_t __shmem;
-
-unsigned int __popcount16(unsigned int x);
-unsigned int __log2_ceil16(unsigned int x);
-
-void shmemx_memcpy(unsigned char *dest, unsigned char *source, unsigned int nbytes);
 
 void* shmem_ptr(const void* dest, int pe);
 void* __attribute__((malloc)) shmem_malloc(size_t size);
@@ -447,8 +439,6 @@ shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst,
 DECL_SHMEM_ALLTOALLS_X(32,int)
 DECL_SHMEM_ALLTOALLS_X(64,long long)
 
-
-void shmemx_memcpy_nbi(void *dest, const void *src, int nbytes, int pe);
 
 #define DECL_SHMEM_X_PUT_NBI(N,T,S) \
 	void shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe);

@@ -27,32 +27,8 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_alltoall_x_h
-#define _def_shmem_alltoall_x_h
 #include "internals.h"
 #include "shmem.h"
-#include "shmemx.h"
 
-#define SHMEM_ALLTOALL_X(N,T) \
-void \
-shmem_alltoall##N(void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
-{ \
-	int i, j; \
-	int dst_offset = ((__shmem.my_pe - PE_start) >> logPE_stride)*nelems; \
-	int PE_size_stride = PE_size << logPE_stride; \
-	int step = 1 << logPE_stride; \
-	int PE_end = PE_size_stride + PE_start; \
-	T* psrc = (T*)source; \
-	T* pdsto = (T*)dest + dst_offset; \
-	shmemx_memcpy((void*)pdsto, (void*)psrc, nelems * (N >> 3)); \
-	for (j = 1; j < PE_size; j++) { \
-		int PE_to = __shmem.my_pe + j*step; \
-		if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-		T* pdst = (T*)shmem_ptr(pdsto, PE_to); \
-		shmemx_memcpy((void*)pdst, (void*)psrc, nelems * (N >> 3)); \
-	} \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
-}
-
-#endif
-
+int __shmemx_brk (const void* ptr);
+void* __attribute__((malloc)) __shmemx_sbrk(size_t size);

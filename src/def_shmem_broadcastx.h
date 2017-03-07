@@ -29,6 +29,7 @@
 
 #ifndef _def_shmem_broadcastx_h
 #define _def_shmem_broadcastx_h
+#include "shmemx.h"
 
 #define SHMEM_BROADCASTX(N,T) \
 void \

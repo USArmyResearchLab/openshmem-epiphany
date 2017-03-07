@@ -29,6 +29,7 @@
 
 #ifndef _def_shmem_x_get_h
 #define _def_shmem_x_get_h
+#include "shmemx.h"
 
 #define SHMEM_X_GET_NBI(N,T,S) \
 void \
