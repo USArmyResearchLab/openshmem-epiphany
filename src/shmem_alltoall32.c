@@ -27,10 +27,6 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
-#include "internals.h"
-#include "shmem.h"
 #include "def_shmem_alltoall_x.h"
 
 SHMEM_ALLTOALL_X(32,int)
-

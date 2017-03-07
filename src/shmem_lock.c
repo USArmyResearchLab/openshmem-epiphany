@@ -30,58 +30,11 @@
 #include "internals.h"
 #include "shmem.h"
 
-long*
-__shmem_lock_ptr (const long* p)
-{
-	if ((unsigned int)p <= 0x100000) // addr > 1 MB
-		return (long*)(__shmem.lock_high_bits | (unsigned int)p);
-	return (long*)p;
-}
-
-void
-__shmem_clear_lock (volatile long* x)
-{
-	shmem_quiet();
-	*x = 0;
-}
-
-void
-__shmem_set_lock (volatile long* x)
-{
-	__asm__ __volatile__(
-		"mov r63, #0                 \n" // zero lock pointer offset
-		"mov r62, #1                 \n" // value to write to lock
-		".Loop%=:                    \n"
-		"   mov r61, r62             \n" // copying value to write to lock
-		"   testset r61, [%[x], r63] \n" // test set
-		"   sub r61, r61, #0         \n" // checking result
-		"   bne .Loop%=              \n" // if zero, loop until we acquire lock
-		:
-		: [x] "r" (x)
-		: "r61", "r62", "r63"
-	);
-}
-
-void
-__shmem_set_lock_self (long* x)
-{
-	long* gx = (long*)(e_emem_config.base | (unsigned int)x);
-	__shmem_set_lock(gx);
-}
-
-int
-__shmem_test_lock (volatile long* x)
-{
-	long r = 1; // attempting to acquire the lock
-	__asm__ __volatile__(
-		"mov r63, #0               \n" // zero lock pointer offset
-		"testset %[r], [%[x], r63] \n" // test set
-		: [r] "+r" (r)
-		: [x] "r" (x)
-		: "r63"
-	); // return 0 if the lock was originally cleared and call set lock
-	return (r ? 0 : 1); // return 1 of the lock had already been set.
-}
+long* __shmem_lock_ptr (const long* p);
+void __shmem_clear_lock (volatile long* x);
+void __shmem_set_lock (volatile long* x);
+void __shmem_set_lock_self (long* x);
+int __shmem_test_lock (volatile long* x);
 
 void
 shmem_clear_lock (volatile long* lock)
