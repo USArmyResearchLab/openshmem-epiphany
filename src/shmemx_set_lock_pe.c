@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-void
+SHMEM_SCOPE void
 shmemx_set_lock_pe(volatile long* lock, int pe)
 {
 	long* x = (long*)shmem_ptr((const void*)lock, pe);

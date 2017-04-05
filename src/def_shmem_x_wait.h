@@ -28,16 +28,22 @@
  */
 
 
+#ifndef _def_shmem_x_wait_h
+#define _def_shmem_x_wait_h
+
 #include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_iput.h"
 
-SHMEM_X_IPUT(char_iput,char)
-SHMEM_X_IPUT(short_iput,short)
-SHMEM_X_IPUT(int_iput,int)
-SHMEM_X_IPUT(long_iput,long)
-SHMEM_X_IPUT(longlong_iput,long long)
-SHMEM_X_IPUT(longdouble_iput,long double)
-SHMEM_X_IPUT(double_iput,double)
-SHMEM_X_IPUT(float_iput,float)
+#define SHMEM_X_WAIT(N,T) \
+SHMEM_SCOPE void \
+shmem_##N (volatile T *ivar, T cmp_value) \
+{ \
+	volatile T* p = ivar; \
+	while (*p == cmp_value); \
+}
 
+#define ALIAS_SHMEM_X_WAIT(N,T,A) \
+SHMEM_SCOPE void \
+shmem_##N (volatile T *ivar, T cmp_value) \
+__attribute__((alias("shmem_" #A)));
+
+#endif

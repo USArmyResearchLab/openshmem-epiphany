@@ -61,7 +61,7 @@ __shmem_collect##N##_0 (void *dest, const void *source, size_t nelems, int PE_st
 	} \
 	shmem_barrier(PE_start, 0, PE_size, pSync); \
 } \
-void \
+SHMEM_SCOPE void \
 shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
 	if (logPE_stride==0) return \

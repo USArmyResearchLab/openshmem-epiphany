@@ -29,8 +29,7 @@
 
 
 #include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_get.h"
+#include "def_shmem_x_wait.h"
 
-SHMEM_X_GET_NBI(getmem,void,0)
+SHMEM_X_WAIT(int_wait,int)
 

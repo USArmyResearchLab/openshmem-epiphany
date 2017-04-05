@@ -31,5 +31,6 @@
 #include "shmem.h"
 #include "internals.h"
 
-void shmem_global_exit(int status)
+SHMEM_SCOPE void
+shmem_global_exit(int status)
 { exit(status); }

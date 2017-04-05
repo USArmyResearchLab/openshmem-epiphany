@@ -30,7 +30,8 @@
 #include "internals.h"
 #include "shmem.h"
 
-void* shmem_ptr(const void* dest, int pe)
+SHMEM_SCOPE void*
+shmem_ptr(const void* dest, int pe)
 {
 	unsigned int row = pe >> SHMEM_ROW_SHIFT;
 	unsigned int col = pe & SHMEM_ROW_MASK;

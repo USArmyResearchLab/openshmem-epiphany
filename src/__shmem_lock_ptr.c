@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-long*
+SHMEM_SCOPE long*
 __shmem_lock_ptr (const long* p)
 {
 	if ((unsigned int)p <= 0x100000) // addr > 1 MB

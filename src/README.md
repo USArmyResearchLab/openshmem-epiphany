@@ -34,6 +34,8 @@ Compile-time options include:
 | `SHMEM_HEAP_START` `#`   | minimum local address of SHMEM heap            |
 | `SHMEM_USE_WAND_BARRIER` | hardware accelerated `shmem_barrier_all()`     |
 | `SHMEM_USE_IPI_GET`      | `shmem_*_get()` use inter-processor interrupts |
+| `SHMEM_USE_HEADER_ONLY`  | feature avoids linking with -lshmem; enables \ |
+|                          | higher performance, smaller program footprint  |
 
 # Building
 

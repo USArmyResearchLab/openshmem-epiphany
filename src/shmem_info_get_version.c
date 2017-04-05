@@ -31,7 +31,8 @@
 #include "shmem.h"
 #include "internals.h"
 
-void shmem_info_get_version(int *major, int *minor)
+SHMEM_SCOPE void
+shmem_info_get_version(int *major, int *minor)
 {
 	*major = SHMEM_MAJOR_VERSION;
 	*minor = SHMEM_MINOR_VERSION;

@@ -35,5 +35,6 @@
 SHMEM_X_GET(get32,void,2)
 
 ALIAS_SHMEM_X_GET(int_get,int,get32)
+ALIAS_SHMEM_X_GET(long_get,long,get32)
 ALIAS_SHMEM_X_GET(float_get,float,get32)
 

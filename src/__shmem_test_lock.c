@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-int
+SHMEM_SCOPE int
 __shmem_test_lock (volatile long* x)
 {
 	long r = 1; // attempting to acquire the lock

@@ -34,7 +34,6 @@
 
 SHMEM_X_GET(get64,void,3)
 
-ALIAS_SHMEM_X_GET(long_get,long,get64)
 ALIAS_SHMEM_X_GET(longlong_get,long long,get64)
 ALIAS_SHMEM_X_GET(double_get,double,get64)
 

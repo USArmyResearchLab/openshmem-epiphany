@@ -31,5 +31,6 @@
 #include "shmem.h"
 #include "internals.h"
 
-void shmem_finalize(void)
+SHMEM_SCOPE void
+shmem_finalize(void)
 { shmemx_brk(__shmem.local_mem_base); }

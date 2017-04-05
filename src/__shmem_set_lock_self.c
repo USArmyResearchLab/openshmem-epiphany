@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-void
+SHMEM_SCOPE void
 __shmem_set_lock_self (long* x)
 {
 	long* gx = (long*)(e_emem_config.base | (unsigned int)x);

@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-void
+SHMEM_SCOPE void
 __shmem_clear_lock (volatile long* x)
 {
 	shmem_quiet();

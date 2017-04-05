@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <complex.h>
 #include <sys/types.h>
+#include "internals.h"
 
 #if defined(__coprthr_device__) // Using COPRTHR
 
@@ -144,11 +145,11 @@ typedef struct {
 
 extern shmem_internals_t __shmem;
 
-void* shmem_ptr(const void* dest, int pe);
-void* __attribute__((malloc)) shmem_malloc(size_t size);
-void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size);
-void shmem_free(const void *ptr);
-void* shmem_realloc(const void* ptr, size_t size);
+SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
+SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);
+SHMEM_SCOPE void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size);
+SHMEM_SCOPE void shmem_free(const void *ptr);
+SHMEM_SCOPE void* shmem_realloc(const void* ptr, size_t size);
 
 
 #define shmem_clear_cache_inv(...)      do{}while(0)
@@ -161,20 +162,21 @@ void* shmem_realloc(const void* ptr, size_t size);
 
 #define shmem_fence(...) shmem_quiet(__VA_ARGS__)
 
-void shmem_quiet(void);
+SHMEM_SCOPE void shmem_quiet(void);
 
-long* __shmem_lock_ptr (const long* p);
-void __shmem_clear_lock (volatile long* x);
-void __shmem_set_lock (volatile long* x);
-void __shmem_set_lock_self (long* x);
-int __shmem_test_lock (volatile long* x);
-void shmem_clear_lock (volatile long* lock);
-void shmem_set_lock (volatile long* lock);
-int shmem_test_lock (volatile long* lock);
+SHMEM_SCOPE long* __shmem_lock_ptr (const long* p);
+SHMEM_SCOPE void __shmem_clear_lock (volatile long* x);
+SHMEM_SCOPE void __shmem_set_lock (volatile long* x);
+SHMEM_SCOPE void __shmem_set_lock_self (long* x);
+SHMEM_SCOPE int __shmem_test_lock (volatile long* x);
+SHMEM_SCOPE void shmem_clear_lock (volatile long* lock);
+SHMEM_SCOPE void shmem_set_lock (volatile long* lock);
+SHMEM_SCOPE int shmem_test_lock (volatile long* lock);
 
 
 #define DECL_SHMEM_X_FINC(N,T) \
-T __shmem_##N##_finc (T *ptr, int pe);
+SHMEM_SCOPE T \
+shmem_##N##_finc (T *ptr, int pe);
 
 DECL_SHMEM_X_FINC(int,int)
 DECL_SHMEM_X_FINC(long,long)
@@ -189,7 +191,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_INC(N,T) \
-void __shmem_##N##_inc (T* ptr, int pe);
+SHMEM_SCOPE void \
+shmem_##N##_inc (T* ptr, int pe);
 
 DECL_SHMEM_X_INC(int,int)
 DECL_SHMEM_X_INC(long,long)
@@ -204,7 +207,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_FADD(N,T) \
-T __shmem_##N##_fadd (T *ptr, T value, int pe);
+SHMEM_SCOPE T \
+shmem_##N##_fadd (T *ptr, T value, int pe);
 
 DECL_SHMEM_X_FADD(int,int)
 DECL_SHMEM_X_FADD(long,long)
@@ -219,7 +223,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_ADD(N,T) \
-void __shmem_##N##_add (T* ptr, T value, int pe);
+SHMEM_SCOPE void \
+shmem_##N##_add (T* ptr, T value, int pe);
 
 DECL_SHMEM_X_ADD(int,int)
 DECL_SHMEM_X_ADD(long,long)
@@ -234,7 +239,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_CSWAP(N,T) \
-T __shmem_##N##_cswap (T *ptr, T cond, T value, int pe);
+SHMEM_SCOPE T \
+shmem_##N##_cswap (T *ptr, T cond, T value, int pe);
 
 DECL_SHMEM_X_CSWAP(int,int)
 DECL_SHMEM_X_CSWAP(long,long)
@@ -249,7 +255,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_SWAP(N,T) \
-T __shmem_##N##_swap (T *ptr, T value, int pe);
+SHMEM_SCOPE T \
+shmem_##N##_swap (T *ptr, T value, int pe);
 
 DECL_SHMEM_X_SWAP(int,int)
 DECL_SHMEM_X_SWAP(float,float)
@@ -267,7 +274,8 @@ _Generic((dest), \
 )(dest,value,pe)
 
 #define DECL_SHMEM_X_FETCH(N,T) \
-T __shmem_##N##_fetch (volatile T *ptr, int pe);
+SHMEM_SCOPE T \
+shmem_##N##_fetch (const T *ptr, int pe);
 
 DECL_SHMEM_X_FETCH(int,int)
 DECL_SHMEM_X_FETCH(float,float)
@@ -286,7 +294,8 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_SET(N,T) \
-void __shmem_##N##_set (volatile T *ptr, T value, int pe);
+SHMEM_SCOPE void \
+shmem_##N##_set (T* dest, T value, int pe);
 
 DECL_SHMEM_X_SET(int,int)
 DECL_SHMEM_X_SET(float,float)
@@ -305,7 +314,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_WAIT(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (volatile T *ivar, T cmp_value);
 
 DECL_SHMEM_X_WAIT(int_wait,int)
@@ -315,7 +324,7 @@ DECL_SHMEM_X_WAIT(short_wait,short)
 DECL_SHMEM_X_WAIT(wait,long)
 
 #define DECL_SHMEM_X_WAIT_UNTIL(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (volatile T *ivar, int cmp, T cmp_value);
 
 DECL_SHMEM_X_WAIT_UNTIL(int_wait_until,int)
@@ -327,26 +336,27 @@ DECL_SHMEM_X_WAIT_UNTIL(wait_until,long)
 
 #ifdef SHMEM_USE_WAND_BARRIER
 
-void __attribute__((aligned(8))) __shmem_wand_isr(void);
-void __shmem_wand_barrier_init(void);
-void __shmem_wand_barrier(void);
+SHMEM_SCOPE void __attribute__((aligned(8))) __shmem_wand_isr(void);
+SHMEM_SCOPE void SHMEM_INLINE __shmem_wand_barrier_init(void);
+SHMEM_SCOPE void SHMEM_INLINE __shmem_wand_barrier(void);
 
 #else
 
-void __shmem_dissemination_barrier_init(void);
-void __shmem_dissemination_barrier(void);
+SHMEM_SCOPE void SHMEM_INLINE __shmem_dissemination_barrier_init(void);
+SHMEM_SCOPE void SHMEM_INLINE __shmem_dissemination_barrier(void);
 
 #endif
 
-void 
+SHMEM_SCOPE void SHMEM_INLINE
 __shmem_barrier_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync);
 
-void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
-void shmem_barrier_all(void);
+SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
+SHMEM_SCOPE void shmem_barrier_all(void);
 
 
 #define DECL_SHMEM_X_TO_ALL(N,T,OP) \
-void shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
+SHMEM_SCOPE void \
+shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
 
 DECL_SHMEM_X_TO_ALL(complexd_sum,complex double,SUM_OP)
 DECL_SHMEM_X_TO_ALL(complexf_sum,complex float,SUM_OP)
@@ -401,7 +411,7 @@ DECL_SHMEM_X_TO_ALL(longlong_min,long long,MIN_OP)
 
 
 #define DECL_SHMEM_BROADCASTX(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_broadcast##N (void *dest, const void *source, size_t nelems, int PE_root, int PE_start, int logPE_stride, int PE_size, long *pSync); 
 
 DECL_SHMEM_BROADCASTX(32,int)
@@ -409,7 +419,7 @@ DECL_SHMEM_BROADCASTX(64,long long)
 
 
 #define DECL_SHMEM_FCOLLECT_N(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_fcollect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync); 
 
 DECL_SHMEM_FCOLLECT_N(32,int)
@@ -417,7 +427,7 @@ DECL_SHMEM_FCOLLECT_N(64,long long)
 
 
 #define DECL_SHMEM_COLLECT_N(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
 
 DECL_SHMEM_COLLECT_N(32,int)
@@ -425,7 +435,7 @@ DECL_SHMEM_COLLECT_N(64,long long)
 
 
 #define DECL_SHMEM_ALLTOALL_X(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_alltoall##N(void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
 
 DECL_SHMEM_ALLTOALL_X(32,int)
@@ -433,7 +443,7 @@ DECL_SHMEM_ALLTOALL_X(64,long long)
 
 
 #define DECL_SHMEM_ALLTOALLS_X(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
 
 DECL_SHMEM_ALLTOALLS_X(32,int)
@@ -441,7 +451,8 @@ DECL_SHMEM_ALLTOALLS_X(64,long long)
 
 
 #define DECL_SHMEM_X_PUT_NBI(N,T,S) \
-	void shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe);
+SHMEM_SCOPE void \
+shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe);
 
 DECL_SHMEM_X_PUT_NBI(char_put,char,0)
 DECL_SHMEM_X_PUT_NBI(short_put,short,1)
@@ -472,7 +483,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_GET_NBI(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe);
 
 DECL_SHMEM_X_GET_NBI(char_get,char,0)
@@ -504,7 +515,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_PUT(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe);
 
 DECL_SHMEM_X_PUT(char_put,char,0)
@@ -536,7 +547,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_GET(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe);
 
 DECL_SHMEM_X_GET(char_get,char,0)
@@ -568,7 +579,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_P(X,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##X##_p (T *addr, T value, int pe);
 
 DECL_SHMEM_X_P(char,char)
@@ -621,7 +632,7 @@ _Generic((addr), \
 
 
 #define DECL_SHMEM_X_IPUT(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
 
 DECL_SHMEM_X_IPUT(char_iput,char)
@@ -652,7 +663,7 @@ _Generic((dest), \
 
 
 #define DECL_SHMEM_X_IGET(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
 
 DECL_SHMEM_X_IGET(char_iget,char)
@@ -682,11 +693,11 @@ _Generic((dest), \
 )(dest,source,dst,sst,nelems,pe)
 
 
-void shmem_init(void);
-void shmem_finalize(void);
-void shmem_global_exit(int status);
-void shmem_info_get_version(int *major, int *minor);
-void shmem_info_get_name(char *name);
+SHMEM_SCOPE void shmem_init(void);
+SHMEM_SCOPE void shmem_finalize(void);
+SHMEM_SCOPE void shmem_global_exit(int status);
+SHMEM_SCOPE void shmem_info_get_version(int *major, int *minor);
+SHMEM_SCOPE void shmem_info_get_name(char *name);
 
 static int shmem_my_pe(void)
 { return __shmem.my_pe; }
@@ -706,5 +717,8 @@ static int shmem_addr_accessible(const void *addr, int pe)
 	);
 }
 
+#if defined(SHMEM_USE_HEADER_ONLY)
+#include "shmem_header_only.h"
+#endif
 
 #endif

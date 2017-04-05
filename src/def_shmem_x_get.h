@@ -32,12 +32,12 @@
 #include "shmemx.h"
 
 #define SHMEM_X_GET_NBI(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
 { shmemx_memcpy_nbi((void*)dest, shmem_ptr(src,pe), nelems << S); }
 
 #define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
-void \
+SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
 __attribute__((alias("shmem_" #A "_nbi")));
 
@@ -57,7 +57,7 @@ typedef struct
 extern shmem_ipi_args_t shmem_ipi_args;
 
 #define SHMEM_X_GET(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 { \
 	if ((nelems << S) < 128) { \
@@ -81,14 +81,14 @@ shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 #else
 
 #define SHMEM_X_GET(N,T,S) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 { shmemx_memcpy((void*)dest, shmem_ptr((void*)src,pe), nelems << S); }
 
 #endif
 
 #define ALIAS_SHMEM_X_GET(N,T,A) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 __attribute__((alias("shmem_" #A)));
 

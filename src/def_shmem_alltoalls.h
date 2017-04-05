@@ -31,7 +31,7 @@
 #define _def_shmem_alltoalls_h
 
 #define SHMEM_ALLTOALLS_X(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
 	const int PE_step = 1 << logPE_stride; \

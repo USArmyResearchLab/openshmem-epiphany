@@ -31,7 +31,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-void
+SHMEM_SCOPE void
 shmem_quiet(void)
 {
 	if (__shmem.dma_used) { // SHMEM doesn't guarantee value is available

@@ -31,7 +31,7 @@
 #define _def_shmem_x_iget_h
 
 #define SHMEM_X_IGET(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
 { \
    int it, is, n = dst*nelems; \
@@ -42,7 +42,7 @@ shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems
 }
 
 #define ALIAS_SHMEM_X_IGET(N,T,A) \
-void \
+SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
 __attribute__((alias("shmem_" #A)));
 

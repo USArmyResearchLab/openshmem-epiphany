@@ -34,7 +34,7 @@
 #include "shmemx.h"
 
 #define SHMEM_ALLTOALL_X(N,T) \
-void \
+SHMEM_SCOPE void \
 shmem_alltoall##N(void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
 	int i, j; \

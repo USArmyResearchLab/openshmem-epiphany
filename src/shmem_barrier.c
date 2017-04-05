@@ -30,7 +30,7 @@
 #include "internals.h"
 #include "shmem.h"
 
-void 
+SHMEM_SCOPE void SHMEM_INLINE
 __shmem_barrier_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync)
 { /* Routine for PE_size <= 2. Looping over shmem_barrier() for npes = 2 may
 	* not work correctly.  Solution requires using testset because only
@@ -45,7 +45,7 @@ __shmem_barrier_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync)
 	*lock = 0;
 }
 
-void
+SHMEM_SCOPE void
 shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync)
 {
 	if (PE_size < 3) return __shmem_barrier_lte2(PE_start, logPE_stride, PE_size, pSync);

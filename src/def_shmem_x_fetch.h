@@ -31,10 +31,10 @@
 #define _def_shmem_x_fetch_h
 
 #define SHMEM_X_FETCH(N,T) \
-T \
+static T \
 __shmem_##N##_fetch (volatile T *ptr, int pe) \
 { return *ptr; } \
-T \
+SHMEM_SCOPE T \
 shmem_##N##_fetch (const T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \

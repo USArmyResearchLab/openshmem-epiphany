@@ -31,7 +31,7 @@
 #define _def_shmem_x_finc_h
 
 #define SHMEM_X_FINC(N,T) \
-T \
+static T \
 __shmem_##N##_finc (T *ptr, int pe) \
 { \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
@@ -42,7 +42,7 @@ __shmem_##N##_finc (T *ptr, int pe) \
 	__shmem_clear_lock(x); \
 	return r; \
 } \
-T \
+SHMEM_SCOPE T \
 shmem_##N##_finc (T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \

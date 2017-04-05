@@ -30,13 +30,15 @@
 #include "internals.h"
 #include "shmem.h"
 
-int __shmemx_brk(const void* ptr)
+SHMEM_SCOPE int
+__shmemx_brk(const void* ptr)
 {
 	__shmem.free_mem = (void*)ptr;
 	return 0;
 }
 
-void* __attribute__((malloc)) __shmemx_sbrk(size_t size)
+SHMEM_SCOPE void* __attribute__((malloc))
+__shmemx_sbrk(size_t size)
 {
 	void* ptr = __shmem.free_mem;
 	__shmem.free_mem += size;

@@ -32,7 +32,8 @@
 
 #ifdef SHMEM_USE_WAND_BARRIER
 
-void shmem_barrier_all(void)
+SHMEM_SCOPE void
+shmem_barrier_all(void)
 {
 	shmem_quiet();
 	__asm__ __volatile__ (
@@ -47,7 +48,8 @@ void shmem_barrier_all(void)
 
 #else
 
-void shmem_barrier_all(void)
+SHMEM_SCOPE void
+shmem_barrier_all(void)
 {
 	shmem_quiet();
 	int c;

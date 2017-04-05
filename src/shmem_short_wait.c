@@ -29,8 +29,7 @@
 
 
 #include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_put.h"
+#include "def_shmem_x_wait.h"
 
-SHMEM_X_PUT_NBI(putmem,void,0)
+SHMEM_X_WAIT(short_wait,short)
 

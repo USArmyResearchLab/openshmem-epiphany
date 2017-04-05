@@ -33,7 +33,104 @@
 
 shmem_internals_t __shmem = { 0 };
 
-void shmem_init(void)
+#ifdef SHMEM_USE_WAND_BARRIER
+
+SHMEM_SCOPE void __attribute__((aligned(8)))
+__shmem_wand_isr (void)
+{
+	__asm__ __volatile__ (
+		"gid                 \n" // disable further interrupts
+		"str r0, [sp, -0x1]  \n" // push r0 on the stack
+		"str r1, [sp, -0x2]  \n" // push r0 on the stack
+		"movfs r0, STATUS    \n" // read STATUS register
+		"mov r1, 0xFFF7      \n" // low bits of NOT WAND bit
+		"movt r1, 0xFFFF     \n" // and high bits
+		"and r0, r0, r1      \n" // clearing WAND bit
+		"movts STATUS, r0    \n" // setting STATUS register
+		"ldr r0, [sp, -0x1]  \n" // pop r0 from the stack
+		"ldr r1, [sp, -0x2]  \n" // pop r1 from the stack
+		"gie                 \n" // enable interrupts
+		"rti                 \n" // PC = IRET, which returns to after WAND instr
+		: : : "cc"
+	);
+	__builtin_unreachable();
+}
+
+SHMEM_SCOPE void SHMEM_INLINE
+__shmem_wand_barrier_init(void)
+{
+	unsigned int *ivt = (unsigned int*)0x20;
+	*ivt = ((((unsigned int)__shmem_wand_isr - (unsigned int)ivt) >> 1) << 8) | 0xe8; // e8 = B<*> Branch Opcode
+	__asm__ __volatile__ (
+		"gie             \n" // enables interrupts in ILAT register
+		"mov r1, 0xFEFF  \n" // low bits of NOT IRQ mask
+		"movt r1, 0xFFFF \n" // and top bits
+		"movfs r0, IMASK \n" // read IMASK register
+		"and r0, r0, r1  \n" // clearing WAND bit
+		"movts IMASK, r0 \n" // setting IMASK register
+		: : : "r0", "r1", "cc"
+	);
+}
+
+#else
+
+SHMEM_SCOPE void SHMEM_INLINE
+__shmem_dissemination_barrier_init(void)
+{
+	int c, r;
+	for (c = 0, r = 1; r < __shmem.n_pes; c++, r <<= 1)
+	{
+		int to = __shmem.my_pe + r;
+		if (to >= __shmem.n_pes) to -= __shmem.n_pes;
+		long* lock = (long*)(__shmem.barrier_sync + c);
+		long* remote_lock = (long*)shmem_ptr((void*)lock, to);
+		__shmem.barrier_psync[c] = remote_lock;
+	}
+}
+
+#endif
+
+#ifdef SHMEM_USE_IPI_GET
+
+shmem_ipi_args_t shmem_ipi_args = {
+	.lock = 0,
+	.source = 0,
+	.dest = 0,
+	.nbytes = 0,
+	.pe = -1,
+	.complete = 0
+};
+
+SHMEM_SCOPE void __attribute__((interrupt ("swi"))) 
+__shmem_user_isr(int signum)
+{
+	shmem_putmem(shmem_ipi_args.dest, shmem_ipi_args.source, 
+		shmem_ipi_args.nbytes, shmem_ipi_args.pe);
+	volatile int* remote_complete = shmem_ptr(&(shmem_ipi_args.complete), 
+		shmem_ipi_args.pe);
+	*remote_complete = 1; // inform remote PE
+}
+
+SHMEM_SCOPE void SHMEM_INLINE
+__shmem_ipi_get_init (void)
+{
+	unsigned int *ivt = (unsigned int*)0x24;
+	*ivt = ((((unsigned int)__shmem_user_isr - (unsigned int)ivt) >> 1) << 8) | 0xe8; // e8 = B<*> Branch Opcode
+	__asm__ __volatile__ (
+		"gie              \n" // enable interrupts
+		"mov r1, 0xFDFF   \n" // low bits of NOT USER_INTERRUPT mask
+		"movt r1, 0xFFFF  \n" // and top bits
+		"movfs r0, IMASK  \n" // read IMASK register
+		"and r0, r0, r1   \n" // clearing user interrupt mask bit
+		"movts IMASK, r0  \n" // setting IMASK register
+		: : : "r0", "r1", "cc"
+	);
+}
+
+#endif
+
+SHMEM_SCOPE void
+shmem_init(void)
 {
 	__asm__ __volatile__ (
 		"movfs %[id], COREID \n" // storing COREID register value

@@ -31,7 +31,7 @@
 #define _def_shmem_x_inc_h
 
 #define SHMEM_X_INC(N,T) \
-void \
+static void \
 __shmem_##N##_inc (T* ptr, int pe) \
 { \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
@@ -39,7 +39,7 @@ __shmem_##N##_inc (T* ptr, int pe) \
 	*ptr += 1; \
 	__shmem_clear_lock(x); \
 } \
-void \
+SHMEM_SCOPE void \
 shmem_##N##_inc (T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \

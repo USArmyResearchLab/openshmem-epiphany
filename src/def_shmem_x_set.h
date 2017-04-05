@@ -31,13 +31,13 @@
 #define _def_shmem_x_set_h
 
 #define SHMEM_X_SET(N,T) \
-void \
+static void \
 __shmem_##N##_set (volatile T *ptr, T value, int pe) \
 { *ptr = value; } \
-T \
+SHMEM_SCOPE void \
 shmem_##N##_set (T *dest, T value, int pe) \
 { \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
+	volatile T* ptr = (volatile T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_set(ptr, value, pe); \
 }
 

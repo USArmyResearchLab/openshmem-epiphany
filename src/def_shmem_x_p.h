@@ -31,7 +31,7 @@
 #define _def_shmem_x_p_h
 
 #define SHMEM_X_P(X,T) \
-void \
+SHMEM_SCOPE void \
 shmem_##X##_p (T *addr, T value, int pe) \
 { \
 	long* lock = (long*)shmem_ptr((void*)&__shmem.lock_atomic, pe); \

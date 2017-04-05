@@ -30,7 +30,8 @@
 #include "internals.h"
 #include "shmem.h"
 
-void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size)
+SHMEM_SCOPE void* __attribute__((malloc))
+shmem_align(size_t alignment, size_t size)
 {
 	unsigned int minus1 = alignment - 1;
 	unsigned int mask = ~(minus1);

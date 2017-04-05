@@ -30,7 +30,8 @@
 #include "internals.h"
 #include "shmem.h"
 
-void* __attribute__((malloc)) shmem_malloc(size_t size)
+SHMEM_SCOPE void* __attribute__((malloc))
+shmem_malloc(size_t size)
 {
 	return shmem_align(8, size);
 }

@@ -31,7 +31,7 @@
 #define _def_shmem_fcollect_n_h
 
 #define SHMEM_FCOLLECT_N(N,T) \
-void \
+static void \
 __shmem_fcollect##N##_0 (void *dest, const void *source, size_t nelems, int PE_start, int PE_size, long *pSync) \
 { \
 	int PE = __shmem.my_pe; \
@@ -82,7 +82,7 @@ __shmem_fcollect##N##_0 (void *dest, const void *source, size_t nelems, int PE_s
 		} \
 	} \
 } \
-void \
+SHMEM_SCOPE void \
 shmem_fcollect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
 	if (logPE_stride==0) return \

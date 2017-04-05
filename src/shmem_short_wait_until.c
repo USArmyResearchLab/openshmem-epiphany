@@ -29,20 +29,7 @@
 
 #include "internals.h"
 #include "shmem.h"
+#include "def_shmem_x_wait_until.h"
 
-SHMEM_SCOPE void
-__shmem_set_lock (volatile long* x)
-{
-	__asm__ __volatile__(
-		"mov r63, #0                 \n" // zero lock pointer offset
-		"mov r62, #1                 \n" // value to write to lock
-		".Loop%=:                    \n"
-		"   mov r61, r62             \n" // copying value to write to lock
-		"   testset r61, [%[x], r63] \n" // test set
-		"   sub r61, r61, #0         \n" // checking result
-		"   bne .Loop%=              \n" // if zero, loop until we acquire lock
-		:
-		: [x] "r" (x)
-		: "r61", "r62", "r63"
-	);
-}
+SHMEM_X_WAIT_UNTIL(short_wait_until,short)
+

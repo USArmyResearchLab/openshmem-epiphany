@@ -31,7 +31,7 @@
 #define _def_shmem_x_cswap_h
 
 #define SHMEM_X_CSWAP(N,T) \
-T \
+static T \
 __shmem_##N##_cswap (T *ptr, T cond, T value, int pe) \
 { \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
@@ -43,7 +43,7 @@ __shmem_##N##_cswap (T *ptr, T cond, T value, int pe) \
 	__shmem_clear_lock(x); \
 	return r; \
 } \
-T \
+SHMEM_SCOPE T \
 shmem_##N##_cswap (T *dest, T cond, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \

@@ -29,45 +29,9 @@
 
 
 #include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_get.h"
+#include "def_shmem_x_wait.h"
 
-#ifdef SHMEM_USE_IPI_GET
+SHMEM_X_WAIT(long_wait,long)
 
-shmem_ipi_args_t shmem_ipi_args = {
-	.lock = 0,
-	.source = 0,
-	.dest = 0,
-	.nbytes = 0,
-	.pe = -1,
-	.complete = 0
-};
-
-void __attribute__((interrupt ("swi"))) 
-__shmem_user_isr(int signum)
-{
-	shmem_putmem(shmem_ipi_args.dest, shmem_ipi_args.source, 
-		shmem_ipi_args.nbytes, shmem_ipi_args.pe);
-	volatile int* remote_complete = shmem_ptr(&(shmem_ipi_args.complete), 
-		shmem_ipi_args.pe);
-	*remote_complete = 1; // inform remote PE
-}
-
-void 
-__shmem_ipi_get_init (void)
-{
-	unsigned int *ivt = (unsigned int*)0x24;
-	*ivt = ((((unsigned int)__shmem_user_isr - (unsigned int)ivt) >> 1) << 8) | 0xe8; // e8 = B<*> Branch Opcode
-	__asm__ __volatile__ (
-		"gie              \n" // enable interrupts
-		"mov r1, 0xFDFF   \n" // low bits of NOT USER_INTERRUPT mask
-		"movt r1, 0xFFFF  \n" // and top bits
-		"movfs r0, IMASK  \n" // read IMASK register
-		"and r0, r0, r1   \n" // clearing user interrupt mask bit
-		"movts IMASK, r0  \n" // setting IMASK register
-		: : : "r0", "r1", "cc"
-	);
-}
-
-#endif
+ALIAS_SHMEM_X_WAIT(wait,long,long_wait)
 

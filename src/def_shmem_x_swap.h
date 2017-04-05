@@ -32,7 +32,7 @@
 #define _def_shmem_x_swap_h
 
 #define SHMEM_X_SWAP(N,T) \
-T \
+static T \
 __shmem_##N##_swap (T *ptr, T value, int pe) \
 { \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
@@ -42,7 +42,7 @@ __shmem_##N##_swap (T *ptr, T value, int pe) \
 	__shmem_clear_lock(x); \
 	return r; \
 } \
-T \
+SHMEM_SCOPE T \
 shmem_##N##_swap (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \

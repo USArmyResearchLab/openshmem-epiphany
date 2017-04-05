@@ -30,9 +30,6 @@
 #ifndef _def_shmem_x_to_all_h
 #define _def_shmem_x_to_all_h
 
-//#define HOT  __attribute__((hot))
-#define HOT 
-
 #define SUM_OP  += pWrk[j]
 #define PROD_OP *= pWrk[j]
 #define AND_OP  &= pWrk[j]
@@ -42,7 +39,7 @@
 #define MIN_OP  = (dest[i+j]<pWrk[j])?dest[i+j]:pWrk[j]
 
 #define SHMEM_X_TO_ALL(N,T,OP) \
-void HOT \
+SHMEM_SCOPE void \
 shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
 { \
 	int PE_size_stride = PE_size << logPE_stride; \

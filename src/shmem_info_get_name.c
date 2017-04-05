@@ -31,7 +31,8 @@
 #include "shmem.h"
 #include "internals.h"
 
-void shmem_info_get_name(char *name)
+SHMEM_SCOPE void
+shmem_info_get_name(char *name)
 {
 	char* tmp = SHMEM_VENDOR_STRING;
 	while ((*tmp)) (*name++) = (*tmp++);

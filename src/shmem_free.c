@@ -30,7 +30,8 @@
 #include "internals.h"
 #include "shmem.h"
 
-void shmem_free(const void *ptr)
+SHMEM_SCOPE void
+shmem_free(const void *ptr)
 {
 	if ((unsigned int)ptr < (unsigned int)shmemx_sbrk(0))
 	shmemx_brk(ptr);

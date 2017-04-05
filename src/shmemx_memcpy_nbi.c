@@ -32,7 +32,7 @@
 #include "shmem.h"
 #include "def_shmem_x_to_all.h"
 
-void
+SHMEM_SCOPE void
 shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 {
 	static const unsigned char dma_data_shift[8] = { 3,0,1,0,2,0,1,0 };

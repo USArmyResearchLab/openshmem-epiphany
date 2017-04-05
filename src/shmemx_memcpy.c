@@ -19,7 +19,11 @@
  *  r62 = r62-r63 used as dword src data
  *
 */
-void shmemx_memcpy(unsigned char* dst, unsigned char* src, unsigned int nbytes)
+#include "internals.h"
+#include "shmem.h"
+
+SHMEM_SCOPE void
+shmemx_memcpy(void* dest, const void* source, size_t nbytes)
 {
 	__asm__ __volatile__(
 	"mov r55, %[src]                  \n" // this saves program space at cost of one instruction
@@ -93,8 +97,7 @@ void shmemx_memcpy(unsigned char* dst, unsigned char* src, unsigned int nbytes)
 	".LDdone%=:                       \n"
 	"sub %[src], %[nbytes], #0        \n"
 	"bgt .LByteHandler%=              \n"
-	".LReturn:                        \n"
-			: [dst] "+r" (dst), [src] "+r" (src)
+			: [dst] "+r" (dest), [src] "+r" (source)
 			: [nbytes] "r" (nbytes)
 			: "r3", "r54", "r55",
 			  "r56", "r57", "r58", "r59",

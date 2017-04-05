@@ -29,14 +29,7 @@
 
 #include "internals.h"
 #include "shmem.h"
-#include "def_shmem_x_p.h"
+#include "def_shmem_x_wait_until.h"
 
-SHMEM_X_P(char,char)
-SHMEM_X_P(short,short)
-SHMEM_X_P(int,int)
-SHMEM_X_P(long,long)
-SHMEM_X_P(longlong,long long)
-SHMEM_X_P(float,float)
-SHMEM_X_P(double,double)
-SHMEM_X_P(longdouble,long double)
+SHMEM_X_WAIT_UNTIL(longlong_wait_until,long long)
 

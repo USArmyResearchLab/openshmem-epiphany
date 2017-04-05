@@ -27,22 +27,43 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
-#include "shmem.h"
 
-SHMEM_SCOPE void
-__shmem_set_lock (volatile long* x)
-{
-	__asm__ __volatile__(
-		"mov r63, #0                 \n" // zero lock pointer offset
-		"mov r62, #1                 \n" // value to write to lock
-		".Loop%=:                    \n"
-		"   mov r61, r62             \n" // copying value to write to lock
-		"   testset r61, [%[x], r63] \n" // test set
-		"   sub r61, r61, #0         \n" // checking result
-		"   bne .Loop%=              \n" // if zero, loop until we acquire lock
-		:
-		: [x] "r" (x)
-		: "r61", "r62", "r63"
-	);
+#ifndef _def_shmem_x_wait_until_h
+#define _def_shmem_x_wait_until_h
+
+#include "internals.h"
+
+#define SHMEM_X_WAIT_UNTIL(N,T) \
+SHMEM_SCOPE void \
+shmem_##N (volatile T *ivar, int cmp, T cmp_value) \
+{ \
+	volatile T* p = ivar; \
+	switch (cmp) { \
+		case SHMEM_CMP_EQ: \
+			while (*p != cmp_value); \
+			break; \
+		case SHMEM_CMP_NE: \
+			while (*p == cmp_value); \
+			break; \
+		case SHMEM_CMP_GT: \
+			while (*p <= cmp_value); \
+			break; \
+		case SHMEM_CMP_LE: \
+			while (*p > cmp_value); \
+			break; \
+		case SHMEM_CMP_LT: \
+			while (*p >= cmp_value); \
+			break; \
+		case SHMEM_CMP_GE: \
+			while (*p < cmp_value); \
+			break; \
+	} \
 }
+
+
+#define ALIAS_SHMEM_X_WAIT_UNTIL(N,T,A) \
+SHMEM_SCOPE void \
+shmem_##N (volatile T *ivar, int cmp, T cmp_value) \
+__attribute__((alias("shmem_" #A)));
+
+#endif

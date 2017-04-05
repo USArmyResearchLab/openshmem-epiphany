@@ -27,20 +27,9 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_wait_until.h"
 
-#define SHMEM_X_WAIT(N,T) \
-void \
-shmem_##N (volatile T *ivar, T cmp_value) \
-{ \
-	volatile T* p = ivar; \
-	while (*p == cmp_value); \
-}
-
-SHMEM_X_WAIT(int_wait,int)
-SHMEM_X_WAIT(long_wait,long)
-SHMEM_X_WAIT(longlong_wait,long long)
-SHMEM_X_WAIT(short_wait,short)
-SHMEM_X_WAIT(wait,long)
+SHMEM_X_WAIT_UNTIL(int_wait_until,int)
 

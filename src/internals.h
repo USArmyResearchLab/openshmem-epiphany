@@ -30,7 +30,10 @@
 #ifndef _internal_h
 #define _internal_h
 
-/* internals moved */
-
+#if defined(SHMEM_USE_HEADER_ONLY)
+#define SHMEM_SCOPE static
+#else
+#define SHMEM_SCOPE
 #endif
 
+#endif
