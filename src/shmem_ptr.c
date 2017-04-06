@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void*
 shmem_ptr(const void* dest, int pe)
 {
@@ -39,3 +43,7 @@ shmem_ptr(const void* dest, int pe)
 	void* remote = (void*)((coreid << 20) | (unsigned int) dest);
 	return remote;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -27,9 +27,12 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "shmem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_SCOPE void
 shmem_quiet(void)
@@ -57,3 +60,6 @@ shmem_quiet(void)
 	}
 }
 
+#ifdef __cplusplus
+}
+#endif

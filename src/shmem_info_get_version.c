@@ -27,9 +27,12 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_SCOPE void
 shmem_info_get_version(int *major, int *minor)
@@ -37,3 +40,7 @@ shmem_info_get_version(int *major, int *minor)
 	*major = SHMEM_MAJOR_VERSION;
 	*minor = SHMEM_MINOR_VERSION;
 }
+
+#ifdef __cplusplus
+}
+#endif

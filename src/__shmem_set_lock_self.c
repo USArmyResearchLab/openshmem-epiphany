@@ -30,9 +30,17 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void
 __shmem_set_lock_self (long* x)
 {
 	long* gx = (long*)(e_emem_config.base | (unsigned int)x);
 	__shmem_set_lock(gx);
 }
+
+#ifdef __cplusplus
+}
+#endif

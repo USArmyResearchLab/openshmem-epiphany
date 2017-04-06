@@ -32,7 +32,14 @@
 #include "shmem.h"
 #include "def_shmem_x_iput.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_IPUT(char_iput,char)
 
 ALIAS_SHMEM_X_IPUT(iput8,void,char_iput)
 
+#ifdef __cplusplus
+}
+#endif

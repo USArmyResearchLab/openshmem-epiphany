@@ -30,9 +30,17 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void*
 shmem_realloc(const void* ptr, size_t size)
 {
 	shmemx_brk(ptr);
 	return shmemx_sbrk(size);
 }
+
+#ifdef __cplusplus
+}
+#endif

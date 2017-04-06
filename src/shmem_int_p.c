@@ -31,5 +31,12 @@
 #include "shmem.h"
 #include "def_shmem_x_p.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_P(int,int)
 
+#ifdef __cplusplus
+}
+#endif

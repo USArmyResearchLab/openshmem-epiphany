@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void
 __shmem_set_lock (volatile long* x)
 {
@@ -46,3 +50,7 @@ __shmem_set_lock (volatile long* x)
 		: "r61", "r62", "r63"
 	);
 }
+
+#ifdef __cplusplus
+}
+#endif

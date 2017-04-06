@@ -39,25 +39,26 @@ __shmem_collect##N##_0 (void *dest, const void *source, size_t nelems, int PE_st
 { \
 	int PE = __shmem.my_pe; \
 	int PE_step = 1; \
-	int orig_PE_end = PE_start + (PE_size - 1); \
 	int PE_end = PE_start + (PE_size - 1); \
 	int my_offset = 0; \
+	int inelems = (int)nelems; \
 	/* We know the value here is 0 and we can use it and reset it before \
     * it's needed in the barrier */ \
 	volatile long *offset = pSync + SHMEM_COLLECT_SYNC_SIZE - 1; \
 	int* neighbor_offset = (int*)shmem_ptr((void*)offset, PE + PE_step); \
 	if (__builtin_expect((PE == PE_start),0)) { \
-		*neighbor_offset = my_offset + nelems; \
+		*neighbor_offset = my_offset + inelems; \
 	} else { \
 		/* spin until neighbor sets offset */ \
 		while (!(my_offset = *offset)); \
 		*offset = SHMEM_SYNC_VALUE; \
 		if (__builtin_expect((PE != PE_end),1)) \
-			*neighbor_offset = my_offset + nelems; \
+			*neighbor_offset = my_offset + inelems; \
 	} \
-	for (int i = PE_start; i <= PE_end; i += PE_step) { \
+	int i, j; \
+	for (i = PE_start; i <= PE_end; i += PE_step) { \
 		T* dst = (T*)shmem_ptr((void*)dest, i) + my_offset; \
-		for (int j = 0; j < nelems; j++) dst[j] = ((T*)source)[j]; \
+		for (j = 0; j < inelems; j++) dst[j] = ((T*)source)[j]; \
 	} \
 	shmem_barrier(PE_start, 0, PE_size, pSync); \
 } \
@@ -70,22 +71,24 @@ shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, i
 	int PE_step = 0x1 << logPE_stride; \
 	int PE_end = PE_start + PE_step * (PE_size - 1); \
 	int my_offset = 0; \
+	int inelems = (int)nelems; \
 	/* We know the value here is 0 and we can use it and reset it before \
     * it's needed in the barrier */ \
 	volatile long *offset = pSync + SHMEM_COLLECT_SYNC_SIZE - 1; \
 	int* neighbor_offset = (int*)shmem_ptr((void*)offset, PE + PE_step); \
 	if (__builtin_expect((PE == PE_start),0)) { \
-		*neighbor_offset = my_offset + nelems; \
+		*neighbor_offset = my_offset + inelems; \
 	} else { \
 		/* spin until neighbor sets offset */ \
 		while (!(my_offset = *offset)); \
 		*offset = SHMEM_SYNC_VALUE; \
 		if (__builtin_expect((PE != PE_end),1)) \
-			*neighbor_offset = my_offset + nelems; \
+			*neighbor_offset = my_offset + inelems; \
 	} \
-	for (int i = PE_start; i <= PE_end; i += PE_step) { \
+	int i, j; \
+	for (i = PE_start; i <= PE_end; i += PE_step) { \
 		T* dst = (T*)shmem_ptr((void*)dest, i) + my_offset; \
-		for (int j = 0; j < nelems; j++) dst[j] = ((T*)source)[j]; \
+		for (j = 0; j < inelems; j++) dst[j] = ((T*)source)[j]; \
 	} \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 }

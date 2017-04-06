@@ -32,5 +32,12 @@
 #include "internals.h"
 #include "def_shmem_x_to_all.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_TO_ALL(complexf_prod,complex float,PROD_OP)
 
+#ifdef __cplusplus
+}
+#endif

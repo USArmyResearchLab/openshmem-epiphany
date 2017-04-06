@@ -27,13 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "shmem.h"
 #include "def_shmem_x_get.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_X_GET(get8,void,0)
 
 ALIAS_SHMEM_X_GET(char_get,char,get8)
 ALIAS_SHMEM_X_GET(getmem,void,get8)
 
+#ifdef __cplusplus
+}
+#endif

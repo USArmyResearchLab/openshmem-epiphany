@@ -31,7 +31,7 @@
 #ifndef _shmemx_h
 #define _shmemx_h
 
-#include "shmem.h"
+#include "internals.h"
 
 SHMEM_SCOPE void shmemx_set_lock_pe(volatile long* lock, int pe);
 SHMEM_SCOPE int shmemx_test_lock_pe(volatile long* lock, int pe);

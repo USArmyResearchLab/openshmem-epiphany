@@ -27,10 +27,13 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "shmem.h"
 #include "def_shmem_x_to_all.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_SCOPE void
 shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
@@ -83,3 +86,6 @@ shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 		}
 }
 
+#ifdef __cplusplus
+}
+#endif

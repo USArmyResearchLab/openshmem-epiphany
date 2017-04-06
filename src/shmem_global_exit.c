@@ -27,10 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void
 shmem_global_exit(int status)
-{ exit(status); }
+{
+	exit(status);
+}
+
+#ifdef __cplusplus
+}
+#endif

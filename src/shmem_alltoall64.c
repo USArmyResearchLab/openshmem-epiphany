@@ -29,4 +29,12 @@
 
 #include "def_shmem_alltoall_x.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_ALLTOALL_X(64,long long)
+
+#ifdef __cplusplus
+}
+#endif

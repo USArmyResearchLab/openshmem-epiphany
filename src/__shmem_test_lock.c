@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE int
 __shmem_test_lock (volatile long* x)
 {
@@ -43,3 +47,7 @@ __shmem_test_lock (volatile long* x)
 	); // return 0 if the lock was originally cleared and call set lock
 	return (r ? 0 : 1); // return 1 of the lock had already been set.
 }
+
+#ifdef __cplusplus
+}
+#endif

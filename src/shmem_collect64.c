@@ -32,5 +32,12 @@
 #include "shmem.h"
 #include "def_shmem_collect_n.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_COLLECT_N(64,long long)
 
+#ifdef __cplusplus
+}
+#endif

@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void* __attribute__((malloc))
 shmem_align(size_t alignment, size_t size)
 {
@@ -40,3 +44,7 @@ shmem_align(size_t alignment, size_t size)
 	shmemx_sbrk(y); // advance to alignment address
 	return shmemx_sbrk(size);
 }
+
+#ifdef __cplusplus
+}
+#endif

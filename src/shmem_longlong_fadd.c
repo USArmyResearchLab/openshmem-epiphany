@@ -27,11 +27,16 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "shmem.h"
 #include "def_shmem_x_fadd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_FADD(longlong,long long)
 
-
+#ifdef __cplusplus
+}
+#endif

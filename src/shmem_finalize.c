@@ -27,10 +27,17 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void
 shmem_finalize(void)
-{ shmemx_brk(__shmem.local_mem_base); }
+{ shmemx_brk((void*)__shmem.local_mem_base); }
+
+#ifdef __cplusplus
+}
+#endif

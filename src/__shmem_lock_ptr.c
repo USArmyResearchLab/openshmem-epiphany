@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE long*
 __shmem_lock_ptr (const long* p)
 {
@@ -37,3 +41,7 @@ __shmem_lock_ptr (const long* p)
 		return (long*)(__shmem.lock_high_bits | (unsigned int)p);
 	return (long*)p;
 }
+
+#ifdef __cplusplus
+}
+#endif

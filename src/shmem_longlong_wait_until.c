@@ -31,5 +31,12 @@
 #include "shmem.h"
 #include "def_shmem_x_wait_until.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_WAIT_UNTIL(longlong_wait_until,long long)
 
+#ifdef __cplusplus
+}
+#endif

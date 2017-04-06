@@ -30,9 +30,17 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void
 __shmem_clear_lock (volatile long* x)
 {
 	shmem_quiet();
 	*x = 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

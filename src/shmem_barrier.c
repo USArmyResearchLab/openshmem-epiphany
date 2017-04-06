@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void SHMEM_INLINE
 __shmem_barrier_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync)
 { /* Routine for PE_size <= 2. Looping over shmem_barrier() for npes = 2 may
@@ -50,7 +54,6 @@ shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync)
 {
 	if (PE_size < 3) return __shmem_barrier_lte2(PE_start, logPE_stride, PE_size, pSync);
 	int PE_size_stride = PE_size << logPE_stride;
-	int PE_step = 0x1 << logPE_stride;
 	int PE_end = PE_size_stride + PE_start;
 
 	int c, r;
@@ -65,3 +68,7 @@ shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync)
 		*lock = SHMEM_SYNC_VALUE;
 	}
 }
+
+#ifdef __cplusplus
+}
+#endif

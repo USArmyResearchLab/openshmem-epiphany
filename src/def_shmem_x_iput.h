@@ -35,7 +35,7 @@ SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
 { \
 	int it, is, n = dst*nelems; \
-	T* pdst = shmem_ptr(dest, pe); \
+	T* pdst = (T*)shmem_ptr(dest, pe); \
 	for (it = 0, is = 0; it < n; it += dst, is += sst) { \
 		pdst[it] = source[is]; \
 	} \

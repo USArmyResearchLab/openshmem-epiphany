@@ -27,14 +27,22 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_SCOPE void
 shmem_info_get_name(char *name)
 {
-	char* tmp = SHMEM_VENDOR_STRING;
+	const char* vendor_string = SHMEM_VENDOR_STRING;
+	char* tmp = (char*)vendor_string;
 	while ((*tmp)) (*name++) = (*tmp++);
 	*name = '\0'; // null terminate
 }
+
+#ifdef __cplusplus
+}
+#endif

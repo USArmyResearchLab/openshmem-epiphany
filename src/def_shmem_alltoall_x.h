@@ -37,7 +37,7 @@
 SHMEM_SCOPE void \
 shmem_alltoall##N(void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
-	int i, j; \
+	int j; \
 	int dst_offset = ((__shmem.my_pe - PE_start) >> logPE_stride)*nelems; \
 	int PE_size_stride = PE_size << logPE_stride; \
 	int step = 1 << logPE_stride; \

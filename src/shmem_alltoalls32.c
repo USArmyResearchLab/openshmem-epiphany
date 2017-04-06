@@ -32,5 +32,12 @@
 #include "shmem.h"
 #include "def_shmem_alltoalls.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_ALLTOALLS_X(32,int)
 
+#ifdef __cplusplus
+}
+#endif

@@ -31,5 +31,12 @@
 #include "shmem.h"
 #include "def_shmem_x_fetch.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_FETCH(double,double)
 
+#ifdef __cplusplus
+}
+#endif

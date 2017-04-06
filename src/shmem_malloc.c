@@ -30,8 +30,16 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void* __attribute__((malloc))
 shmem_malloc(size_t size)
 {
 	return shmem_align(8, size);
 }
+
+#ifdef __cplusplus
+}
+#endif

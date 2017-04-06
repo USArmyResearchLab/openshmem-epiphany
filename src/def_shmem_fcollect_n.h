@@ -41,38 +41,40 @@ __shmem_fcollect##N##_0 (void *dest, const void *source, size_t nelems, int PE_s
 	int PEx = PE - PE_start; \
 	T* psrc = (T*)source; \
 	T* pdst = (T*)dest; \
-	for (int i = 0; i < nelems; i++) { \
-		pdst[PEx*nelems + i] = psrc[i]; \
+	int inelems = (int)nelems; \
+	int i, j, c, r; \
+	for(i = 0; i < inelems; i++) { \
+		pdst[PEx*inelems + i] = psrc[i]; \
 	} \
 	if (__builtin_expect(PE_size & (PE_size - 1),0)) { /* Use ring algorithm for non-powers of 2 */ \
-		for (int j = 1; j < PE_size; j++) { \
+		for(j = 1; j < PE_size; j++) { \
 			int PE_to = __shmem.my_pe + j*step; \
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			int offset = (PE - PE_start) *nelems; \
+			int offset = (PE - PE_start) *inelems; \
 			pdst = (T*)shmem_ptr((void*)dest, PE_to); \
-			for (int i = 0; i < nelems; i++) { \
+			for(i = 0; i < inelems; i++) { \
 				pdst[offset + i] = psrc[i]; \
 			} \
 		} \
 		shmem_barrier(PE_start, 0, PE_size, pSync); \
 	} else { /* recursive doubling (butterfly) algorithm broadcasts increasingly more */ \
-		int Nx = nelems * PE_size; \
+		int Nx = inelems * PE_size; \
 		int x = PE_size-1; \
 		x |= (x >> 1); \
 		x |= (x >> 2); /* up to 16 PEs */ \
 		/*x |= (x >> 4);*/ /* up to 1024 PEs */ \
 		/*x |= (x >> 8);*/ /* up to 65536 PEs */ \
 		x += 1; /* the next largest power of 2 of the largest PE number */ \
-		for (int c = 0, r = (PE_size_stride >> 1); r >= 1; c++, x >>= 1, r>>=1) { \
+		for(c = 0, r = (PE_size_stride >> 1); r >= 1; c++, x >>= 1, r>>=1) { \
 			int PE_to = __shmem.my_pe + r; \
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
 			volatile long* lock = (volatile long*)(pSync + c); \
 			long* remote_lock = (long*)shmem_ptr((void*)lock, PE_to); \
 			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
-			for (int j = 0; j < (1<<c); j++) { \
-				int offset = (PEx + x*j )*nelems; \
+			for(j = 0; j < (1<<c); j++) { \
+				int offset = (PEx + x*j )*inelems; \
 				if (offset >= Nx) offset -= Nx; \
-				for (int i = 0; i < nelems; i++) { \
+				for(i = 0; i < inelems; i++) { \
 					remote_dest[offset + i] =  pdst[offset + i]; \
 				} \
 			} \
@@ -94,38 +96,40 @@ shmem_fcollect##N (void *dest, const void *source, size_t nelems, int PE_start, 
 	int PEx = (PE - PE_start) >> logPE_stride; \
 	T* psrc = (T*)source; \
 	T* pdst = (T*)dest; \
-	for (int i = 0; i < nelems; i++) { \
-		pdst[PEx*nelems + i] = psrc[i]; \
+	int inelems = (int)nelems; \
+	int i, j, c, r; \
+	for(i = 0; i < inelems; i++) { \
+		pdst[PEx*inelems + i] = psrc[i]; \
 	} \
 	if (__builtin_expect(PE_size & (PE_size - 1),0)) { /* Use ring algorithm for non-powers of 2 */ \
-		for (int j = 1; j < PE_size; j++) { \
+		for(j = 1; j < PE_size; j++) { \
 			int PE_to = __shmem.my_pe + j*step; \
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			int offset = ((PE - PE_start) >> logPE_stride)*nelems; \
+			int offset = ((PE - PE_start) >> logPE_stride)*inelems; \
 			pdst = (T*)shmem_ptr((void*)dest, PE_to); \
-			for (int i = 0; i < nelems; i++) { \
+			for(i = 0; i < inelems; i++) { \
 				pdst[offset + i] = psrc[i]; \
 			} \
 		} \
 		shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 	} else { /* recursive doubling (butterfly) algorithm broadcasts increasingly more */ \
-		int Nx = nelems * PE_size; \
+		int Nx = inelems * PE_size; \
 		int x = PE_size-1; \
 		x |= (x >> 1); \
 		x |= (x >> 2); /* up to 16 PEs */ \
 		/*x |= (x >> 4);*/ /* up to 1024 PEs */ \
 		/*x |= (x >> 8);*/ /* up to 65536 PEs */ \
 		x += 1; /* the next largest power of 2 of the largest PE number */ \
-		for (int c = 0, r = (PE_size_stride >> 1); r >= (1 << logPE_stride); c++, x >>= 1, r>>=1) { \
+		for(c = 0, r = (PE_size_stride >> 1); r >= (1 << logPE_stride); c++, x >>= 1, r>>=1) { \
 			int PE_to = __shmem.my_pe + r; \
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
 			volatile long* lock = (volatile long*)(pSync + c); \
 			long* remote_lock = (long*)shmem_ptr((void*)lock, PE_to); \
 			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
-			for (int j = 0; j < (1<<c); j++) { \
-				int offset = (PEx + x*j )*nelems; \
+			for(j = 0; j < (1<<c); j++) { \
+				int offset = (PEx + x*j )*inelems; \
 				if (offset >= Nx) offset -= Nx; \
-				for (int i = 0; i < nelems; i++) { \
+				for(i = 0; i < inelems; i++) { \
 					remote_dest[offset + i] =  pdst[offset + i]; \
 				} \
 			} \

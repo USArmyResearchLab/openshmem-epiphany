@@ -30,6 +30,10 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef SHMEM_USE_WAND_BARRIER
 
 SHMEM_SCOPE void
@@ -63,4 +67,8 @@ shmem_barrier_all(void)
 	__shmem.dma_used = 0; // reset
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

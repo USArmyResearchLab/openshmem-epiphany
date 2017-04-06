@@ -27,13 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "shmem.h"
 #include "def_shmem_x_put.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 SHMEM_X_PUT_NBI(put8,void,0)
 
 ALIAS_SHMEM_X_PUT_NBI(char_put,char,put8)
 ALIAS_SHMEM_X_PUT_NBI(putmem,void,put8)
 
+#ifdef __cplusplus
+}
+#endif

@@ -30,17 +30,25 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE int
 __shmemx_brk(const void* ptr)
 {
-	__shmem.free_mem = (void*)ptr;
+	__shmem.free_mem = (intptr_t)ptr;
 	return 0;
 }
 
 SHMEM_SCOPE void* __attribute__((malloc))
 __shmemx_sbrk(size_t size)
 {
-	void* ptr = __shmem.free_mem;
+	void* ptr = (void*)__shmem.free_mem;
 	__shmem.free_mem += size;
 	return ptr;
 }
+
+#ifdef __cplusplus
+}
+#endif

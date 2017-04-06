@@ -27,8 +27,13 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
-#include "shmem.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int __shmemx_brk (const void* ptr);
 void* __attribute__((malloc)) __shmemx_sbrk(size_t size);
+
+#ifdef __cplusplus
+}
+#endif

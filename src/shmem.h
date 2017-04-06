@@ -30,6 +30,7 @@
 #ifndef _shmem_h
 #define _shmem_h
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <complex.h>
 #include <sys/types.h>
@@ -95,6 +96,10 @@
 #define shmemalign(...)                shmem_align(__VA_ARGS__)
 #define start_pes(...)                 shmem_init()
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum shmem_cmp_constants
 {
 	SHMEM_CMP_EQ = 0,
@@ -116,9 +121,9 @@ typedef struct
 } __attribute__((aligned(8))) shmem_dma_desc_t;
 
 typedef struct {
-	unsigned int my_pe;
-	unsigned int n_pes;
-	unsigned int n_pes_log2;
+	int my_pe;
+	int n_pes;
+	int n_pes_log2;
 	unsigned int dma_start;
 	unsigned int dma_used;
 	unsigned int lock_high_bits;
@@ -134,8 +139,8 @@ typedef struct {
 	unsigned char volatile * volatile cdst0;
 	unsigned char volatile * volatile cdst1;
 	unsigned int coreid;
-	void* local_mem_base;
-	void* free_mem;
+	intptr_t local_mem_base;
+	intptr_t free_mem;
 	volatile long barrier_sync[SHMEM_BARRIER_SYNC_SIZE];
 #ifndef SHMEM_USE_WAND_BARRIER
 	long* barrier_psync[SHMEM_BARRIER_SYNC_SIZE];
@@ -716,6 +721,10 @@ static int shmem_addr_accessible(const void *addr, int pe)
 		) ? 1 : 0
 	);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #if defined(SHMEM_USE_HEADER_ONLY)
 #include "shmem_header_only.h"

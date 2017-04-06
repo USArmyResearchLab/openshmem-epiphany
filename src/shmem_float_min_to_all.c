@@ -27,10 +27,16 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
 #include "def_shmem_x_to_all.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_TO_ALL(float_min,float,MIN_OP)
 
+#ifdef __cplusplus
+}
+#endif

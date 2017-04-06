@@ -31,5 +31,12 @@
 #include "shmem.h"
 #include "def_shmem_x_swap.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_SWAP(longlong,long long)
 
+#ifdef __cplusplus
+}
+#endif

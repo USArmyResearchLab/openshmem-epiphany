@@ -30,9 +30,17 @@
 #include "internals.h"
 #include "shmem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE int
 shmemx_test_lock_pe(volatile long* lock, int pe)
 {
 	long* x = (long*)shmem_ptr((const void*)lock, pe);
 	return __shmem_test_lock(x);
 }
+
+#ifdef __cplusplus
+}
+#endif

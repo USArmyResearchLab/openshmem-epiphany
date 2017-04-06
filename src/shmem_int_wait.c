@@ -27,9 +27,15 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "internals.h"
 #include "def_shmem_x_wait.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_X_WAIT(int_wait,int)
 
+#ifdef __cplusplus
+}
+#endif

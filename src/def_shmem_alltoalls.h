@@ -30,14 +30,17 @@
 #ifndef _def_shmem_alltoalls_h
 #define _def_shmem_alltoalls_h
 
+#include <stdint.h>
+
 #define SHMEM_ALLTOALLS_X(N,T) \
 SHMEM_SCOPE void \
 shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
 	const int PE_step = 1 << logPE_stride; \
-	T* pdst = (T*)(dest + sizeof(T) * nelems * dst * __shmem.my_pe); \
-	for (int i = 0, pe = PE_start; i < PE_size; i++, pe += PE_step) \
-		shmem_iput##N(pdst, source + sizeof(T) * nelems * sst * i, dst, sst, nelems, pe); \
+	T* pdst = (T*)((intptr_t)dest + sizeof(T) * nelems * dst * __shmem.my_pe); \
+	int i, pe; \
+	for (i = 0, pe = PE_start; i < PE_size; i++, pe += PE_step) \
+		shmem_iput##N(pdst, (T*)((intptr_t)source + sizeof(T) * nelems * sst * i), dst, sst, nelems, pe); \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 }
 

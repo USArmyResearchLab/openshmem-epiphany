@@ -27,9 +27,12 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 shmem_internals_t __shmem = { 0 };
 
@@ -163,10 +166,14 @@ shmem_init(void)
 	__shmem.lock_high_bits = (unsigned int)shmem_ptr(NULL, 0); // using PE 0 for all global locks
 #if !defined(__coprthr_device__)
 	extern char _end;
-	__shmem.free_mem = (void*)&_end; // This should already be double-word aligned
+	__shmem.free_mem = (intptr_t)&_end; // This should already be double-word aligned
 #endif
-	__shmem.local_mem_base = (void*)shmemx_sbrk(0);
+	__shmem.local_mem_base = (intptr_t)shmemx_sbrk(0);
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
 	shmem_barrier (0, 0, __shmem.n_pes, (long*)__shmem.barrier_sync);
 }
+
+#ifdef __cplusplus
+}
+#endif
