@@ -34,6 +34,7 @@
 
 #define SHMEM_USE_IPI_GET
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NELEMENT 8192
@@ -59,7 +60,7 @@ int main (void)
 	}
 
 	if (me == 0) {
-		printf("# SHMEM GetMem times for variable message size\n" \
+		host_printf("# SHMEM GetMem times for variable message size\n" \
 			"# Bytes\tLatency (nanoseconds)\n");
 	}
 
@@ -86,13 +87,13 @@ int main (void)
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%6d %7u\n", bytes, nsec);
+			host_printf("%6d %7u\n", bytes, nsec);
 		}
 
 		int err = 0;
 		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
 		for (int i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
-		if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
+		if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 
 	shmem_free(target);

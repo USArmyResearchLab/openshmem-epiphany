@@ -28,6 +28,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 
 int main(int argc, char* argv[])
 {
@@ -43,6 +44,6 @@ int main(int argc, char* argv[])
 	int me = shmem_my_pe();
 	shmem_info_get_name(name);
 	shmem_info_get_version(&major, &minor);
-	printf("Hello World from %d of %d %s (%d.%d)\n", me, n_pes, SHMEM_VENDOR_STRING, major, minor);
+	host_printf("Hello World from %d of %d %s (%d.%d)\n", me, n_pes, SHMEM_VENDOR_STRING, major, minor);
 	return 0;
 }

@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NLOOP 10000
@@ -50,7 +51,7 @@ int main (void)
 	int npes = shmem_n_pes();
 
 	if (me == 0) {
-		printf("# SHMEM Barrier times for variable NPES\n" \
+		host_printf("# SHMEM Barrier times for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
@@ -70,7 +71,7 @@ int main (void)
 
 		if (me == 0) {
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%5d %7u\n", npe, nsec);
+			host_printf("%5d %7u\n", npe, nsec);
 		}
 	}
 	shmem_finalize();

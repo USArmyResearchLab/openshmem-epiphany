@@ -1,4 +1,4 @@
-DEFS = -fhost -fdynamic-calls -std=c99
+DEFS = -fhost -std=c99 -fno-unroll-loops
 
 COPRTHR = /usr/local/browndeer/coprthr2
 

@@ -33,10 +33,37 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NELEMENT 8192
 #define NLOOP 10000
+
+static void
+__shmem_quiet(void)
+{
+	if (__shmem.dma_used) { // SHMEM doesn't guarantee value is available
+		__asm__ __volatile__ (
+			"mov r0, #15             \n" // setting r0 lower 4 bits on
+			".Loop%=:                \n"
+			"   movfs r1, DMA0STATUS \n" // copy DMA0STATUS to r1
+			"   and r1,r1,r0         \n" // check if DMA0STATUS != 0
+			"   movfs r2, DMA1STATUS \n" // copy DMA1STATUS to r2
+			"   and r2, r2, r0       \n" // check if DMA1STATUS != 0
+			"   orr r2, r2, r1       \n" // check if either are != 0
+			"   bne .Loop%=          \n" // spin until both complete
+			: : : "r0", "r1", "r2", "cc"
+		);
+		if (__shmem.cdst0) {
+			while(*__shmem.cdst0 == __shmem.csrc0);
+			__shmem.cdst0 = 0;
+		}
+		if (__shmem.cdst1) {
+			while(*__shmem.cdst1 == __shmem.csrc1);
+			__shmem.cdst1 = 0;
+		}
+	}
+}
 
 int main (void)
 {
@@ -59,7 +86,7 @@ int main (void)
 	}
 
 	if (me == 0) {
-		printf("# SHMEM Non-Blocking GetMem, Dual-Issue Performance\n" \
+		host_printf("# SHMEM Non-Blocking GetMem, Dual-Issue Performance\n" \
 			"# Bytes\tLatency (nanoseconds)\n");
 	}
 
@@ -82,23 +109,28 @@ int main (void)
 			shmem_getmem_nbi(target + n2, source + n2, n2, nxtpe);
 		}
 
-		shmem_quiet();
+		__shmem_quiet();
 
 		t -= ctimer();
 
-		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
+		shmem_barrier_all();
+
+		//shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
+		t = npes;
 		t /= npes; /* Average time across all PEs for dual get */
 
+		shmem_barrier_all();
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%6d %7u\n", bytes, nsec);
+			host_printf("%6d %7u\n", bytes, nsec);
 		}
 
+		shmem_barrier_all();
 		int err = 0;
 		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
 		for (int i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
-		if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
+		if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 
 	shmem_free(target);

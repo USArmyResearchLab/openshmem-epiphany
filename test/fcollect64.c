@@ -33,6 +33,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NELEMENT 128
@@ -59,7 +60,7 @@ int main (void)
 	}
 
 	if (me == 0) {
-		printf("# SHMEM Fcollect64 times for NPES = %d\n" \
+		host_printf("# SHMEM Fcollect64 times for NPES = %d\n" \
 			"# Bytes\tLatency (nanoseconds)\n", npes);
 	}
 
@@ -81,7 +82,7 @@ int main (void)
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%5d %7u\n", bytes, nsec);
+			host_printf("%5d %7u\n", bytes, nsec);
 		}
 		int err = 0;
 		for (int j = 0; j < npes; j++) {
@@ -89,7 +90,7 @@ int main (void)
 				if (target[j*nelement + i] != ((i + 1) * 10 + j)) err++;
 			}
 		}
-		if (err) printf("%d: %d ERRORS\n", me, err);
+		if (err) host_printf("%d: %d ERRORS\n", me, err);
 	}
 
 	shmem_free(target);

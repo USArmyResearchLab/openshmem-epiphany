@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NELEMENT 2048
@@ -59,7 +60,7 @@ int main (void)
 	}
 
 	if (me == 0) {
-		printf("# SHMEM Reduction times for NPES = %d\n" \
+		host_printf("# SHMEM Reduction times for NPES = %d\n" \
 			"# Nelements \tLatency (nanoseconds)\n", npes);
 	}
 
@@ -80,7 +81,7 @@ int main (void)
 
 		if (me == 0) {
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%5d %7u\n", nelement, nsec);
+			host_printf("%5d %7u\n", nelement, nsec);
 		}
 
 		int err = 0;
@@ -89,7 +90,7 @@ int main (void)
 				err++;
 			}
 		}
-		if (err) printf("# %d: ERRORS %d\n", me, err);
+		if (err) host_printf("# %d: ERRORS %d\n", me, err);
 	}
 
 	shmem_free(target);

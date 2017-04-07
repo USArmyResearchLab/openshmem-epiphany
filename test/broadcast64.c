@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NELEMENT 1024
@@ -54,7 +55,7 @@ int main (void)
 	long long* target = (long long*)shmem_malloc(NELEMENT * sizeof (*target));
 
 	if (me == 0) {
-		printf("# SHMEM Broadcast64 times for NPES = %d\n" \
+		host_printf("# SHMEM Broadcast64 times for NPES = %d\n" \
 			"# Bytes\tLatency (nanoseconds)\n", npes);
 	}
 
@@ -78,13 +79,13 @@ int main (void)
 		if (me == 0) {
 			unsigned int bytes = elements * sizeof(*source);
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%5d %7u\n", bytes, nsec);
+			host_printf("%5d %7u\n", bytes, nsec);
 		}
 		else {
 			int err = 0;
 			for (int i = 0; i < elements; i++) if (target[i] != source[i]) err++;
 			for (int i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
-			if (err) printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
+			if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 		}
 	}
 

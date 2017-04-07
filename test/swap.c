@@ -32,6 +32,7 @@
  */
 
 #include <shmem.h>
+#include <host_stdio.h>
 #include "ctimer.h"
 
 #define NLOOP 10000
@@ -50,7 +51,7 @@ int main (void)
 	int npes = shmem_n_pes();
 
 	if (me == 0) {
-		printf("# SHMEM Atomic Swap Performance for variable NPES\n" \
+		host_printf("# SHMEM Atomic Swap Performance for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
@@ -76,15 +77,15 @@ int main (void)
 
 		if (me == 0) {
 			unsigned int nsec = ctimer_nsec(t / NLOOP);
-			printf("%5d %7u\n", npe, nsec);
+			host_printf("%5d %7u\n", npe, nsec);
 		}
 
 		if (me < npe) {
-			if (dest != me) printf("# %d: ERROR dest = %d\n", me, dest);
-			if (prev != -nxtpe && NLOOP == 1) printf("# %d: ERROR prev = %d\n", me, prev);
+			if (dest != me) host_printf("# %d: ERROR dest = %d\n", me, dest);
+			if (prev != -nxtpe && NLOOP == 1) host_printf("# %d: ERROR prev = %d\n", me, prev);
 		} else {
-			if (dest != -me) printf("# %d: ERROR dest = %d\n", me, dest);
-			if (prev != 0 && NLOOP == 1) printf("# %d: ERROR prev = %d\n", me, prev);
+			if (dest != -me) host_printf("# %d: ERROR dest = %d\n", me, dest);
+			if (prev != 0 && NLOOP == 1) host_printf("# %d: ERROR prev = %d\n", me, prev);
 		}
 	}
 	shmem_finalize();
