@@ -1,6 +1,7 @@
 CC = e-gcc
+CC = e-g++
 AR = e-ar
-DEFS = -O3 -std=c11
+DEFS = -O3
 INCS =
 LIBS =
 

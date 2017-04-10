@@ -30,25 +30,23 @@
 #ifndef _shmem_h
 #define _shmem_h
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <complex.h>
-#include <sys/types.h>
+//#include <sys/types.h>
 #include "internals.h"
 
 #define SHMEM_MAJOR_VERSION             1
 #define SHMEM_MINOR_VERSION             3
 #define SHMEM_MAX_NAME_LEN              64
 #define SHMEM_VENDOR_STRING             "ARL OpenSHMEM for Epiphany, version 1.3"
-#define SHMEM_INTERNAL_F2C_SCALE        ( sizeof (long) / sizeof (int) )
-#define SHMEM_BCAST_SYNC_SIZE           ( SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_BARRIER_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_REDUCE_SYNC_SIZE          ( 2*SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_REDUCE_MIN_WRKDATA_SIZE   ( 16 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_SYNC_VALUE                ( 0 )
-#define SHMEM_COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_ALLTOALL_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
-#define SHMEM_ALLTOALLS_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / SHMEM_INTERNAL_F2C_SCALE )
+#define SHMEM_INTERNAL_F2C_SCALE        __INTERNAL_F2C_SCALE
+#define SHMEM_BCAST_SYNC_SIZE           __BCAST_SYNC_SIZE
+#define SHMEM_BARRIER_SYNC_SIZE         __BARRIER_SYNC_SIZE
+#define SHMEM_REDUCE_SYNC_SIZE          __REDUCE_SYNC_SIZE
+#define SHMEM_REDUCE_MIN_WRKDATA_SIZE   __REDUCE_MIN_WRKDATA_SIZE
+#define SHMEM_SYNC_VALUE                __SYNC_VALUE
+#define SHMEM_COLLECT_SYNC_SIZE         __COLLECT_SYNC_SIZE
+#define SHMEM_ALLTOALL_SYNC_SIZE        __ALLTOALL_SYNC_SIZE
+#define SHMEM_ALLTOALLS_SYNC_SIZE       __ALLTOALLS_SYNC_SIZE
 #define _SHMEM_MAJOR_VERSION            SHMEM_MAJOR_VERSION
 #define _SHMEM_MINOR_VERSION            SHMEM_MINOR_VERSION
 #define _SHMEM_MAX_NAME_LEN             SHMEM_MAX_NAME_LEN
@@ -88,46 +86,6 @@ enum shmem_cmp_constants
 	SHMEM_CMP_LT,
 	SHMEM_CMP_GE
 };
-
-typedef struct
-{
-	unsigned config;
-	unsigned inner_stride;
-	unsigned count;
-	unsigned outer_stride;
-	void*    src_addr;
-	void*    dst_addr;
-} __attribute__((aligned(8))) shmem_dma_desc_t;
-
-typedef struct {
-	int my_pe;
-	int n_pes;
-	int n_pes_log2;
-	unsigned int dma_start;
-	unsigned int dma_used;
-	unsigned int lock_high_bits;
-	volatile long lock_atomic;
-	volatile long lock_atomic_int;
-	volatile long lock_atomic_long;
-	volatile long lock_atomic_longlong;
-	volatile long lock_atomic_float;
-	volatile long lock_atomic_double;
-	volatile long lock_receive_finished;
-	volatile unsigned char csrc0;
-	volatile unsigned char csrc1;
-	unsigned char volatile * volatile cdst0;
-	unsigned char volatile * volatile cdst1;
-	unsigned int coreid;
-	intptr_t local_mem_base;
-	intptr_t free_mem;
-	volatile long barrier_sync[SHMEM_BARRIER_SYNC_SIZE];
-#ifndef SHMEM_USE_WAND_BARRIER
-	long* barrier_psync[SHMEM_BARRIER_SYNC_SIZE];
-#endif
-	shmem_dma_desc_t dma_desc;
-} shmem_internals_t;
-
-extern shmem_internals_t __shmem;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);

@@ -30,6 +30,8 @@
 #ifndef _internal_h
 #define _internal_h
 
+#include <stdint.h>
+
 #if defined(__coprthr_device__) // Using COPRTHR
 
 #define SHMEM_LOW_PRIORITY __dynamic_call
@@ -64,9 +66,59 @@
 #define SHMEM_SCOPE
 #endif
 
+#define __INTERNAL_F2C_SCALE        ( sizeof (long) / sizeof (int) )
+#define __BCAST_SYNC_SIZE           ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __BARRIER_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __REDUCE_SYNC_SIZE          ( 2*SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __REDUCE_MIN_WRKDATA_SIZE   ( 16 / __INTERNAL_F2C_SCALE )
+#define __SYNC_VALUE                ( 0 )
+#define __COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __ALLTOALL_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __ALLTOALLS_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+
 #if __cplusplus
 extern "C" {
 #endif
+
+typedef struct
+{
+	unsigned config;
+	unsigned inner_stride;
+	unsigned count;
+	unsigned outer_stride;
+	void*    src_addr;
+	void*    dst_addr;
+} __attribute__((aligned(8))) shmem_dma_desc_t;
+
+typedef struct {
+	int my_pe;
+	int n_pes;
+	int n_pes_log2;
+	unsigned int dma_start;
+	unsigned int dma_used;
+	unsigned int lock_high_bits;
+	volatile long lock_atomic;
+	volatile long lock_atomic_int;
+	volatile long lock_atomic_long;
+	volatile long lock_atomic_longlong;
+	volatile long lock_atomic_float;
+	volatile long lock_atomic_double;
+	volatile long lock_receive_finished;
+	volatile unsigned char csrc0;
+	volatile unsigned char csrc1;
+	unsigned char volatile * volatile cdst0;
+	unsigned char volatile * volatile cdst1;
+	unsigned int coreid;
+	intptr_t local_mem_base;
+	intptr_t free_mem;
+	volatile long barrier_sync[__BARRIER_SYNC_SIZE];
+#ifndef SHMEM_USE_WAND_BARRIER
+	long* barrier_psync[__BARRIER_SYNC_SIZE];
+#endif
+	shmem_dma_desc_t dma_desc;
+} shmem_internals_t;
+
+extern shmem_internals_t __shmem;
 
 SHMEM_SCOPE long* __shmem_lock_ptr (const long* p);
 SHMEM_SCOPE void __shmem_clear_lock (volatile long* x);

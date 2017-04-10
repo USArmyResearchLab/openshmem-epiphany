@@ -27,6 +27,7 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
+#include <stdlib.h>
 #include "shmem.h"
 #include "internals.h"
 

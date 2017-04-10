@@ -31,6 +31,10 @@
 #define _def_shmem_x_get_h
 #include "shmemx.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SHMEM_X_GET_NBI(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
@@ -92,5 +96,8 @@ SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 __attribute__((alias("shmem_" #A)));
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

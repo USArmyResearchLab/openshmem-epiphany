@@ -1,6 +1,6 @@
 CC = coprcc
 AR = e-ar
-DEFS = -std=c99 -fno-unroll-loops
+DEFS = -fno-unroll-loops
 INCS =
 LIBS =
 

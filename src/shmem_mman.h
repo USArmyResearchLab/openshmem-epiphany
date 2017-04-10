@@ -27,6 +27,11 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
+#ifndef _shmem_mman_h
+#define _shmem_mman_h
+
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,4 +41,6 @@ void* __attribute__((malloc)) __shmemx_sbrk(size_t size);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

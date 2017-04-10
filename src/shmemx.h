@@ -33,11 +33,19 @@
 
 #include "internals.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SHMEM_SCOPE void shmemx_set_lock_pe(volatile long* lock, int pe);
 SHMEM_SCOPE int shmemx_test_lock_pe(volatile long* lock, int pe);
 SHMEM_SCOPE void shmemx_clear_lock_pe(volatile long* lock, int pe);
 
 SHMEM_SCOPE void shmemx_memcpy(void* dest, const void* source, size_t nbytes);
 SHMEM_SCOPE void shmemx_memcpy_nbi(void* dest, const void* source, size_t nbytes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
