@@ -8,7 +8,7 @@ SHMEM = ../../src
 INCS = -I. -I$(COPRTHR)/include -I$(SHMEM)
 LIBS = -L$(COPRTHR)/lib -lcoprthr -lcoprthrcc -lm
 
-ELIBS = -L$(COPRTHR)/lib -lcoprthr_mpi -lcoprthr2_dev -L$(SHMEM) -lshmem
+ELIBS = -L$(COPRTHR)/lib -lcoprthr_mpi -lcoprthr2_dev -L$(SHMEM) -lshmem_coprthr
 
 TARGET = main.x shmem_tfunc.e32 shmem_tfunc2.e32
 
