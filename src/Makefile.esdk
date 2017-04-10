@@ -1,5 +1,4 @@
 CC = e-gcc
-CC = e-g++
 AR = e-ar
 DEFS = -O3
 INCS =
