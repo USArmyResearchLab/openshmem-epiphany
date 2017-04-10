@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -67,9 +67,10 @@ __shmem_quiet(void)
 
 int main (void)
 {
+	int i, nelement;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
 		pSync[i] = SHMEM_SYNC_VALUE;
 	}
 
@@ -81,7 +82,7 @@ int main (void)
 
 	char* source = (char*)shmem_malloc(NELEMENT);
 	char* target = (char*)shmem_malloc(NELEMENT);
-	for (int i = 0; i < NELEMENT; i++) {
+	for (i = 0; i < NELEMENT; i++) {
 		source[i] = (char)(i + 1);
 	}
 
@@ -92,10 +93,10 @@ int main (void)
 
 	/* For int get we take average of all the times realized by a pair of PEs,
 	thus reducing effects of physical location of PEs */
-	for (int nelement = 2; nelement <= NELEMENT; nelement <<= 1)
+	for (nelement = 2; nelement <= NELEMENT; nelement <<= 1)
 	{
 		// reset values for each iteration
-		for (int i = 0; i < NELEMENT; i++) {
+		for (i = 0; i < NELEMENT; i++) {
 			target[i] = 0xff;
 		}
 		shmem_barrier_all();
@@ -104,7 +105,7 @@ int main (void)
 		unsigned int t = ctimer();
 
 		unsigned int n2 = nelement >> 1;
-		for (int i = 0; i < NLOOP; i++) {
+		for (i = 0; i < NLOOP; i++) {
 			shmem_getmem_nbi(target, source, n2, nxtpe);
 			shmem_getmem_nbi(target + n2, source + n2, n2, nxtpe);
 		}
@@ -115,8 +116,7 @@ int main (void)
 
 		shmem_barrier_all();
 
-		//shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
-		t = npes;
+		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
 		t /= npes; /* Average time across all PEs for dual get */
 
 		shmem_barrier_all();
@@ -128,8 +128,8 @@ int main (void)
 
 		shmem_barrier_all();
 		int err = 0;
-		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
-		for (int i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
+		for (i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
+		for (i = nelement; i < NELEMENT; i++) if (target[i] != 0xff) err++;
 		if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 

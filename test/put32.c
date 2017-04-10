@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,9 +41,10 @@
 
 int main (void)
 {
+	int i, nelement;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
 		pSync[i] = SHMEM_SYNC_VALUE;
 	}
 
@@ -55,7 +56,7 @@ int main (void)
 
 	int* source = (int*)shmem_malloc(NELEMENT*sizeof(int));
 	int* target = (int*)shmem_malloc(NELEMENT*sizeof(int));
-	for (int i = 0; i < NELEMENT; i++) {
+	for (i = 0; i < NELEMENT; i++) {
 		source[i] = i + 1;
 	}
 
@@ -66,10 +67,10 @@ int main (void)
 
 	/* For int put we take average of all the times realized by a pair of PEs,
 	thus reducing effects of physical location of PEs */
-	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
+	for (nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
 		// reset values for each iteration
-		for (int i = 0; i < NELEMENT; i++) {
+		for (i = 0; i < NELEMENT; i++) {
 			target[i] = -90;
 		}
 		shmem_barrier_all();
@@ -77,7 +78,7 @@ int main (void)
 
 		unsigned int t = ctimer();
 
-		for (int i = 0; i < NLOOP; i++) {
+		for (i = 0; i < NLOOP; i++) {
 			shmem_put32(target, source, nelement, nxtpe);
 		}
 
@@ -93,8 +94,8 @@ int main (void)
 		}
 
 		int err = 0;
-		for (int i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
-		for (int i = nelement; i < NELEMENT; i++) if (target[i] != -90) err++;
+		for (i = 0; i < nelement; i++) if (target[i] != source[i]) err++;
+		for (i = nelement; i < NELEMENT; i++) if (target[i] != -90) err++;
 		if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 	}
 

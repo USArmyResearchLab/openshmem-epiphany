@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,10 +39,11 @@
 
 int main (void)
 {
+	int i, npe;
 	static int dest;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
 		pSync[i] = SHMEM_SYNC_VALUE;
 	}
 
@@ -57,7 +58,7 @@ int main (void)
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
-	for (int npe = 2; npe <= npes; npe++)
+	for (npe = 2; npe <= npes; npe++)
 	{
 		unsigned int t = 0;
 		shmem_barrier_all();
@@ -65,8 +66,8 @@ int main (void)
 
 		if (me < npe) {
 			t = ctimer();
-			for (int i = 0; i < NLOOP; i++) {
-				shmem_int_finc(&dest, nxtpe);
+			for (i = 0; i < NLOOP; i++) {
+				shmem_finc(&dest, nxtpe);
 			}
 			t -= ctimer();
 		}

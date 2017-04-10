@@ -1,4 +1,4 @@
-DEFS = -fhost -std=c99 -fno-unroll-loops
+DEFS = -fhost -fno-unroll-loops
 
 COPRTHR = /usr/local/browndeer/coprthr2
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,9 +40,10 @@
 
 int main (void)
 {
+	int i, elements;
 	static long pSyncA[SHMEM_BCAST_SYNC_SIZE];
 	static long pSyncB[SHMEM_BCAST_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_BCAST_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_BCAST_SYNC_SIZE; i++) {
 		pSyncA[i] = SHMEM_SYNC_VALUE;
 		pSyncB[i] = SHMEM_SYNC_VALUE;
 	}
@@ -59,10 +60,10 @@ int main (void)
 			"# Bytes\tLatency (nanoseconds)\n", npes);
 	}
 
-	for (int elements = 1; elements <= NELEMENT; elements <<= 1)
+	for (elements = 1; elements <= NELEMENT; elements <<= 1)
 	{
 		// reset values for each iteration
-		for (int i = 0; i < NELEMENT; i++) {
+		for (i = 0; i < NELEMENT; i++) {
 			source[i] = i + 1;
 			target[i] = -90;
 		}
@@ -70,7 +71,7 @@ int main (void)
 		ctimer_start();
 
 		unsigned int t = ctimer();
-		for (int i = 0; i < NLOOP; i += 2) {
+		for (i = 0; i < NLOOP; i += 2) {
 			shmem_broadcast32 (target, source, elements, 0, 0, 0, npes, pSyncA);
 			shmem_broadcast32 (target, source, elements, 0, 0, 0, npes, pSyncB);
 		}
@@ -83,8 +84,8 @@ int main (void)
 		}
 		else {
 			int err = 0;
-			for (int i = 0; i < elements; i++) if (target[i] != source[i]) err++;
-			for (int i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
+			for (i = 0; i < elements; i++) if (target[i] != source[i]) err++;
+			for (i = elements; i < NELEMENT; i++) if (target[i] != -90) err++;
 			if (err) host_printf("# %d: ERROR: %d incorrect value(s) copied\n", me, err);
 		}
 	}

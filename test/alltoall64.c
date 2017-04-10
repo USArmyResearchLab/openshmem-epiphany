@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,9 +41,10 @@
 
 int main (void)
 {
+	int i, j, nelement;
 	static long pSyncA[SHMEM_ALLTOALL_SYNC_SIZE];
 	static long pSyncB[SHMEM_ALLTOALL_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_ALLTOALL_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_ALLTOALL_SYNC_SIZE; i++) {
 		pSyncA[i] = SHMEM_SYNC_VALUE;
 		pSyncB[i] = SHMEM_SYNC_VALUE;
 	}
@@ -54,7 +55,7 @@ int main (void)
 
 	long long* source = (long long*)shmem_malloc(NELEMENT * npes * sizeof (*source));
 	long long* target = (long long*)shmem_malloc(NELEMENT * npes * sizeof (*target));
-	for (int i = 0; i < NELEMENT * npes; i++) {
+	for (i = 0; i < NELEMENT * npes; i++) {
 		source[i] = me;
 		target[i] = -90;
 	}
@@ -64,13 +65,13 @@ int main (void)
 			"# Bytes\tLatency (nanoseconds)\n", npes);
 	}
 
-	for (int nelement = 1; nelement <= NELEMENT; nelement <<= 1)
+	for (nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
 		shmem_barrier_all();
 		ctimer_start();
 
 		unsigned int t = ctimer();
-		for (int i = 0; i < NLOOP; i += 2) {
+		for (i = 0; i < NLOOP; i += 2) {
 			shmem_alltoall64 (target, source, nelement, 0, 0, npes, pSyncA);
 			shmem_alltoall64 (target, source, nelement, 0, 0, npes, pSyncB);
 		}
@@ -82,8 +83,8 @@ int main (void)
 			host_printf("%5d %7u\n", bytes, nsec);
 		}
 		unsigned int err = 0;
-		for (int j = 0; j < npes; j++) {
-			for (int i = 0; i < nelement; i++) {
+		for (j = 0; j < npes; j++) {
+			for (i = 0; i < nelement; i++) {
 				if (target[j*nelement + i] != j) err++;
 			}
 		}

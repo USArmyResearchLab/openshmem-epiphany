@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,9 +39,10 @@
 
 int main (void)
 {
+	int i, npe;
 	static long pSyncA[SHMEM_BARRIER_SYNC_SIZE];
 	static long pSyncB[SHMEM_BARRIER_SYNC_SIZE];
-	for (int i = 0; i < SHMEM_BARRIER_SYNC_SIZE; i++) {
+	for (i = 0; i < SHMEM_BARRIER_SYNC_SIZE; i++) {
 		pSyncA[i] = SHMEM_SYNC_VALUE;
 		pSyncB[i] = SHMEM_SYNC_VALUE;
 	}
@@ -55,14 +56,14 @@ int main (void)
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
-	for (int npe = 2; npe <= npes; npe++)
+	for (npe = 2; npe <= npes; npe++)
 	{
 		shmem_barrier_all();
 		ctimer_start();
 
 		unsigned int t = ctimer();
 		if (me < npe) {
-			for (int i = 0; i < NLOOP; i += 2) {
+			for (i = 0; i < NLOOP; i += 2) {
 				shmem_barrier(0, 0, npe, pSyncA);
 				shmem_barrier(0, 0, npe, pSyncB);
 			}

@@ -156,90 +156,119 @@ F(char,char) \
 F(short,short) \
 DECL_EXTENDED_AMO(F)
 
+#ifdef _Generic // Use C11 Generic syntax
+#define ISTYPE(X,T,F,...) T: F, __VA_ARGS__
+#define DECL_ARG1(X,T,F) T: F
+#define DECL_GENERIC(...) _Generic(__VA_ARGS__)
+#else
+#if __GNUC__ > 3 // Use GCC builtin syntax
+#define ISTYPE(X,T,F,...) __builtin_choose_expr(__builtin_types_compatible_p(typeof(X),T),F,__VA_ARGS__)
+#define DECL_ARG1(X,T,F) ISTYPE(X,T,F,(void)0) //
+#define DECL_GENERIC(...) __VA_ARGS__
+#else
+#define DECL_GENERIC(...) (void)0 // Error, function unsupported/unavailable
+#endif
+#endif
+#define DECL_ARG2(X,T,F,...) ISTYPE(X,T,F,DECL_ARG1(X,__VA_ARGS__))
+#define DECL_ARG3(X,T,F,...) ISTYPE(X,T,F,DECL_ARG2(X,__VA_ARGS__))
+#define DECL_ARG4(X,T,F,...) ISTYPE(X,T,F,DECL_ARG3(X,__VA_ARGS__))
+#define DECL_ARG5(X,T,F,...) ISTYPE(X,T,F,DECL_ARG4(X,__VA_ARGS__))
+#define DECL_ARG6(X,T,F,...) ISTYPE(X,T,F,DECL_ARG5(X,__VA_ARGS__))
+#define DECL_ARG7(X,T,F,...) ISTYPE(X,T,F,DECL_ARG6(X,__VA_ARGS__))
+#define DECL_ARG8(X,T,F,...) ISTYPE(X,T,F,DECL_ARG7(X,__VA_ARGS__))
+
 #define SHMEM_FINC(N,T) SHMEM_SCOPE T shmem_##N##_finc (T *ptr, int pe);
 DECL_STANDARD_AMO(SHMEM_FINC)
 #define shmem_finc(dest,pe) \
-_Generic((dest), \
-	int*:       shmem_int_finc, \
-	long*:      shmem_long_finc, \
-	long long*: shmem_longlong_finc \
-)(dest,pe)
+DECL_GENERIC( \
+DECL_ARG3((dest), \
+	int*,       shmem_int_finc, \
+	long*,      shmem_long_finc, \
+	long long*, shmem_longlong_finc \
+))(dest,pe)
 
 #define SHMEM_INC(N,T) \
 SHMEM_SCOPE void shmem_##N##_inc (T* ptr, int pe);
 DECL_STANDARD_AMO(SHMEM_INC)
 #define shmem_inc(dest,pe) \
-_Generic((dest), \
-	int*:       shmem_int_inc, \
-	long*:      shmem_long_inc, \
-	long long*: shmem_longlong_inc \
-)(dest,pe)
+DECL_GENERIC( \
+DECL_ARG3((dest), \
+	int*,       shmem_int_inc, \
+	long*,      shmem_long_inc, \
+	long long*, shmem_longlong_inc \
+))(dest,pe)
 
 #define SHMEM_FADD(N,T) \
 SHMEM_SCOPE T shmem_##N##_fadd (T *ptr, T value, int pe);
 DECL_STANDARD_AMO(SHMEM_FADD)
 #define shmem_fadd(dest,value,pe) \
-_Generic((dest), \
-	int*:       shmem_int_fadd, \
-	long*:      shmem_long_fadd, \
-	long long*: shmem_longlong_fadd \
-)(dest,value,pe)
+DECL_GENERIC( \
+DECL_ARG3((dest), \
+	int*,       shmem_int_fadd, \
+	long*,      shmem_long_fadd, \
+	long long*, shmem_longlong_fadd \
+))(dest,value,pe)
 
 #define SHMEM_ADD(N,T) \
 SHMEM_SCOPE void shmem_##N##_add (T* ptr, T value, int pe);
 DECL_STANDARD_AMO(SHMEM_ADD)
 #define shmem_add(dest,value,pe) \
-_Generic((dest), \
-	int*:       shmem_int_add, \
-	long*:      shmem_long_add, \
-	long long*: shmem_longlong_add \
-)(dest,value,pe)
+DECL_GENERIC( \
+DECL_ARG3((dest),\
+ int*,       shmem_int_add, \
+ long*,      shmem_long_add, \
+ long long*, shmem_longlong_add \
+))(dest,value,pe)
 
 #define SHMEM_CSWAP(N,T) \
 SHMEM_SCOPE T shmem_##N##_cswap (T *ptr, T cond, T value, int pe);
 DECL_STANDARD_AMO(SHMEM_CSWAP)
 #define shmem_cswap(dest,cond,value,pe) \
-_Generic((dest), \
-	int*:       shmem_int_cswap, \
-	long*:      shmem_long_cswap, \
-	long long*: shmem_longlong_cswap \
-)(dest,cond,value,pe)
+DECL_GENERIC( \
+DECL_ARG3((dest), \
+	int*,       shmem_int_cswap, \
+	long*,      shmem_long_cswap, \
+	long long*, shmem_longlong_cswap \
+))(dest,cond,value,pe)
 
 #define SHMEM_SWAP(N,T) \
 SHMEM_SCOPE T shmem_##N##_swap (T *ptr, T value, int pe);
 DECL_EXTENDED_AMO(SHMEM_SWAP)
 #define shmem_swap(dest,value,pe) \
-_Generic((dest), \
-	int*:       shmem_int_swap, \
-	float*:     shmem_float_swap, \
-	long*:      shmem_long_swap, \
-	double*:    shmem_double_swap, \
-	long long*: shmem_longlong_swap \
-)(dest,value,pe)
+DECL_GENERIC( \
+DECL_ARG5((dest), \
+	int*,       shmem_int_swap, \
+	float*,     shmem_float_swap, \
+	long*,      shmem_long_swap, \
+	double*,    shmem_double_swap, \
+	long long*, shmem_longlong_swap \
+))(dest,value,pe)
 
 #define SHMEM_FETCH(N,T) \
 SHMEM_SCOPE T shmem_##N##_fetch (const T *ptr, int pe);
 DECL_EXTENDED_AMO(SHMEM_FETCH)
 #define shmem_fetch(dest,pe) \
-_Generic((dest), \
-	int*:       shmem_int_fetch, \
-	float*:     shmem_float_fetch, \
-	long*:      shmem_long_fetch, \
-	double*:    shmem_double_fetch, \
-	long long*: shmem_longlong_fetch \
-)(dest,pe)
+DECL_GENERIC( \
+DECL_ARG5((dest), \
+	int*,       shmem_int_fetch, \
+	float*,     shmem_float_fetch, \
+	long*,      shmem_long_fetch, \
+	double*,    shmem_double_fetch, \
+	long long*, shmem_longlong_fetch \
+))(dest,pe)
 
 #define SHMEM_SET(N,T) \
 SHMEM_SCOPE void shmem_##N##_set (T* dest, T value, int pe);
 DECL_EXTENDED_AMO(SHMEM_SET)
 #define shmem_set(dest,value,pe) \
-_Generic((dest), \
-	int*:       shmem_int_set, \
-	float*:     shmem_float_set, \
-	long*:      shmem_long_set, \
-	double*:    shmem_double_set, \
-	long long*: shmem_longlong_set \
-)(dest,value,pe)
+DECL_GENERIC( \
+DECL_ARG5((dest), \
+	int*,       shmem_int_set, \
+	float*,     shmem_float_set, \
+	long*,      shmem_long_set, \
+	double*,    shmem_double_set, \
+	long long*, shmem_longlong_set \
+))(dest,value,pe)
 
 #define DECL_SHMEM_X_WAIT(N,T) \
 SHMEM_SCOPE void shmem_##N (volatile T *ivar, T cmp_value);
@@ -342,16 +371,17 @@ DECL_SHMEM_X_PUT_NBI(put32,void)
 DECL_SHMEM_X_PUT_NBI(put64,void)
 DECL_SHMEM_X_PUT_NBI(put128,void)
 #define shmem_put_nbi(dest,src,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_put_nbi, \
-	double*:      shmem_double_put_nbi, \
-	long double*: shmem_longdouble_put_nbi, \
-	char*:        shmem_char_put_nbi, \
-	short*:       shmem_short_put_nbi, \
-	int*:         shmem_int_put_nbi, \
-	long*:        shmem_long_put_nbi, \
-	long long*:   shmem_longlong_put_nbi \
-)(dest,src,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_put_nbi, \
+	double*,      shmem_double_put_nbi, \
+	long double*, shmem_longdouble_put_nbi, \
+	char*,        shmem_char_put_nbi, \
+	short*,       shmem_short_put_nbi, \
+	int*,         shmem_int_put_nbi, \
+	long*,        shmem_long_put_nbi, \
+	long long*,   shmem_longlong_put_nbi \
+))(dest,src,nelems,pe)
 
 #define SHMEM_GET_NBI(N,T) \
 SHMEM_SCOPE void shmem_##N##_get_nbi (T *dest, const T *src, size_t nelems, int pe);
@@ -365,16 +395,17 @@ DECL_SHMEM_X_GET_NBI(get32,void)
 DECL_SHMEM_X_GET_NBI(get64,void)
 DECL_SHMEM_X_GET_NBI(get128,void)
 #define shmem_get_nbi(dest,src,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_get_nbi, \
-	double*:      shmem_double_get_nbi, \
-	long double*: shmem_longdouble_get_nbi, \
-	char*:        shmem_char_get_nbi, \
-	short*:       shmem_short_get_nbi, \
-	int*:         shmem_int_get_nbi, \
-	long*:        shmem_long_get_nbi, \
-	long long*:   shmem_longlong_get_nbi \
-)(dest,src,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_get_nbi, \
+	double*,      shmem_double_get_nbi, \
+	long double*, shmem_longdouble_get_nbi, \
+	char*,        shmem_char_get_nbi, \
+	short*,       shmem_short_get_nbi, \
+	int*,         shmem_int_get_nbi, \
+	long*,        shmem_long_get_nbi, \
+	long long*,   shmem_longlong_get_nbi \
+))(dest,src,nelems,pe)
 
 #define SHMEM_PUT(N,T) \
 SHMEM_SCOPE void shmem_##N##_put (T *dest, const T *src, size_t nelems, int pe);
@@ -388,16 +419,17 @@ DECL_SHMEM_X_PUT(put32,void)
 DECL_SHMEM_X_PUT(put64,void)
 DECL_SHMEM_X_PUT(put128,void)
 #define shmem_put(dest,src,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_put, \
-	double*:      shmem_double_put, \
-	long double*: shmem_longdouble_put, \
-	char*:        shmem_char_put, \
-	short*:       shmem_short_put, \
-	int*:         shmem_int_put, \
-	long*:        shmem_long_put, \
-	long long*:   shmem_longlong_put \
-)(dest,src,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_put, \
+	double*,      shmem_double_put, \
+	long double*, shmem_longdouble_put, \
+	char*,        shmem_char_put, \
+	short*,       shmem_short_put, \
+	int*,         shmem_int_put, \
+	long*,        shmem_long_put, \
+	long long*,   shmem_longlong_put \
+))(dest,src,nelems,pe)
 
 #define SHMEM_GET(N,T) \
 SHMEM_SCOPE void shmem_##N##_get (T *dest, const T *src, size_t nelems, int pe);
@@ -411,30 +443,32 @@ DECL_SHMEM_X_GET(get32,void)
 DECL_SHMEM_X_GET(get64,void)
 DECL_SHMEM_X_GET(get128,void)
 #define shmem_get(dest,src,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_get, \
-	double*:      shmem_double_get, \
-	long double*: shmem_longdouble_get, \
-	char*:        shmem_char_get, \
-	short*:       shmem_short_get, \
-	int*:         shmem_int_get, \
-	long*:        shmem_long_get, \
-	long long*:   shmem_longlong_get \
-)(dest,src,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_get, \
+	double*,      shmem_double_get, \
+	long double*, shmem_longdouble_get, \
+	char*,        shmem_char_get, \
+	short*,       shmem_short_get, \
+	int*,         shmem_int_get, \
+	long*,        shmem_long_get, \
+	long long*,   shmem_longlong_get \
+))(dest,src,nelems,pe)
 
 #define SHMEM_P(X,T) \
 SHMEM_SCOPE void shmem_##X##_p (T *addr, T value, int pe);
 DECL_STANDARD_RMA(SHMEM_P)
 #define shmem_p(addr,value,pe) \
-_Generic((addr), \
-	float*:       shmem_float_p, \
-	double*:      shmem_double_p, \
-	long double*: shmem_longdouble_p, \
-	char*:        shmem_char_p, \
-	short*:       shmem_short_p, \
-	int*:         shmem_int_p, \
-	long*:        shmem_long_p, \
-	long long*:   shmem_longlong_p \
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_p, \
+	double*,      shmem_double_p, \
+	long double*, shmem_longdouble_p, \
+	char*,        shmem_char_p, \
+	short*,       shmem_short_p, \
+	int*,         shmem_int_p, \
+	long*,        shmem_long_p, \
+	long long*,   shmem_longlong_p \
 )(addr,value,pe)
 
 #define SHMEM_G(X,T) \
@@ -442,16 +476,17 @@ static T shmem_##X##_g (T *addr, int pe) \
 { return *((T*)shmem_ptr((void*)addr, pe)); }
 DECL_STANDARD_RMA(SHMEM_G)
 #define shmem_g(addr,pe) \
-_Generic((addr), \
-	float*:       shmem_float_g, \
-	double*:      shmem_double_g, \
-	long double*: shmem_longdouble_g, \
-	char*:        shmem_char_g, \
-	short*:       shmem_short_g, \
-	int*:         shmem_int_g, \
-	long*:        shmem_long_g, \
-	long long*:   shmem_longlong_g \
-)(addr,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_g, \
+	double*,      shmem_double_g, \
+	long double*, shmem_longdouble_g, \
+	char*,        shmem_char_g, \
+	short*,       shmem_short_g, \
+	int*,         shmem_int_g, \
+	long*,        shmem_long_g, \
+	long long*,   shmem_longlong_g \
+))(addr,pe)
 
 #define SHMEM_IPUT(N,T) \
 SHMEM_SCOPE void shmem_##N##_iput (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
@@ -464,16 +499,17 @@ DECL_SHMEM_X_IPUT(iput32,void)
 DECL_SHMEM_X_IPUT(iput64,void)
 DECL_SHMEM_X_IPUT(iput128,void)
 #define shmem_iput(dest,source,dst,sst,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_iput, \
-	double*:      shmem_double_iput, \
-	long double*: shmem_longdouble_iput, \
-	char*:        shmem_char_iput, \
-	short*:       shmem_short_iput, \
-	int*:         shmem_int_iput, \
-	long*:        shmem_long_iput, \
-	long long*:   shmem_longlong_iput \
-)(dest,source,dst,sst,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_iput, \
+	double*,      shmem_double_iput, \
+	long double*, shmem_longdouble_iput, \
+	char*,        shmem_char_iput, \
+	short*,       shmem_short_iput, \
+	int*,         shmem_int_iput, \
+	long*,        shmem_long_iput, \
+	long long*,   shmem_longlong_iput \
+))(dest,source,dst,sst,nelems,pe)
 
 #define SHMEM_IGET(N,T) \
 SHMEM_SCOPE void shmem_##N##_iget (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
@@ -486,16 +522,17 @@ DECL_SHMEM_X_IGET(iget32,void)
 DECL_SHMEM_X_IGET(iget64,void)
 DECL_SHMEM_X_IGET(iget128,void)
 #define shmem_iget(dest,source,dst,sst,nelems,pe) \
-_Generic((dest), \
-	float*:       shmem_float_iget, \
-	double*:      shmem_double_iget, \
-	long double*: shmem_longdouble_iget, \
-	char*:        shmem_char_iget, \
-	short*:       shmem_short_iget, \
-	int*:         shmem_int_iget, \
-	long*:        shmem_long_iget, \
-	long long*:   shmem_longlong_iget \
-)(dest,source,dst,sst,nelems,pe)
+DECL_GENERIC( \
+DECL_ARG8((dest), \
+	float*,       shmem_float_iget, \
+	double*,      shmem_double_iget, \
+	long double*, shmem_longdouble_iget, \
+	char*,        shmem_char_iget, \
+	short*,       shmem_short_iget, \
+	int*,         shmem_int_iget, \
+	long*,        shmem_long_iget, \
+	long long*,   shmem_longlong_iget \
+))(dest,source,dst,sst,nelems,pe)
 
 
 SHMEM_SCOPE void shmem_init(void);
