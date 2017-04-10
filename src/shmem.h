@@ -120,7 +120,7 @@ DECL_EXTENDED_AMO(F)
 #define DECL_GENERIC(...) _Generic(__VA_ARGS__)
 #else
 #if __GNUC__ > 3 // Use GCC builtin syntax
-#define DECL_GENERIC_TYPE(X,T,F,...) __builtin_choose_expr(__builtin_types_compatible_p(typeof(X),T),F,__VA_ARGS__)
+#define DECL_GENERIC_TYPE(X,T,F,...) __builtin_choose_expr(__builtin_types_compatible_p(typeof(&(*X)),T),F,__VA_ARGS__)
 #define DECL_ARG1(X,T,F) DECL_GENERIC_TYPE(X,T,F,(void)0) //
 #define DECL_GENERIC(...) __VA_ARGS__
 #else
