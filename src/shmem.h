@@ -157,25 +157,25 @@ F(short,short) \
 DECL_EXTENDED_AMO(F)
 
 #ifdef _Generic // Use C11 Generic syntax
-#define ISTYPE(X,T,F,...) T: F, __VA_ARGS__
+#define DECL_GENERIC_TYPE(X,T,F,...) T: F, __VA_ARGS__
 #define DECL_ARG1(X,T,F) T: F
 #define DECL_GENERIC(...) _Generic(__VA_ARGS__)
 #else
 #if __GNUC__ > 3 // Use GCC builtin syntax
-#define ISTYPE(X,T,F,...) __builtin_choose_expr(__builtin_types_compatible_p(typeof(X),T),F,__VA_ARGS__)
-#define DECL_ARG1(X,T,F) ISTYPE(X,T,F,(void)0) //
+#define DECL_GENERIC_TYPE(X,T,F,...) __builtin_choose_expr(__builtin_types_compatible_p(typeof(X),T),F,__VA_ARGS__)
+#define DECL_ARG1(X,T,F) DECL_GENERIC_TYPE(X,T,F,(void)0) //
 #define DECL_GENERIC(...) __VA_ARGS__
 #else
 #define DECL_GENERIC(...) (void)0 // Error, function unsupported/unavailable
 #endif
 #endif
-#define DECL_ARG2(X,T,F,...) ISTYPE(X,T,F,DECL_ARG1(X,__VA_ARGS__))
-#define DECL_ARG3(X,T,F,...) ISTYPE(X,T,F,DECL_ARG2(X,__VA_ARGS__))
-#define DECL_ARG4(X,T,F,...) ISTYPE(X,T,F,DECL_ARG3(X,__VA_ARGS__))
-#define DECL_ARG5(X,T,F,...) ISTYPE(X,T,F,DECL_ARG4(X,__VA_ARGS__))
-#define DECL_ARG6(X,T,F,...) ISTYPE(X,T,F,DECL_ARG5(X,__VA_ARGS__))
-#define DECL_ARG7(X,T,F,...) ISTYPE(X,T,F,DECL_ARG6(X,__VA_ARGS__))
-#define DECL_ARG8(X,T,F,...) ISTYPE(X,T,F,DECL_ARG7(X,__VA_ARGS__))
+#define DECL_ARG2(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG1(X,__VA_ARGS__))
+#define DECL_ARG3(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG2(X,__VA_ARGS__))
+#define DECL_ARG4(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG3(X,__VA_ARGS__))
+#define DECL_ARG5(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG4(X,__VA_ARGS__))
+#define DECL_ARG6(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG5(X,__VA_ARGS__))
+#define DECL_ARG7(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG6(X,__VA_ARGS__))
+#define DECL_ARG8(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG7(X,__VA_ARGS__))
 
 #define SHMEM_FINC(N,T) SHMEM_SCOPE T shmem_##N##_finc (T *ptr, int pe);
 DECL_STANDARD_AMO(SHMEM_FINC)
