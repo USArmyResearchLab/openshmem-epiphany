@@ -34,6 +34,7 @@
 
 #if defined(__coprthr_device__) // Using COPRTHR
 
+#include "coprthr2.h"
 #define SHMEM_LOW_PRIORITY __dynamic_call
 #define shmemx_brk(ptr) coprthr_tls_brk(ptr)
 #define shmemx_sbrk(size) coprthr_tls_sbrk(size)
