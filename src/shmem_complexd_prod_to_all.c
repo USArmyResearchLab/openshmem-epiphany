@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_TO_ALL(complexd_prod,complex double,PROD_OP)
+SHMEM_X_TO_ALL(complexd_prod,double _Complex,PROD_OP)
 
 #ifdef __cplusplus
 }

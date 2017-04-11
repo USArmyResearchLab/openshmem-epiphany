@@ -30,8 +30,6 @@
 #ifndef _shmem_h
 #define _shmem_h
 
-#include <complex.h>
-//#include <sys/types.h>
 #include "internals.h"
 
 #define SHMEM_MAJOR_VERSION             1
@@ -250,8 +248,8 @@ SHMEM_SCOPE void shmem_barrier_all(void);
 #define DECL_SHMEM_X_TO_ALL(N,T) \
 SHMEM_SCOPE void shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
 
-DECL_SHMEM_X_TO_ALL(complexd_sum,complex double)
-DECL_SHMEM_X_TO_ALL(complexf_sum,complex float)
+DECL_SHMEM_X_TO_ALL(complexd_sum,double _Complex)
+DECL_SHMEM_X_TO_ALL(complexf_sum,float _Complex)
 DECL_SHMEM_X_TO_ALL(float_sum,float)
 DECL_SHMEM_X_TO_ALL(double_sum,double)
 DECL_SHMEM_X_TO_ALL(longdouble_sum,long double)
@@ -260,8 +258,8 @@ DECL_SHMEM_X_TO_ALL(int_sum,int)
 DECL_SHMEM_X_TO_ALL(long_sum,long)
 DECL_SHMEM_X_TO_ALL(longlong_sum,long long)
 
-DECL_SHMEM_X_TO_ALL(complexd_prod,complex double)
-DECL_SHMEM_X_TO_ALL(complexf_prod,complex float)
+DECL_SHMEM_X_TO_ALL(complexd_prod,double _Complex)
+DECL_SHMEM_X_TO_ALL(complexf_prod,float _Complex)
 DECL_SHMEM_X_TO_ALL(float_prod,float)
 DECL_SHMEM_X_TO_ALL(double_prod,double)
 DECL_SHMEM_X_TO_ALL(longdouble_prod,long double)

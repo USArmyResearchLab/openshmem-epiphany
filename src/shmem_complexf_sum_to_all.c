@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_TO_ALL(complexf_sum,complex float,SUM_OP)
+SHMEM_X_TO_ALL(complexf_sum,float _Complex,SUM_OP)
 
 #ifdef __cplusplus
 }
