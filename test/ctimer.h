@@ -30,6 +30,10 @@
 #ifndef _ctimer_h
 #define _ctimer_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ctimer_start(void);
 unsigned int ctimer_nsec(unsigned int);
 
@@ -66,6 +70,10 @@ ctimer(void)
 	return (r - ns); // this counts down from r
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
