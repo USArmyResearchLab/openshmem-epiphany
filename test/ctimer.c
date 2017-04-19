@@ -35,17 +35,16 @@ void
 ctimer_start(void)
 {
 	__asm__ __volatile__ (
-		"mov r0, 0xFFFF              \n" // load MAX value
-		"movt r0, 0xFFFF             \n" // into r0
-		"movts CTIMER0, r0           \n" // set ctimer0 to MAX
-		"movfs r0, CONFIG            \n" // read CONFIG register
-		"mov r1, %%low(0xFFFFFF0F)   \n" // low bits of CONFIG mask
-		"movt r1, %%high(0xFFFFFF0F) \n" // and top bits
-		"mov r2, 0x10                \n" // 
-		"and r0, r0, r1              \n" // apply mask to clear TIMERMODE bits from previous config
-		"movts CONFIG, r0            \n" // turn off ctimer0
-		"orr r0, r0, r2              \n" // addd new TIMERMODE to config
-		"movts CONFIG, r0            \n" // start the ctimer counter
+		"movfs r1, CONFIG            \n" // read CONFIG register
+		"mov r0, %%low(0xFFFFFF0F)   \n" // low bits of CONFIG mask
+		"movt r0, %%high(0xFFFFFF0F) \n" // and top bits
+//		"add r0, r0, 0xF0            \n" // XXX uncomment if you need MAX value...
+		"movts CTIMER0, r0           \n" // ...or lazy...set ctimer0 almost to MAX value (0xFFFFFFFF)
+		"mov r2, 0x10                \n" // CTIMER0 CONFIG starts at bit 4 for CLK (0001 << 4)
+		"and r1, r1, r0              \n" // apply mask to clear TIMERMODE bits from previous CONFIG
+		"movts CONFIG, r1            \n" // turn off ctimer0
+		"orr r1, r1, r2              \n" // add new TIMERMODE to CONFIG
+		"movts CONFIG, r1            \n" // start the ctimer counter
 		: : : "r0", "r1", "r2", "cc"
 	);
 }

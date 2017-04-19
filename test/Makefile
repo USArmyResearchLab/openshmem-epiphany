@@ -1,4 +1,5 @@
 DEFS = -fhost -fno-unroll-loops
+CFLAGS = -O3
 
 COPRTHR = /usr/local/browndeer/coprthr2
 
@@ -31,7 +32,7 @@ info: all $(OBJ_FILES)
 .SUFFIXES: .c .o .x .S
 
 ctimer.o: ctimer.c
-	e-gcc -c $< -o $@
+	e-gcc $(CFLAGS) -c $< -o $@
 
 .c.o:
 	coprcc -c $(DEFS) $(INCS) $(LIBS) $<
