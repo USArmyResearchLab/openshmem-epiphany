@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_FCOLLECT_N(64,long long)
+SHMEM_FCOLLECT_N(64,3)
 
 #ifdef __cplusplus
 }

@@ -30,115 +30,28 @@
 #ifndef _def_shmem_fcollect_n_h
 #define _def_shmem_fcollect_n_h
 
-#define SHMEM_FCOLLECT_N(N,T) \
-static void \
-__shmem_fcollect##N##_0 (void *dest, const void *source, size_t nelems, int PE_start, int PE_size, long *pSync) \
-{ \
-	int PE = __shmem.my_pe; \
-	int PE_size_stride = PE_size; \
-	int step = 1; \
-	int PE_end = PE_size_stride + PE_start; \
-	int PEx = PE - PE_start; \
-	T* psrc = (T*)source; \
-	T* pdst = (T*)dest; \
-	int inelems = (int)nelems; \
-	int i, j, c, r; \
-	for(i = 0; i < inelems; i++) { \
-		pdst[PEx*inelems + i] = psrc[i]; \
-	} \
-	if (__builtin_expect(PE_size & (PE_size - 1),0)) { /* Use ring algorithm for non-powers of 2 */ \
-		for(j = 1; j < PE_size; j++) { \
-			int PE_to = __shmem.my_pe + j*step; \
-			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			int offset = (PE - PE_start) *inelems; \
-			pdst = (T*)shmem_ptr((void*)dest, PE_to); \
-			for(i = 0; i < inelems; i++) { \
-				pdst[offset + i] = psrc[i]; \
-			} \
-		} \
-		shmem_barrier(PE_start, 0, PE_size, pSync); \
-	} else { /* recursive doubling (butterfly) algorithm broadcasts increasingly more */ \
-		int Nx = inelems * PE_size; \
-		int x = PE_size-1; \
-		x |= (x >> 1); \
-		x |= (x >> 2); /* up to 16 PEs */ \
-		/*x |= (x >> 4);*/ /* up to 1024 PEs */ \
-		/*x |= (x >> 8);*/ /* up to 65536 PEs */ \
-		x += 1; /* the next largest power of 2 of the largest PE number */ \
-		for(c = 0, r = (PE_size_stride >> 1); r >= 1; c++, x >>= 1, r>>=1) { \
-			int PE_to = __shmem.my_pe + r; \
-			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			volatile long* lock = (volatile long*)(pSync + c); \
-			long* remote_lock = (long*)shmem_ptr((void*)lock, PE_to); \
-			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
-			for(j = 0; j < (1<<c); j++) { \
-				int offset = (PEx + x*j )*inelems; \
-				if (offset >= Nx) offset -= Nx; \
-				for(i = 0; i < inelems; i++) { \
-					remote_dest[offset + i] =  pdst[offset + i]; \
-				} \
-			} \
-			*remote_lock = 1; \
-			while (*lock == SHMEM_SYNC_VALUE); \
-			*lock = SHMEM_SYNC_VALUE; \
-		} \
-	} \
-} \
+#define SHMEM_FCOLLECT_N(N,S) \
 SHMEM_SCOPE void \
-shmem_fcollect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
+shmem_fcollect##N (void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long* pSync) \
 { \
-	if (logPE_stride==0) return \
-		__shmem_fcollect##N##_0(dest,source,nelems,PE_start,PE_size,pSync); \
-	int PE = __shmem.my_pe; \
-	int PE_size_stride = PE_size << logPE_stride; \
-	int step = 1 << logPE_stride; \
-	int PE_end = PE_size_stride + PE_start; \
-	int PEx = (PE - PE_start) >> logPE_stride; \
-	T* psrc = (T*)source; \
-	T* pdst = (T*)dest; \
-	int inelems = (int)nelems; \
-	int i, j, c, r; \
-	for(i = 0; i < inelems; i++) { \
-		pdst[PEx*inelems + i] = psrc[i]; \
+	const int step = 1 << logPE_stride; \
+	const int pe_shift = PE_size << logPE_stride; \
+	const int pe_end = PE_start + pe_shift; \
+	const int my_pe = __shmem.my_pe; \
+	const int nbytes = nelems << S; /* << 2 = 4 bytes, << 3 = 8 bytes */ \
+	const ptrdiff_t offset = nbytes * ((my_pe - PE_start) >> logPE_stride); \
+	const void* target = dest + offset; \
+	int pe = my_pe; \
+	do { \
+		shmemx_memcpy(shmem_ptr(target,pe), source, nbytes); \
+		pe += step; \
+	} while (pe < pe_end); \
+	pe -= pe_shift; \
+	while (pe < my_pe) { \
+		shmemx_memcpy(shmem_ptr(target,pe), source, nbytes); \
+		pe += step; \
 	} \
-	if (__builtin_expect(PE_size & (PE_size - 1),0)) { /* Use ring algorithm for non-powers of 2 */ \
-		for(j = 1; j < PE_size; j++) { \
-			int PE_to = __shmem.my_pe + j*step; \
-			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			int offset = ((PE - PE_start) >> logPE_stride)*inelems; \
-			pdst = (T*)shmem_ptr((void*)dest, PE_to); \
-			for(i = 0; i < inelems; i++) { \
-				pdst[offset + i] = psrc[i]; \
-			} \
-		} \
-		shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
-	} else { /* recursive doubling (butterfly) algorithm broadcasts increasingly more */ \
-		int Nx = inelems * PE_size; \
-		int x = PE_size-1; \
-		x |= (x >> 1); \
-		x |= (x >> 2); /* up to 16 PEs */ \
-		/*x |= (x >> 4);*/ /* up to 1024 PEs */ \
-		/*x |= (x >> 8);*/ /* up to 65536 PEs */ \
-		x += 1; /* the next largest power of 2 of the largest PE number */ \
-		for(c = 0, r = (PE_size_stride >> 1); r >= (1 << logPE_stride); c++, x >>= 1, r>>=1) { \
-			int PE_to = __shmem.my_pe + r; \
-			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			volatile long* lock = (volatile long*)(pSync + c); \
-			long* remote_lock = (long*)shmem_ptr((void*)lock, PE_to); \
-			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
-			for(j = 0; j < (1<<c); j++) { \
-				int offset = (PEx + x*j )*inelems; \
-				if (offset >= Nx) offset -= Nx; \
-				for(i = 0; i < inelems; i++) { \
-					remote_dest[offset + i] =  pdst[offset + i]; \
-				} \
-			} \
-			*remote_lock = 1; \
-			while (*lock == SHMEM_SYNC_VALUE); \
-			*lock = SHMEM_SYNC_VALUE; \
-		} \
-	} \
+	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 }
 
 #endif
-

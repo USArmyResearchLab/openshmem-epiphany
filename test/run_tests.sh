@@ -29,8 +29,8 @@ run "$n1" ./collect64.x
 run "$p2" ./cswap_eq.x
 run "$p2" ./cswap_neq.x
 run "$p2" ./fadd.x
-run "1 3 5 6 7 9 10 11 12 13 14 15" ./fcollect32.x
-run "1 3 5 6 7 9 10 11 12 13 14 15" ./fcollect64.x
+run "$n1" ./fcollect32.x
+run "$n1" ./fcollect64.x
 run "$p2" ./fetch.x
 run "$p2" ./finc.x
 run "$p1" ./get.x
