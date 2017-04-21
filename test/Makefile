@@ -10,7 +10,7 @@ INCS += -I../src/
 
 SRC_FILES = $(wildcard *.c)
 
-DEPENDS = ctimer.o
+DEPENDS = 
 
 TARGETS = \
 	add.x alltoall64.x barrier.x broadcast32.x broadcast64.x \
@@ -30,9 +30,6 @@ info: all $(OBJ_FILES)
 
 .SUFFIXES:
 .SUFFIXES: .c .o .x .S
-
-ctimer.o: ctimer.c
-	e-gcc $(CFLAGS) -c $< -o $@
 
 .c.o:
 	coprcc -c $(DEFS) $(INCS) $(LIBS) $<

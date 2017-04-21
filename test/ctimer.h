@@ -34,12 +34,34 @@
 extern "C" {
 #endif
 
-void ctimer_start(void);
-unsigned int ctimer_nsec(unsigned int);
-
 #ifdef __epiphany__ // Specific to Epiphany
-
 #define INV_GHZ 1.66666667f // 1/0.6 GHz
+
+static void
+ctimer_start(void)
+{
+	__asm__ __volatile__ (
+		"movfs r1, CONFIG            \n" // read CONFIG register
+		"mov r0, %%low(0xFFFFFF0F)   \n" // low bits of CONFIG mask
+		"movt r0, %%high(0xFFFFFF0F) \n" // and top bits
+//		"add r0, r0, 0xF0            \n" // XXX uncomment if you need MAX value...
+		"movts CTIMER0, r0           \n" // ...or lazy...set ctimer0 almost to MAX value (0xFFFFFFFF)
+		"mov r2, 0x10                \n" // CTIMER0 CONFIG starts at bit 4 for CLK (0001 << 4)
+		"and r1, r1, r0              \n" // apply mask to clear TIMERMODE bits from previous CONFIG
+		"movts CONFIG, r1            \n" // turn off ctimer0
+		"orr r1, r1, r2              \n" // add new TIMERMODE to CONFIG
+		"movts CONFIG, r1            \n" // start the ctimer counter
+		: : : "r0", "r1", "r2", "cc"
+	);
+}
+
+unsigned int
+ctimer_nsec(unsigned int cycles)
+{
+	float fcycles = (float)cycles;
+	unsigned int nsec = (unsigned int)(fcycles * INV_GHZ);
+	return nsec;
+}
 
 static unsigned int inline __attribute__((__always_inline__)) 
 ctimer(void)
@@ -57,6 +79,18 @@ ctimer(void)
 #include <sys/time.h>
 
 struct timeval t0; // initialized with ctimer_start()
+
+static void
+ctimer_start(void)
+{
+	gettimeofday(&t0, 0);
+}
+
+unsigned int
+ctimer_nsec(unsigned int t)
+{
+	return t;
+}
 
 static unsigned int inline __attribute__((__always_inline__)) 
 ctimer(void)
