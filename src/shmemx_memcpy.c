@@ -131,8 +131,8 @@ shmemx_memcpy(void* dest, const void* source, size_t nbytes)
 	".LDdone%=:                       \n"
 	"sub %[src], %[nbytes], #0        \n"
 	"bgt .LByteHandler%=              \n"
-			: [dst] "+r" (dest), [src] "+r" (source)
-			: [nbytes] "r" (nbytes)
+			: [dst] "+r" (dest), [src] "+r" (source), [nbytes] "+r" (nbytes)
+			:
 			: "r3", "r54", "r55",
 			  "r56", "r57", "r58", "r59",
 			  "r60", "r61", "r62", "r63",
