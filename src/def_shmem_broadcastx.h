@@ -54,6 +54,8 @@ shmem_broadcast##N (void *dest, const void *source, size_t nelems, int PE_root, 
 	int mask2 = PEx & -PEx; /* least significant 1 bit */ \
 	if (PEx==0) mask2 = maskx; \
 	int mask1 = (mask2 << 1) - 1; \
+	__shmem.lock_receive_finished = 0; \
+	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 	do { \
 		if ((PEx & mask1) == 0) { \
 			int PE_to = (PEx | mask2) + PE_start + PE_root_stride; \
