@@ -52,11 +52,11 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 	for (i = 0; i < nreduce; i++) { \
 		dest[i] = source[i]; \
 	} \
+	*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
+	*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
+	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
 	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
 		int to = __shmem.my_pe; \
-		*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
-		*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
-		shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
 		for (r = 1; r < PE_size; r++) { \
 			to += PE_step; \
 			if (to >= PE_end) to -= PE_size_stride; \
