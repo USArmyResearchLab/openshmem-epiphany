@@ -47,13 +47,16 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 	int PE_end = PE_size_stride + PE_start; \
 	int nreduced2p1 = (nreduce >> 1) + 1; \
 	int nwrk = (nreduced2p1 > (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
-	volatile long* vSync = (volatile long*)pSync; \
+	volatile long* vSync = (volatile long*)(pSync + SHMEM_REDUCE_SYNC_SIZE - 2); \
 	int i, j, r; \
 	for (i = 0; i < nreduce; i++) { \
 		dest[i] = source[i]; \
 	} \
 	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
 		int to = __shmem.my_pe; \
+		*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
+		*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
+		shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
 		for (r = 1; r < PE_size; r++) { \
 			to += PE_step; \
 			if (to >= PE_end) to -= PE_size_stride; \
@@ -65,7 +68,7 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 				nrem = (nrem > nwrk) ? nwrk : nrem; \
 				__shmem_set_lock(remote_lock0); \
 				for (j = 0; j < nrem; j++) { \
-					remote_work[j] = dest[i+j]; \
+					remote_work[j] = source[i+j]; \
 				} \
 				__shmem_set_lock(remote_lock1); \
 				while (!vSync[1]); \

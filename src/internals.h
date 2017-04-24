@@ -70,7 +70,7 @@
 #define __INTERNAL_F2C_SCALE        ( sizeof (long) / sizeof (int) )
 #define __BCAST_SYNC_SIZE           ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
 #define __BARRIER_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __REDUCE_SYNC_SIZE          ( 2*SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __REDUCE_SYNC_SIZE          ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE + 2)
 #define __REDUCE_MIN_WRKDATA_SIZE   ( 16 / __INTERNAL_F2C_SCALE )
 #define __SYNC_VALUE                ( 0 )
 #define __COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
