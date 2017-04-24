@@ -55,6 +55,7 @@ shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 	__shmem.dma_desc.outer_stride = stride,
 	__shmem.dma_desc.config = config;
 	__shmem.dma_used = 1;
+#if 0 // XXX dual channel DMA may be unstable
 	unsigned int dmachannel;
 	__asm__ __volatile__ (
 		"mov r0, #15             \n"
@@ -63,10 +64,10 @@ shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 		"   movfs r1, DMA0STATUS \n"
 		"   and r1,r1,r0         \n"
 		"   beq .Lconfig%=       \n" // if DMA0 isn't busy, branch to start DMA0
-	 	"   movfs r1, DMA1STATUS \n"
- 		"   and r1,r1,r0         \n"
-	 	"   bne .Loop%=          \n" // loop until one DMA engine isn't busy
- 		"movts DMA1CONFIG, %[x]  \n" // start DMA1
+		"   movfs r1, DMA1STATUS \n"
+		"   and r1,r1,r0         \n"
+		"   bne .Loop%=          \n" // loop until one DMA engine isn't busy
+		"movts DMA1CONFIG, %[x]  \n" // start DMA1
 		"mov r2, #1              \n"
 		"b .Ldone%=              \n"
 		".Lconfig%=:             \n"
@@ -84,6 +85,20 @@ shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
 			__shmem.cdst0 = cdst;
 			__shmem.csrc0 = value;
 		}
+#else
+	__asm__ __volatile__ (
+		"mov r0, #15             \n"
+		".Loop%=:                \n"
+		"   movfs r1, DMA0STATUS \n"
+		"   and r1,r1,r0         \n"
+		"   bne .Loop%=          \n" // loop until one DMA engine isn't busy
+		"movts DMA0CONFIG, %[x]  \n" // start DMA0
+		:
+		: [x] "r" (__shmem.dma_start)
+		: "r0", "r1", "memory", "cc");
+		__shmem.cdst0 = cdst;
+		__shmem.csrc0 = value;
+#endif
 }
 
 #ifdef __cplusplus
