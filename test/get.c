@@ -42,6 +42,7 @@
 int main (void)
 {
 	int i, nelement;
+	static unsigned int t, tsum;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
@@ -75,18 +76,17 @@ int main (void)
 		shmem_barrier_all();
 		ctimer_start();
 
-		unsigned int t = ctimer();
+		t = ctimer();
 		for (i = 0; i < NLOOP; i++) {
 			shmem_getmem(target, source, nelement, nxtpe);
 		}
 		t -= ctimer();
 
-		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
-		t /= npes; /* Average time across all PEs for one get */
+		shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npes, pWrk, pSync);
 
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));
 			host_printf("%6d %7u\n", bytes, nsec);
 		}
 

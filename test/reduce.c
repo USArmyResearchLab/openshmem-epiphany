@@ -36,11 +36,12 @@
 #include "ctimer.h"
 
 #define NELEMENT 2048
-#define NLOOP 10000
+#define NLOOP 100
 
 int main (void)
 {
 	int i, nelement;
+	static unsigned int t, tsum;
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
 		pSync[i] = SHMEM_SYNC_VALUE;
@@ -74,14 +75,16 @@ int main (void)
 		shmem_barrier_all();
 		ctimer_start();
 
-		unsigned int t = ctimer();
+		t = ctimer();
 		for (i = 0; i < NLOOP; i++) {
 			shmem_int_sum_to_all(target, source, nelement, 0, 0, npes, pWrk, pSync);
 		}
 		t -= ctimer();
 
+		shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npes, pWrk, pSync);
+
 		if (me == 0) {
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));
 			host_printf("%5d %7u\n", nelement, nsec);
 		}
 

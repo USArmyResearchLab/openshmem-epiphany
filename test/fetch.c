@@ -41,6 +41,7 @@ int main (void)
 {
 	int i, npe;
 	static int dest;
+	static unsigned int t, tsum;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
@@ -60,7 +61,6 @@ int main (void)
 
 	for (npe = 2; npe <= npes; npe++)
 	{
-		unsigned int t = 0;
 		shmem_barrier_all();
 		ctimer_start();
 
@@ -70,13 +70,12 @@ int main (void)
 				shmem_fetch(&dest, nxtpe);
 			}
 			t -= ctimer();
+			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);
 		}
 
-		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
-		t /= npe;
 
 		if (me == 0) {
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npe * NLOOP));
 			host_printf("%5d %7u\n", npe, nsec);
 		}
 	}

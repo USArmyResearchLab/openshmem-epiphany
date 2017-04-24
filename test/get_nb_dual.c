@@ -39,35 +39,10 @@
 #define NELEMENT 8192
 #define NLOOP 10000
 
-static void
-__shmem_quiet(void)
-{
-	if (__shmem.dma_used) { // SHMEM doesn't guarantee value is available
-		__asm__ __volatile__ (
-			"mov r0, #15             \n" // setting r0 lower 4 bits on
-			".Loop%=:                \n"
-			"   movfs r1, DMA0STATUS \n" // copy DMA0STATUS to r1
-			"   and r1,r1,r0         \n" // check if DMA0STATUS != 0
-			"   movfs r2, DMA1STATUS \n" // copy DMA1STATUS to r2
-			"   and r2, r2, r0       \n" // check if DMA1STATUS != 0
-			"   orr r2, r2, r1       \n" // check if either are != 0
-			"   bne .Loop%=          \n" // spin until both complete
-			: : : "r0", "r1", "r2", "cc"
-		);
-		if (__shmem.cdst0) {
-			while(*__shmem.cdst0 == __shmem.csrc0);
-			__shmem.cdst0 = 0;
-		}
-		if (__shmem.cdst1) {
-			while(*__shmem.cdst1 == __shmem.csrc1);
-			__shmem.cdst1 = 0;
-		}
-	}
-}
-
 int main (void)
 {
 	int i, nelement;
+	static unsigned int t, tsum;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
@@ -102,7 +77,7 @@ int main (void)
 		shmem_barrier_all();
 		ctimer_start();
 
-		unsigned int t = ctimer();
+		t = ctimer();
 
 		unsigned int n2 = nelement >> 1;
 		for (i = 0; i < NLOOP; i++) {
@@ -110,19 +85,16 @@ int main (void)
 			shmem_getmem_nbi(target + n2, source + n2, n2, nxtpe);
 		}
 
-		__shmem_quiet();
+		shmem_quiet();
 
 		t -= ctimer();
 
-		shmem_barrier_all();
-
-		shmem_int_sum_to_all(&t, &t, 1, 0, 0, npes, pWrk, pSync);
-		t /= npes; /* Average time across all PEs for dual get */
+		shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npes, pWrk, pSync);
 
 		shmem_barrier_all();
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));
 			host_printf("%6d %7u\n", bytes, nsec);
 		}
 
