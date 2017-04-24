@@ -35,6 +35,7 @@
 SHMEM_SCOPE void \
 shmem_broadcast##N (void *dest, const void *source, size_t nelems, int PE_root, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
+	if (PE_size == 1) return; \
 	int PE = __shmem.my_pe; \
 	int PE_root_stride = PE_root << logPE_stride; \
 	T* psrc = (T*)dest; \
