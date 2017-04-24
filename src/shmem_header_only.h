@@ -1,6 +1,10 @@
 #ifndef _shmem_header_only_h
 #define _shmem_header_only_h
 
+#ifndef SHMEM_USE_HEADER_ONLY
+#define SHMEM_USE_HEADER_ONLY
+#endif
+
 #include "__shmem_clear_lock.c"
 #include "__shmem_lock_ptr.c"
 #include "__shmem_set_lock.c"
