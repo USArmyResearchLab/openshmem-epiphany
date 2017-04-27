@@ -61,8 +61,7 @@ Then test and benchmark the code. This is optional and presently works only
 with the COPRTHR-2 SDK:
 ```
 cd ../test
-make
-./run_tests.sh
+make run
 ```
 You may also run the example codes.  The directory name prefixes of `c_` and
 `e_` are for use with the COPRTHR-2 SDK and eSDK, respectively.

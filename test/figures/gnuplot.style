@@ -1,0 +1,24 @@
+set autoscale
+unset log
+unset label
+unset key
+unset ytics
+unset y2tics
+unset style
+unset border
+unset clip
+# Axes
+set style line 11 lc rgb '#000000' lt 1
+set tics nomirror out scale 0.75
+# Grid
+set style line 12 lc rgb'#808080' lt 0 lw 1
+set grid back ls 12 lw 0.5
+set style function filledcurves y1=0
+set clip two
+#set terminal svg enhanced background rgb 'white'
+set terminal pdf enhanced background rgb 'white'
+Tc(x) = alpha + beta * x
+set fit errorvariables
+if (!exists("filename")) filename='default.pdf'
+set output filename
+PEs=16

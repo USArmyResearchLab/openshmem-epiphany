@@ -44,6 +44,8 @@ int main(int argc, char* argv[])
 	int me = shmem_my_pe();
 	shmem_info_get_name(name);
 	shmem_info_get_version(&major, &minor);
-	host_printf("Hello World from %d of %d %s (%d.%d)\n", me, n_pes, SHMEM_VENDOR_STRING, major, minor);
+	if (me == 0) host_printf("%s (%d.%d)\n", SHMEM_VENDOR_STRING, major, minor);
+	shmem_barrier_all();
+	host_printf("Hello World from %d of %d\n", me, n_pes);
 	return 0;
 }

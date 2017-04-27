@@ -1,0 +1,168 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{OpenSHMEM Performance Results}
+\author{
+	\input{version.dat} \\
+	\input{git.dat}
+}
+
+\maketitle
+
+\begin{abstract}
+This is an automatically generated performance report for the
+\input{version.dat} implementation of OpenSHMEM on \input{pes.dat} processing
+elements.
+\end{abstract}
+
+\section{Introduction} \label{sec:intro}
+
+The OpenSHMEM performance results have been generated automatically for the
+\input{version.dat} in this report for \input{pes.dat} processing elements
+(PEs). Many of the figures in the Remote Memory Access (Section~\ref{sec:rma})
+and Collective Routines (Section~\ref{sec:collective}) sections include
+parameters \(\alpha\) and \(\beta^{-1}\) in the figure along with their
+standard deviations. These two parameters are from the ``\(\alpha\)-\(\beta\)
+model'' for communication in HPC. They summarize the communication time
+(\(T_c\)) to include the latency (\(\alpha\)) and marginal cost (\(\beta\)) to
+transfer a message (of size \(L\)) in equation~\ref{eq:comm}. The
+\(\beta^{-1}\) parameter is the peak effective core bandwidth for the routine.
+
+\begin{equation}
+	T_c = \alpha + \beta \cdot L
+	\label{eq:comm}
+\end{equation}
+
+\section{Remote Memory Access} \label{sec:rma}
+Figures~\ref{fig:get}-\ref{fig:get_ipi} show the performance contiguous data
+exchange operations defined within the OpenSHMEM API. All routines are
+one-sided communication mechanisms. One-sided communication has the benefit
+that it decouples the communication from synchronization, enabling more
+opportunities for asynchronous communication and computation, thereby
+increasing parallel application performance. Each routine operates on symmetric
+objects, either global synbols, statically defined, or allocated with the
+OpenSHMEM memory management routines \texttt{shmem\_malloc}, or
+\texttt{shmem\_align}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{put.pdf}
+	\caption{Performance of optimized \texttt{shmem\_putmem}
+contiguous data exchange operations for all PEs.}
+	\label{fig:put}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{put_nb.pdf}
+	\label{fig:put_nb}
+	\caption{Performance of optimized \texttt{shmem\_putmem\_nbi} and subsequent
+call to \texttt{shmem\_quiet}, demonstrating contiguous data exchange
+operations for all PEs.}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{get.pdf}
+	\caption{Performance of optimized \texttt{shmem\_getmem}
+contiguous data exchange operations for all PEs.}
+	\label{fig:get}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{get_nb.pdf}
+	\caption{Performance of optimized \texttt{shmem\_getmem\_nbi} and subsequent
+call to \texttt{shmem\_quiet}, demonstrating contiguous data exchange
+operations for all PEs.}
+	\label{fig:get_nb}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{get_ipi.pdf}
+	\caption{Performance of experimental inter-processor user interrupt for
+high-performance \texttt{shmem\_getmem}. The requesting PE causes an interrupt
+on the remote core, forcing the remote core to write data to the requesting
+core.}
+	\label{fig:get_ipi}
+\end{figure}
+
+\section{Atomic Memory Operations} \label{sec:atomic}
+
+Figure \ref{fig:atomics} shows the performance of the atomic memory operations.
+Atomic memory operations are one-sided operations with atomicity guarantees so
+that multiple PEs have exclusive access to the symmetric, shared value.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{atomics.pdf}
+	\caption{Performance of \mbox{OpenSHMEM} atomic operations for 32-bit
+integers and a variable number of processing elements. Atomic operations are
+performed in a tight loop on the next neighboring PE.}
+	\label{fig:atomics}
+\end{figure}
+
+\section{Collective Routines} \label{sec:collective}
+
+Figures~\ref{fig:alltoall64}-\ref{fig:reduce} show the performance for
+communication or synchronization on a group of PEs within an Active set.
+Collective routines require all PEs in the Active set to simultaneously call
+the routine. Reductions perform arithmetic and logical operations across an
+Active set of PEs. Figure \ref{fig:reduce} shows an example of one such
+reduction operation.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{alltoall64.pdf}
+	\caption{Performance of the new (to version~1.3) contiguous all-to-all data
+exchange operation, \texttt{shmem\_alltoall64}, for all PEs.}
+	\label{fig:alltoall64}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{barrier.pdf}
+	\caption{Performance of \texttt{shmem\_barrier} for variable number of
+processing elements.}
+	\label{fig:barrier}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{collect64.pdf}
+	\caption{Performance of linear scaling \texttt{shmem\_collect64} for
+variable message sizes on all PEs.}
+	\label{fig:collect64}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{broadcast64.pdf}
+	\caption{Performance of \texttt{shmem\_broadcast64} for variable message
+sizes.}
+	\label{fig:broadcast64}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{fcollect64.pdf}
+	\caption{Performance of recursive doubling \texttt{shmem\_fcollect64} for
+variable message sizes on all PEs.}
+	\label{fig:fcollect64}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{reduce.pdf}
+	\caption{Reduction performance for \texttt{shmem\_int\_sum\_to\_all} for all
+PEs. The latency and the number of collective reductions per second are shown.
+The effect of the minimum symmetric work array size for reductions, defined as
+\texttt{SHMEM\_REDUCE\_MIN\_WRKDATA\_SIZE} per the \mbox{OpenSHMEM}
+specification, is apparent for small reductions.}
+	\label{fig:reduce}
+\end{figure}
+
+\end{document}
