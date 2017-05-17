@@ -7,9 +7,9 @@ COPRTHR = /usr/local/browndeer/coprthr2
 
 INCS = -I. -I$(COPRTHR)/include
 LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall -le-lib
-LIBS += -L../src/ -lshmem
+LIBS += -L../src -lshmem
 #DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to use header only library
-INCS += -I../src/
+INCS += -I../src -I../common
 
 FIGURES = ./figures/
 SRC_FILES = $(wildcard *.c)
@@ -74,9 +74,6 @@ pes.dat:
 
 %.pdf: %.dat $(FIGURES)%.gnuplot
 	gnuplot -e "filename='$@'; set loadpath '$(FIGURES)'; load '$*.gnuplot'"
-
-put_merged.pdf: put.dat put_nb.dat put_nb_dual.dat $(FIGURES)put_merged.gnuplot
-	gnuplot -e "filename='$@'; set loadpath '$(FIGURES)'; load 'put_merged.gnuplot'"
 
 atomics.pdf: add.dat cswap_neq.dat cswap_eq.dat swap.dat finc.dat inc.dat fadd.dat fetch.dat set.dat $(FIGURES)atomics.gnuplot
 	gnuplot -e "filename='$@'; set loadpath '$(FIGURES)'; load 'atomics.gnuplot'"

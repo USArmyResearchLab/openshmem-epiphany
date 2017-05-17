@@ -55,7 +55,7 @@ ctimer_start(void)
 	);
 }
 
-unsigned int
+static unsigned int
 ctimer_nsec(unsigned int cycles)
 {
 	float fcycles = (float)cycles;
@@ -86,7 +86,7 @@ ctimer_start(void)
 	gettimeofday(&t0, 0);
 }
 
-unsigned int
+static unsigned int
 ctimer_nsec(unsigned int t)
 {
 	return t;
