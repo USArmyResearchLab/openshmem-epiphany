@@ -56,7 +56,7 @@ __attribute__((alias("shmem_" #A "_atomic_fetch_add")));
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(N,T,A) \
 SHMEM_SCOPE T \
-shmem_##N##_add (T *dest, T value, int pe) \
+shmem_##N##_fadd (T *dest, T value, int pe) \
 __attribute__((alias("shmem_" #A "_atomic_fetch_add"), deprecated));
 
 #endif
