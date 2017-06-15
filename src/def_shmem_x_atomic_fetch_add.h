@@ -27,16 +27,36 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_fadd.h"
+#ifndef _def_shmem_x_atomic_fetch_add_h
+#define _def_shmem_x_atomic_fetch_add_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-SHMEM_X_FADD(longlong,long long)
-
-#ifdef __cplusplus
+#define SHMEM_X_ATOMIC_FETCH_ADD(N,T) \
+static T \
+__shmem_##N##_atomic_fetch_add (T *ptr, T value, int pe) \
+{ \
+	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
+	__shmem_set_lock(x); \
+	T r = *ptr; \
+	T incr = r +  value; \
+	*ptr = incr; \
+	__shmem_clear_lock(x); \
+	return r; \
+} \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_fetch_add (T *dest, T value, int pe) \
+{ \
+	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
+	return __shmem_##N##_fadd(ptr, value, pe); \
 }
+
+#define ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_fetch_add (T *dest, T value, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_fetch_add")));
+
+#define ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_add (T *dest, T value, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_fetch_add"), deprecated));
+
 #endif

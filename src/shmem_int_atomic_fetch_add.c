@@ -29,13 +29,16 @@
 
 #include "internals.h"
 #include "shmem.h"
-#include "def_shmem_x_add.h"
+#include "def_shmem_x_atomic_fetch_add.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_ADD(int,int)
+SHMEM_X_ATOMIC_FETCH_ADD(int,int)
+ALIAS_SHMEM_X_FETCH_ADD(int,int,int)
+ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(int32,int32_t,int)
+ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(ptrdiff,int32_t,int)
 
 #ifdef __cplusplus
 }

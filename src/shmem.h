@@ -116,15 +116,51 @@ SHMEM_SCOPE int shmem_test_lock (volatile long* lock);
 #define DECL_ARG6(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG5(X,__VA_ARGS__))
 #define DECL_ARG7(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG6(X,__VA_ARGS__))
 #define DECL_ARG8(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG7(X,__VA_ARGS__))
+#define DECL_ARG9(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG8(X,__VA_ARGS__))
+#define DECL_ARG10(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG9(X,__VA_ARGS__))
+#define DECL_ARG11(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG10(X,__VA_ARGS__))
+#define DECL_ARG12(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG11(X,__VA_ARGS__))
+#define DECL_ARG13(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG12(X,__VA_ARGS__))
+#define DECL_ARG14(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG13(X,__VA_ARGS__))
+#define DECL_ARG15(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG14(X,__VA_ARGS__))
+#define DECL_ARG16(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG15(X,__VA_ARGS__))
+#define DECL_ARG17(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG16(X,__VA_ARGS__))
+#define DECL_ARG18(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG17(X,__VA_ARGS__))
+#define DECL_ARG19(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG18(X,__VA_ARGS__))
+#define DECL_ARG20(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG19(X,__VA_ARGS__))
+#define DECL_ARG21(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG20(X,__VA_ARGS__))
+#define DECL_ARG22(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG21(X,__VA_ARGS__))
+#define DECL_ARG23(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG22(X,__VA_ARGS__))
+#define DECL_ARG24(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG23(X,__VA_ARGS__))
 
 #define DECL_STANDARD_AMO(F) \
 F(int,int) \
 F(long,long) \
-F(longlong,long long)
+F(longlong,long long) \
+F(uint,unsigned int) \
+F(ulong,unsigned long) \
+F(ulonglong,long long) \
+F(int32,int32_t) \
+F(int64,int64_t) \
+F(uint32,uint32_t) \
+F(uint64,uint64_t) \
+F(size,size_t) \
+F(ptrdiff,ptrdiff_t)
+
 #define DECL_EXTENDED_AMO(F) \
 F(float,float) \
 F(double,double) \
 DECL_STANDARD_AMO(F)
+
+#define DECL_BITWISE_AMO(F) \
+F(uint,unsigned int) \
+F(ulong,unsigned long) \
+F(ulonglong,long long) \
+F(int32,int32_t) \
+F(int64,int64_t) \
+F(uint32,uint32_t) \
+F(uint64,uint64_t)
+
 #define DECL_STANDARD_RMA(F) \
 F(longdouble,long double) \
 F(char,char) \
@@ -133,50 +169,114 @@ DECL_EXTENDED_AMO(F)
 
 #define DECL_GENERIC_STANDARD_AMO(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG3((A), \
+DECL_ARG12((A), \
 	int*, F(int), \
 	long*, F(long), \
 	long long*, F(longlong) \
+	unsigned int*, F(uint) \
+	unsigned long*, F(ulong) \
+	unsigned long long*, F(ulonglong) \
+	int32_t*, F(int32) \
+	int64_t*, F(int64) \
+	uint32_t*, F(uint32) \
+	uint64_t*, F(uint64) \
+	size_t*, F(size) \
+	ptrdiff_t*, F(ptrdiff) \
 ))
+
 #define DECL_GENERIC_EXTENDED_AMO(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG5((A), \
-	int*, F(int), \
-	long*, F(long), \
-	long long*, F(longlong), \
+DECL_ARG14((A), \
 	float*, F(float), \
 	double*, F(double) \
-))
-#define DECL_GENERIC_STANDARD_RMA(A,F) \
-DECL_GENERIC((A), \
-DECL_ARG8((A), \
 	int*, F(int), \
 	long*, F(long), \
-	long long*, F(longlong), \
-	float*, F(float), \
-	double*, F(double), \
-	long double*, F(longdouble) \
-	char*, F(char), \
-	short*, F(short) \
+	long long*, F(longlong) \
+	unsigned int*, F(uint) \
+	unsigned long*, F(ulong) \
+	unsigned long long*, F(ulonglong) \
+	int32_t*, F(int32) \
+	int64_t*, F(int64) \
+	uint32_t*, F(uint32) \
+	uint64_t*, F(uint64) \
+	size_t*, F(size) \
+	ptrdiff_t*, F(ptrdiff) \
 ))
 
-#define SHMEM_FINC(N,T) SHMEM_SCOPE T shmem_##N##_finc (T* dest, int pe);
-#define SHMEM_INC(N,T) SHMEM_SCOPE void shmem_##N##_inc (T* dest, int pe);
-#define SHMEM_FADD(N,T) SHMEM_SCOPE T shmem_##N##_fadd (T* dest, T value, int pe);
-#define SHMEM_ADD(N,T) SHMEM_SCOPE void shmem_##N##_add (T* dest, T value, int pe);
-#define SHMEM_CSWAP(N,T) SHMEM_SCOPE T shmem_##N##_cswap (T* dest, T cond, T value, int pe);
-#define SHMEM_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_swap (T* dest, T value, int pe);
-#define SHMEM_FETCH(N,T) SHMEM_SCOPE T shmem_##N##_fetch (const T* dest, int pe);
-#define SHMEM_SET(N,T) SHMEM_SCOPE void shmem_##N##_set (T* dest, T value, int pe);
+#define DECL_GENERIC_BITWISE_AMO(A,F) \
+DECL_GENERIC((A), \
+DECL_ARG7((A), \
+	unsigned int*, F(uint) \
+	unsigned long*, F(ulong) \
+	unsigned long long*, F(ulonglong) \
+	int32_t*, F(int32) \
+	int64_t*, F(int64) \
+	uint32_t*, F(uint32) \
+	uint64_t*, F(uint64) \
+))
 
-DECL_STANDARD_AMO(SHMEM_FINC)
-DECL_STANDARD_AMO(SHMEM_INC)
-DECL_STANDARD_AMO(SHMEM_FADD)
-DECL_STANDARD_AMO(SHMEM_ADD)
-DECL_STANDARD_AMO(SHMEM_CSWAP)
-DECL_EXTENDED_AMO(SHMEM_SWAP)
-DECL_EXTENDED_AMO(SHMEM_FETCH)
-DECL_EXTENDED_AMO(SHMEM_SET)
+#define DECL_GENERIC_STANDARD_RMA(A,F) \
+DECL_GENERIC((A), \
+DECL_ARG24((A), \
+	float*, F(float), \
+	double*, F(double) \
+	long double*, F(longdouble) \
+	char*, F(char), \
+	signed char*, F(schar), \
+	short*, F(short) \
+	int*, F(int), \
+	long*, F(long), \
+	long long*, F(longlong) \
+	unsigned char*, F(uchar) \
+	unsigned short*, F(ushort) \
+	unsigned int*, F(uint) \
+	unsigned long*, F(ulong) \
+	unsigned long long*, F(ulonglong) \
+	int8_t*, F(int8) \
+	int16_t*, F(int16) \
+	int32_t*, F(int32) \
+	int64_t*, F(int64) \
+	uint8_t*, F(uint8) \
+	uint16_t*, F(uint16) \
+	uint32_t*, F(uint32) \
+	uint64_t*, F(uint64) \
+	size_t*, F(size) \
+	ptrdiff_t*, F(ptrdiff) \
+))
+
+#define SHMEM_ATOMIC_COMPARE_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_compare_swap (T* dest, T cond, T value, int pe);
+#define SHMEM_ATOMIC_FETCH_INC(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_inc (T* dest, int pe);
+#define SHMEM_ATOMIC_INC(N,T) SHMEM_SCOPE void shmem_##N##_atomic_inc (T* dest, int pe);
+#define SHMEM_ATOMIC_FETCH_ADD(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_add (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_ADD(N,T) SHMEM_SCOPE void shmem_##N##_atomic_add (T* dest, T value, int pe);
+
+#define SHMEM_ATOMIC_FETCH(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch (const T* dest, int pe);
+#define SHMEM_ATOMIC_SET(N,T) SHMEM_SCOPE void shmem_##N##_atomic_set (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_swap (T* dest, T value, int pe);
+
+#define SHMEM_ATOMIC_FETCH_AND(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_and (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_AND(N,T) SHMEM_SCOPE void shmem_##N##_atomic_and (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_FETCH_OR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_or (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_OR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_or (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_FETCH_XOR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_xor (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_XOR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_xor (T* dest, T value, int pe);
+
+DECL_STANDARD_AMO(SHMEM_ATOMIC_COMPARE_SWAP)
+DECL_STANDARD_AMO(SHMEM_ATOMIC_FETCH_INC)
+DECL_STANDARD_AMO(SHMEM_ATOMIC_INC)
+DECL_STANDARD_AMO(SHMEM_ATOMIC_FETCH_ADD)
+DECL_STANDARD_AMO(SHMEM_ATOMIC_ADD)
+
+DECL_EXTENDED_AMO(SHMEM_ATOMIC_FETCH)
+DECL_EXTENDED_AMO(SHMEM_ATOMIC_SET)
+DECL_EXTENDED_AMO(SHMEM_ATOMIC_SWAP)
+
+DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_AND)
+DECL_GENERIC_AMO(SHMEM_ATOMIC_AND)
+DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_OR)
+DECL_GENERIC_AMO(SHMEM_ATOMIC_OR)
+DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_XOR)
+DECL_GENERIC_AMO(SHMEM_ATOMIC_XOR)
 
 #define DECL_SHMEM_X_WAIT(N,T) \
 SHMEM_SCOPE void shmem_##N (volatile T *ivar, T cmp_value);

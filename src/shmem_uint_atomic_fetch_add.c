@@ -27,24 +27,18 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_add_h
-#define _def_shmem_x_add_h
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_fetch_add.h"
 
-#define SHMEM_X_ADD(N,T) \
-static void \
-__shmem_##N##_add (T* ptr, T value, int pe) \
-{ \
-	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
-	__shmem_set_lock(x); \
-	*ptr += value; \
-	__shmem_clear_lock(x); \
-} \
-SHMEM_SCOPE void \
-shmem_##N##_add (T *dest, T value, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	__shmem_##N##_add(ptr, value, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_FETCH_ADD(uint,unsigned int)
+ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(size,size_t,uint)
+
+#ifdef __cplusplus
+}
+#endif
