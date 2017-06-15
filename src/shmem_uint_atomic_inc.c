@@ -29,13 +29,15 @@
 
 #include "internals.h"
 #include "shmem.h"
-#include "def_shmem_x_finc.h"
+#include "def_shmem_x_atomic_inc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_FINC(long,long)
+SHMEM_X_ATOMIC_INC(uint,unsigned int)
+ALIAS_SHMEM_X_ATOMIC_INC(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_ATOMIC_INC(size,size_t,uint)
 
 #ifdef __cplusplus
 }

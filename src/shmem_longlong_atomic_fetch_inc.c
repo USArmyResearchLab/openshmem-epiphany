@@ -27,27 +27,18 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_finc_h
-#define _def_shmem_x_finc_h
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_fetch_inc.h"
 
-#define SHMEM_X_FINC(N,T) \
-static T \
-__shmem_##N##_finc (T *ptr, int pe) \
-{ \
-	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
-	__shmem_set_lock(x); \
-	T r = *ptr; \
-	T incr = r + 1; \
-	*ptr = incr; \
-	__shmem_clear_lock(x); \
-	return r; \
-} \
-SHMEM_SCOPE T \
-shmem_##N##_finc (T *dest, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	return __shmem_##N##_finc(ptr, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_FETCH_INC(longlong,long long)
+ALIAS_SHMEM_X_FETCH_INC(longlong,long long,longlong)
+ALIAS_SHMEM_X_ATOMIC_FETCH_INC(int64,int64_t,longlong)
+
+#ifdef __cplusplus
+}
+#endif

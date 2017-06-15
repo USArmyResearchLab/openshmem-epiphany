@@ -27,24 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_inc_h
-#define _def_shmem_x_inc_h
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_inc.h"
 
-#define SHMEM_X_INC(N,T) \
-static void \
-__shmem_##N##_inc (T* ptr, int pe) \
-{ \
-	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
-	__shmem_set_lock(x); \
-	*ptr += 1; \
-	__shmem_clear_lock(x); \
-} \
-SHMEM_SCOPE void \
-shmem_##N##_inc (T *dest, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	__shmem_##N##_inc(ptr, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_INC(int,int)
+ALIAS_SHMEM_X_INC(int,int,int)
+ALIAS_SHMEM_X_ATOMIC_INC(int32,int32_t,int)
+ALIAS_SHMEM_X_ATOMIC_INC(ptrdiff,int32_t,int)
+
+#ifdef __cplusplus
+}
+#endif
