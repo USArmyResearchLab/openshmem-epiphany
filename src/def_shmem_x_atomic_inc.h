@@ -48,12 +48,12 @@ shmem_##N##_atomic_inc (T *dest, int pe) \
 
 #define ALIAS_SHMEM_X_ATOMIC_INC(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N##_atomic_inc (T *dest, T value, int pe) \
+shmem_##N##_atomic_inc (T *dest, int pe) \
 __attribute__((alias("shmem_" #A "_atomic_inc")));
 
 #define ALIAS_SHMEM_X_INC(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N##_inc (T *dest, T value, int pe) \
+shmem_##N##_inc (T *dest, int pe) \
 __attribute__((alias("shmem_" #A "_atomic_inc"), deprecated));
 
 #endif

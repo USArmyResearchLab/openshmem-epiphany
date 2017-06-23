@@ -38,7 +38,7 @@ extern "C" {
 SHMEM_X_ATOMIC_INC(int,int)
 ALIAS_SHMEM_X_INC(int,int,int)
 ALIAS_SHMEM_X_ATOMIC_INC(int32,int32_t,int)
-ALIAS_SHMEM_X_ATOMIC_INC(ptrdiff,int32_t,int)
+ALIAS_SHMEM_X_ATOMIC_INC(ptrdiff,ptrdiff_t,int)
 
 #ifdef __cplusplus
 }

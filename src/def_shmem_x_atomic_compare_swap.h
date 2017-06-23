@@ -27,16 +27,28 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_fetch.h"
+#ifndef _def_shmem_x_atomic_compare_swap_h
+#define _def_shmem_x_atomic_compare_swap_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-SHMEM_X_FETCH(double,double)
-
-#ifdef __cplusplus
+#define SHMEM_X_ATOMIC_COMPARE_SWAP(N,T) \
+static T \
+__shmem_##N##_atomic_compare_swap (T *ptr, T cond, T value, int pe) \
+{ \
+	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
+	__shmem_set_lock(x); \
+	T r = *ptr; \
+	if (r == cond) { \
+		*ptr = value; \
+	} \
+	__shmem_clear_lock(x); \
+	return r; \
+} \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_compare_swap (T *dest, T cond, T value, int pe) \
+{ \
+	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
+	return __shmem_##N##_atomic_compare_swap(ptr, cond, value, pe); \
 }
+
 #endif
+

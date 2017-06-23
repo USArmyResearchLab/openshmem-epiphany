@@ -29,13 +29,13 @@
 
 #include "internals.h"
 #include "shmem.h"
-#include "def_shmem_x_set.h"
+#include "def_shmem_x_atomic_set.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_SET(int,int)
+SHMEM_X_ATOMIC_SET(double,double)
 
 #ifdef __cplusplus
 }

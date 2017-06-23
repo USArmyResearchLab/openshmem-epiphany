@@ -27,19 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_set_h
-#define _def_shmem_x_set_h
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_set.h"
 
-#define SHMEM_X_SET(N,T) \
-static void \
-__shmem_##N##_set (volatile T *ptr, T value, int pe) \
-{ *ptr = value; } \
-SHMEM_SCOPE void \
-shmem_##N##_set (T *dest, T value, int pe) \
-{ \
-	volatile T* ptr = (volatile T*)shmem_ptr((void*)dest, pe); \
-	__shmem_##N##_set(ptr, value, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_SET(int,int)
+ALIAS_SHMEM_X_SET(int,int,int)
+ALIAS_SHMEM_X_ATOMIC_SET(int32,int32_t,int)
+ALIAS_SHMEM_X_ATOMIC_SET(ptrdiff,ptrdiff_t,int)
+
+#ifdef __cplusplus
+}
+#endif

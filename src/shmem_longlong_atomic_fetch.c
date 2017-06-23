@@ -29,13 +29,15 @@
 
 #include "internals.h"
 #include "shmem.h"
-#include "def_shmem_x_set.h"
+#include "def_shmem_x_atomic_fetch.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_SET(float,float)
+SHMEM_X_ATOMIC_FETCH(longlong,long long)
+ALIAS_SHMEM_X_FETCH(longlong,long long,longlong)
+ALIAS_SHMEM_X_ATOMIC_FETCH(int64,int64_t,longlong)
 
 #ifdef __cplusplus
 }

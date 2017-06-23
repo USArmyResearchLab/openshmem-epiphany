@@ -45,6 +45,7 @@
 #define SHMEM_COLLECT_SYNC_SIZE         __COLLECT_SYNC_SIZE
 #define SHMEM_ALLTOALL_SYNC_SIZE        __ALLTOALL_SYNC_SIZE
 #define SHMEM_ALLTOALLS_SYNC_SIZE       __ALLTOALLS_SYNC_SIZE
+#define SHMEM_SYNC_SIZE                 __SYNC_SIZE
 #define _SHMEM_MAJOR_VERSION            SHMEM_MAJOR_VERSION
 #define _SHMEM_MINOR_VERSION            SHMEM_MINOR_VERSION
 #define _SHMEM_MAX_NAME_LEN             SHMEM_MAX_NAME_LEN
@@ -69,7 +70,15 @@
 #define shmem_set_cache_line_inv(...)   do{}while(0)
 #define shmem_udcflush(...)             do{}while(0)
 #define shmem_udcflush_line(...)        do{}while(0)
-
+#ifndef __cplusplus
+#define shmem_finc(...)                 shmem_atomic_fetch_inc(__VA_ARGS__)
+#define shmem_inc(...)                  shmem_atomic_inc(__VA_ARGS__)
+#define shmem_fadd(...)                 shmem_atomic_fetch_add(__VA_ARGS__)
+#define shmem_add(...)                  shmem_atomic_add(__VA_ARGS__)
+#define shmem_cswap(...)                shmem_atomic_compare_swap(__VA_ARGS__)
+#define shmem_swap(...)                 shmem_atomic_swap(__VA_ARGS__)
+#define shmem_set(...)                  shmem_atomic_set(__VA_ARGS__)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -139,7 +148,7 @@ F(long,long) \
 F(longlong,long long) \
 F(uint,unsigned int) \
 F(ulong,unsigned long) \
-F(ulonglong,long long) \
+F(ulonglong,unsigned long long) \
 F(int32,int32_t) \
 F(int64,int64_t) \
 F(uint32,uint32_t) \
@@ -155,7 +164,7 @@ DECL_STANDARD_AMO(F)
 #define DECL_BITWISE_AMO(F) \
 F(uint,unsigned int) \
 F(ulong,unsigned long) \
-F(ulonglong,long long) \
+F(ulonglong,unsigned long long) \
 F(int32,int32_t) \
 F(int64,int64_t) \
 F(uint32,uint32_t) \
@@ -177,7 +186,7 @@ DECL_ARG12((A), \
 	unsigned long*, F(ulong) \
 	unsigned long long*, F(ulonglong) \
 	int32_t*, F(int32) \
-	int64_t*, F(int64) \
+	int64_t*, F(int64 \
 	uint32_t*, F(uint32) \
 	uint64_t*, F(uint64) \
 	size_t*, F(size) \
@@ -209,10 +218,10 @@ DECL_ARG7((A), \
 	unsigned int*, F(uint) \
 	unsigned long*, F(ulong) \
 	unsigned long long*, F(ulonglong) \
-	int32_t*, F(int32) \
-	int64_t*, F(int64) \
-	uint32_t*, F(uint32) \
-	uint64_t*, F(uint64) \
+	int32_t*, F(int) \
+	int64_t*, F(longlong) \
+	uint32_t*, F(uint) \
+	uint64_t*, F(ulonglong) \
 ))
 
 #define DECL_GENERIC_STANDARD_RMA(A,F) \
@@ -271,12 +280,12 @@ DECL_EXTENDED_AMO(SHMEM_ATOMIC_FETCH)
 DECL_EXTENDED_AMO(SHMEM_ATOMIC_SET)
 DECL_EXTENDED_AMO(SHMEM_ATOMIC_SWAP)
 
-DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_AND)
-DECL_GENERIC_AMO(SHMEM_ATOMIC_AND)
-DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_OR)
-DECL_GENERIC_AMO(SHMEM_ATOMIC_OR)
-DECL_GENERIC_AMO(SHMEM_ATOMIC_FETCH_XOR)
-DECL_GENERIC_AMO(SHMEM_ATOMIC_XOR)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_AND)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_AND)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_OR)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_OR)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_XOR)
+DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 
 #define DECL_SHMEM_X_WAIT(N,T) \
 SHMEM_SCOPE void shmem_##N (volatile T *ivar, T cmp_value);
@@ -440,14 +449,20 @@ DECL_SHMEM_X_IGET(iget64,void)
 DECL_SHMEM_X_IGET(iget128,void)
 
 #ifndef __cplusplus
-#define SHMEM_FINC_GENERIC(N) shmem_##N##_finc
-#define SHMEM_INC_GENERIC(N) shmem_##N##_inc
-#define SHMEM_FADD_GENERIC(N) shmem_##N##_fadd
-#define SHMEM_ADD_GENERIC(N) shmem_##N##_add
-#define SHMEM_CSWAP_GENERIC(N) shmem_##N##_cswap
-#define SHMEM_SWAP_GENERIC(N) shmem_##N##_swap
-#define SHMEM_FETCH_GENERIC(N) shmem_##N##_fetch
-#define SHMEM_SET_GENERIC(N) shmem_##N##_set
+#define SHMEM_ATOMIC_FETCH_INC_GENERIC(N) shmem_##N##_atomic_fetch_inc
+#define SHMEM_ATOMIC_INC_GENERIC(N) shmem_##N##_atomic_inc
+#define SHMEM_ATOMIC_FETCH_ADD_GENERIC(N) shmem_##N##_atomic_fetch_add
+#define SHMEM_ATOMIC_ADD_GENERIC(N) shmem_##N##_atomic_add
+#define SHMEM_ATOMIC_COMPARE_SWAP_GENERIC(N) shmem_##N##_atomic_compare_swap
+#define SHMEM_ATOMIC_SWAP_GENERIC(N) shmem_##N##_atomic_swap
+#define SHMEM_ATOMIC_FETCH_GENERIC(N) shmem_##N##_atomic_fetch
+#define SHMEM_ATOMIC_SET_GENERIC(N) shmem_##N##_atomic_set
+#define SHMEM_ATOMIC_FETCH_AND_GENERIC(N) shmem_##N##_atomic_fetch_and
+#define SHMEM_ATOMIC_AND_GENERIC(N) shmem_##N##_atomic_and
+#define SHMEM_ATOMIC_FETCH_OR_GENERIC(N) shmem_##N##_atomic_fetch_or
+#define SHMEM_ATOMIC_OR_GENERIC(N) shmem_##N##_atomic_or
+#define SHMEM_ATOMIC_FETCH_XOR_GENERIC(N) shmem_##N##_atomic_fetch_xor
+#define SHMEM_ATOMIC_XOR_GENERIC(N) shmem_##N##_atomic_xor
 #define SHMEM_PUT_NBI_GENERIC(N) shmem_##N##_put_nbi
 #define SHMEM_GET_NBI_GENERIC(N) shmem_##N##_get_nbi
 #define SHMEM_PUT_GENERIC(N) shmem_##N##_put
@@ -456,14 +471,20 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define SHMEM_G_GENERIC(N) shmem_##N##_g
 #define SHMEM_IPUT_GENERIC(N) shmem_##N##_iput
 #define SHMEM_IGET_GENERIC(N) shmem_##N##_iget
-#define shmem_finc(dest,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_FINC_GENERIC)(dest,pe)
-#define shmem_inc(dest,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_INC_GENERIC)(dest,pe)
-#define shmem_fadd(dest,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_FADD_GENERIC)(dest,value,pe)
-#define shmem_add(dest,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ADD_GENERIC)(dest,value,pe)
-#define shmem_cswap(dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CSWAP_GENERIC)(dest,cond,value,pe)
-#define shmem_swap(dest,value,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_SWAP_GENERIC)(dest,value,pe)
-#define shmem_fetch(dest,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_FETCH_GENERIC)(dest,pe)
-#define shmem_set(dest,value,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_SET_GENERIC)(dest,value,pe)
+#define shmem_atomic_fetch_inc(dest,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_INC_GENERIC)(dest,pe)
+#define shmem_atomic_inc(dest,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_INC_GENERIC)(dest,pe)
+#define shmem_atomic_fetch_add(dest,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_ADD_GENERIC)(dest,value,pe)
+#define shmem_atomic_add(dest,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_ADD_GENERIC)(dest,value,pe)
+#define shmem_atomic_compare_swap(dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_COMPARE_SWAP_GENERIC)(dest,cond,value,pe)
+#define shmem_atomic_swap(dest,value,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SWAP_GENERIC)(dest,value,pe)
+#define shmem_atomic_fetch(dest,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_FETCH_GENERIC)(dest,pe)
+#define shmem_atomic_set(dest,value,pe) DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SET_GENERIC)(dest,value,pe)
+#define shmem_atomic_fetch_and(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_AND_GENERIC)(dest,value,pe)
+#define shmem_atomic_and(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_AND_GENERIC)(dest,value,pe)
+#define shmem_atomic_fetch_or(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_OR_GENERIC)(dest,value,pe)
+#define shmem_atomic_or(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_OR_GENERIC)(dest,value,pe)
+#define shmem_atomic_fetch_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
+#define shmem_atomic_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
 #define shmem_put_nbi(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_NBI_GENERIC)(dest,src,nelems,pe)
 #define shmem_get_nbi(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_NBI_GENERIC)(dest,src,nelems,pe)
 #define shmem_put(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_GENERIC)(dest,src,nelems,pe)

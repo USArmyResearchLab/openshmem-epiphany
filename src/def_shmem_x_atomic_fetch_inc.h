@@ -30,7 +30,7 @@
 #ifndef _def_shmem_x_atomic_fetch_inc_h
 #define _def_shmem_x_atomic_fetch_inc_h
 
-#define SHMEM_X_FETCH_INC(N,T) \
+#define SHMEM_X_ATOMIC_FETCH_INC(N,T) \
 static T \
 __shmem_##N##_atomic_fetch_inc (T *ptr, int pe) \
 { \
@@ -51,12 +51,12 @@ shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_INC(N,T,A) \
 SHMEM_SCOPE T \
-shmem_##N##_atomic_fetch_inc (T *dest, T value, int pe) \
+shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
 __attribute__((alias("shmem_" #A "_atomic_fetch_inc")));
 
-#define ALIAS_SHMEM_X_ATOMIC_FETCH_INC(N,T,A) \
+#define ALIAS_SHMEM_X_FINC(N,T,A) \
 SHMEM_SCOPE T \
-shmem_##N##_finc (T *dest, T value, int pe) \
+shmem_##N##_finc (T *dest, int pe) \
 __attribute__((alias("shmem_" #A "_atomic_fetch_inc"), deprecated));
 
 #endif

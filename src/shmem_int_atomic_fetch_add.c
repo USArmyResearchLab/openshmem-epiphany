@@ -36,9 +36,9 @@ extern "C" {
 #endif
 
 SHMEM_X_ATOMIC_FETCH_ADD(int,int)
-ALIAS_SHMEM_X_FETCH_ADD(int,int,int)
+ALIAS_SHMEM_X_FADD(int,int,int)
 ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(int32,int32_t,int)
-ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(ptrdiff,int32_t,int)
+ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(ptrdiff,ptrdiff_t,int)
 
 #ifdef __cplusplus
 }

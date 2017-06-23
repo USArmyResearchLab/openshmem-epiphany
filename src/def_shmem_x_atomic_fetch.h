@@ -27,16 +27,28 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "internals.h"
-#include "shmem.h"
-#include "def_shmem_x_cswap.h"
+#ifndef _def_shmem_x_atomic_fetch_h
+#define _def_shmem_x_atomic_fetch_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-SHMEM_X_CSWAP(longlong,long long)
-
-#ifdef __cplusplus
+#define SHMEM_X_ATOMIC_FETCH(N,T) \
+static T \
+__shmem_##N##_atomic_fetch (volatile T *ptr, int pe) \
+{ return *ptr; } \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_fetch (const T *dest, int pe) \
+{ \
+	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
+	return __shmem_##N##_atomic_fetch(ptr, pe); \
 }
+
+#define ALIAS_SHMEM_X_ATOMIC_FETCH(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_fetch (const T *dest, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_fetch")));
+
+#define ALIAS_SHMEM_X_FETCH(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_fetch (const T *dest, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_fetch"), deprecated));
+
 #endif

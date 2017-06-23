@@ -27,19 +27,17 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_fetch_h
-#define _def_shmem_x_fetch_h
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_set.h"
 
-#define SHMEM_X_FETCH(N,T) \
-static T \
-__shmem_##N##_fetch (volatile T *ptr, int pe) \
-{ return *ptr; } \
-SHMEM_SCOPE T \
-shmem_##N##_fetch (const T *dest, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	return __shmem_##N##_fetch(ptr, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_SET(long,long)
+ALIAS_SHMEM_X_SET(long,long,long)
+
+#ifdef __cplusplus
+}
+#endif
