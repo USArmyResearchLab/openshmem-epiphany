@@ -27,27 +27,18 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
+#include "internals.h"
+#include "shmem.h"
+#include "def_shmem_x_atomic_set.h"
 
-#ifndef _def_shmem_x_swap_h
-#define _def_shmem_x_swap_h
-
-#define SHMEM_X_SWAP(N,T) \
-static T \
-__shmem_##N##_swap (T *ptr, T value, int pe) \
-{ \
-	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
-	__shmem_set_lock(x); \
-	T r = *ptr; \
-	*ptr = value; \
-	__shmem_clear_lock(x); \
-	return r; \
-} \
-SHMEM_SCOPE T \
-shmem_##N##_swap (T *dest, T value, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	return __shmem_##N##_swap(ptr, value, pe); \
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+SHMEM_X_ATOMIC_SET(uint,unsigned int)
+ALIAS_SHMEM_X_ATOMIC_SET(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_ATOMIC_SET(size,size_t,uint)
+
+#ifdef __cplusplus
+}
+#endif
