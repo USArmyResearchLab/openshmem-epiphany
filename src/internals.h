@@ -106,6 +106,8 @@ typedef struct {
 	volatile long lock_atomic_uint;
 	volatile long lock_atomic_ulong;
 	volatile long lock_atomic_ulonglong;
+	volatile long lock_atomic_int32;
+	volatile long lock_atomic_int64;
 	volatile long lock_atomic_float;
 	volatile long lock_atomic_double;
 	volatile long lock_receive_finished;
