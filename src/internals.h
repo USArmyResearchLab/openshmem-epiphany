@@ -76,6 +76,7 @@
 #define __COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
 #define __ALLTOALL_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
 #define __ALLTOALLS_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __SYNC_SIZE                 ( __REDUCE_SYNC_SIZE ) // maximum of SYNC_SIZEs
 
 #if __cplusplus
 extern "C" {
