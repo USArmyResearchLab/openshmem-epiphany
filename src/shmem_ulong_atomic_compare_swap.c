@@ -35,10 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_ATOMIC_COMPARE_SWAP(int,int)
-ALIAS_SHMEM_X_CSWAP(int,int,int)
-ALIAS_SHMEM_X_ATOMIC_COMPARE_SWAP(int32,int32_t,int)
-ALIAS_SHMEM_X_ATOMIC_COMPARE_SWAP(ptrdiff,ptrdiff_t,int)
+SHMEM_X_ATOMIC_COMPARE_SWAP(ulong,unsigned long)
 
 #ifdef __cplusplus
 }

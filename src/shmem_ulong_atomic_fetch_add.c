@@ -36,7 +36,6 @@ extern "C" {
 #endif
 
 SHMEM_X_ATOMIC_FETCH_ADD(ulong,unsigned long)
-ALIAS_SHMEM_X_FADD(ulong,unsigned long,ulong)
 
 #ifdef __cplusplus
 }

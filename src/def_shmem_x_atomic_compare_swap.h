@@ -50,5 +50,14 @@ shmem_##N##_atomic_compare_swap (T *dest, T cond, T value, int pe) \
 	return __shmem_##N##_atomic_compare_swap(ptr, cond, value, pe); \
 }
 
-#endif
+#define ALIAS_SHMEM_X_ATOMIC_COMPARE_SWAP(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_atomic_compare_swap (T *dest, T cond, T value, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_compare_swap")));
 
+#define ALIAS_SHMEM_X_CSWAP(N,T,A) \
+SHMEM_SCOPE T \
+shmem_##N##_cswap (T *dest, T cond, T value, int pe) \
+__attribute__((alias("shmem_" #A "_atomic_compare_swap"), deprecated));
+
+#endif
