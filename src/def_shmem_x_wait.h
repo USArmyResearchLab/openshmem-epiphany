@@ -35,15 +35,15 @@
 
 #define SHMEM_X_WAIT(N,T) \
 SHMEM_SCOPE void \
-shmem_##N (volatile T *ivar, T cmp_value) \
+shmem_##N (T *ivar, T cmp_value) \
 { \
-	volatile T* p = ivar; \
+	volatile T* p = (volatile T*)ivar; \
 	while (*p == cmp_value); \
 }
 
 #define ALIAS_SHMEM_X_WAIT(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N (volatile T *ivar, T cmp_value) \
+shmem_##N (T *ivar, T cmp_value) \
 __attribute__((alias("shmem_" #A)));
 
 #endif
