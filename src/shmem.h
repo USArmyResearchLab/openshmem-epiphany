@@ -70,15 +70,6 @@
 #define shmem_set_cache_line_inv(...)   do{}while(0)
 #define shmem_udcflush(...)             do{}while(0)
 #define shmem_udcflush_line(...)        do{}while(0)
-#ifndef __cplusplus
-#define shmem_finc(...)                 shmem_atomic_fetch_inc(__VA_ARGS__)
-#define shmem_inc(...)                  shmem_atomic_inc(__VA_ARGS__)
-#define shmem_fadd(...)                 shmem_atomic_fetch_add(__VA_ARGS__)
-#define shmem_add(...)                  shmem_atomic_add(__VA_ARGS__)
-#define shmem_cswap(...)                shmem_atomic_compare_swap(__VA_ARGS__)
-#define shmem_swap(...)                 shmem_atomic_swap(__VA_ARGS__)
-#define shmem_set(...)                  shmem_atomic_set(__VA_ARGS__)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,9 +94,9 @@ SHMEM_SCOPE void* shmem_realloc(const void* ptr, size_t size);
 #define shmem_fence(...) shmem_quiet(__VA_ARGS__)
 SHMEM_SCOPE void shmem_quiet(void);
 
-SHMEM_SCOPE void shmem_clear_lock (volatile long* lock);
-SHMEM_SCOPE void shmem_set_lock (volatile long* lock);
-SHMEM_SCOPE int shmem_test_lock (volatile long* lock);
+SHMEM_SCOPE void shmem_clear_lock (long* lock);
+SHMEM_SCOPE void shmem_set_lock (long* lock);
+SHMEM_SCOPE int shmem_test_lock (long* lock);
 
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 20112L) // Use C11 Generic syntax
 #define DECL_GENERIC_TYPE(X,T,F,...) T: F, __VA_ARGS__
@@ -181,15 +172,15 @@ DECL_GENERIC((A), \
 DECL_ARG12((A), \
 	int*, F(int), \
 	long*, F(long), \
-	long long*, F(longlong) \
-	unsigned int*, F(uint) \
-	unsigned long*, F(ulong) \
-	unsigned long long*, F(ulonglong) \
-	int32_t*, F(int32) \
-	int64_t*, F(int64 \
-	uint32_t*, F(uint32) \
-	uint64_t*, F(uint64) \
-	size_t*, F(size) \
+	long long*, F(longlong), \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int32_t*, F(int32), \
+	int64_t*, F(int64), \
+	uint32_t*, F(uint32), \
+	uint64_t*, F(uint64), \
+	size_t*, F(size), \
 	ptrdiff_t*, F(ptrdiff) \
 ))
 
@@ -197,30 +188,30 @@ DECL_ARG12((A), \
 DECL_GENERIC((A), \
 DECL_ARG14((A), \
 	float*, F(float), \
-	double*, F(double) \
+	double*, F(double), \
 	int*, F(int), \
 	long*, F(long), \
-	long long*, F(longlong) \
-	unsigned int*, F(uint) \
-	unsigned long*, F(ulong) \
-	unsigned long long*, F(ulonglong) \
-	int32_t*, F(int32) \
-	int64_t*, F(int64) \
-	uint32_t*, F(uint32) \
-	uint64_t*, F(uint64) \
-	size_t*, F(size) \
+	long long*, F(longlong), \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int32_t*, F(int32), \
+	int64_t*, F(int64), \
+	uint32_t*, F(uint32), \
+	uint64_t*, F(uint64), \
+	size_t*, F(size), \
 	ptrdiff_t*, F(ptrdiff) \
 ))
 
 #define DECL_GENERIC_BITWISE_AMO(A,F) \
 DECL_GENERIC((A), \
 DECL_ARG7((A), \
-	unsigned int*, F(uint) \
-	unsigned long*, F(ulong) \
-	unsigned long long*, F(ulonglong) \
-	int32_t*, F(int) \
-	int64_t*, F(longlong) \
-	uint32_t*, F(uint) \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int32_t*, F(int), \
+	int64_t*, F(longlong), \
+	uint32_t*, F(uint), \
 	uint64_t*, F(ulonglong) \
 ))
 
@@ -228,28 +219,28 @@ DECL_ARG7((A), \
 DECL_GENERIC((A), \
 DECL_ARG24((A), \
 	float*, F(float), \
-	double*, F(double) \
-	long double*, F(longdouble) \
+	double*, F(double), \
+	long double*, F(longdouble), \
 	char*, F(char), \
 	signed char*, F(schar), \
-	short*, F(short) \
+	short*, F(short), \
 	int*, F(int), \
 	long*, F(long), \
-	long long*, F(longlong) \
-	unsigned char*, F(uchar) \
-	unsigned short*, F(ushort) \
-	unsigned int*, F(uint) \
-	unsigned long*, F(ulong) \
-	unsigned long long*, F(ulonglong) \
-	int8_t*, F(int8) \
-	int16_t*, F(int16) \
-	int32_t*, F(int32) \
-	int64_t*, F(int64) \
-	uint8_t*, F(uint8) \
-	uint16_t*, F(uint16) \
-	uint32_t*, F(uint32) \
-	uint64_t*, F(uint64) \
-	size_t*, F(size) \
+	long long*, F(longlong), \
+	unsigned char*, F(uchar), \
+	unsigned short*, F(ushort), \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int8_t*, F(int8), \
+	int16_t*, F(int16), \
+	int32_t*, F(int32), \
+	int64_t*, F(int64), \
+	uint8_t*, F(uint8), \
+	uint16_t*, F(uint16), \
+	uint32_t*, F(uint32), \
+	uint64_t*, F(uint64), \
+	size_t*, F(size), \
 	ptrdiff_t*, F(ptrdiff) \
 ))
 
@@ -288,7 +279,7 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_XOR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 
 #define DECL_SHMEM_X_WAIT(N,T) \
-SHMEM_SCOPE void shmem_##N (volatile T *ivar, T cmp_value);
+SHMEM_SCOPE void shmem_##N (T *ivar, T cmp_value);
 DECL_SHMEM_X_WAIT(int_wait,int)
 DECL_SHMEM_X_WAIT(long_wait,long)
 DECL_SHMEM_X_WAIT(longlong_wait,long long)
@@ -296,7 +287,7 @@ DECL_SHMEM_X_WAIT(short_wait,short)
 DECL_SHMEM_X_WAIT(wait,long)
 
 #define DECL_SHMEM_X_WAIT_UNTIL(N,T) \
-SHMEM_SCOPE void shmem_##N (volatile T *ivar, int cmp, T cmp_value);
+SHMEM_SCOPE void shmem_##N (T *ivar, int cmp, T cmp_value);
 DECL_SHMEM_X_WAIT_UNTIL(int_wait_until,int)
 DECL_SHMEM_X_WAIT_UNTIL(long_wait_until,long)
 DECL_SHMEM_X_WAIT_UNTIL(longlong_wait_until,long long)
@@ -485,6 +476,14 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define shmem_atomic_or(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_OR_GENERIC)(dest,value,pe)
 #define shmem_atomic_fetch_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
 #define shmem_atomic_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
+#define shmem_finc(...) shmem_atomic_fetch_inc(__VA_ARGS__)
+#define shmem_inc(...) shmem_atomic_inc(__VA_ARGS__)
+#define shmem_fadd(...) shmem_atomic_fetch_add(__VA_ARGS__)
+#define shmem_add(...) shmem_atomic_add(__VA_ARGS__)
+#define shmem_cswap(...) shmem_atomic_compare_swap(__VA_ARGS__)
+#define shmem_swap(...) shmem_atomic_swap(__VA_ARGS__)
+#define shmem_fetch(...) shmem_atomic_fetch(__VA_ARGS__)
+#define shmem_set(...) shmem_atomic_set(__VA_ARGS__)
 #define shmem_put_nbi(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_NBI_GENERIC)(dest,src,nelems,pe)
 #define shmem_get_nbi(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_NBI_GENERIC)(dest,src,nelems,pe)
 #define shmem_put(dest,src,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_GENERIC)(dest,src,nelems,pe)
