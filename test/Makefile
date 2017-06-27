@@ -8,7 +8,7 @@ COPRTHR = /usr/local/browndeer/coprthr2
 INCS = -I. -I$(COPRTHR)/include
 LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall -le-lib
 LIBS += -L../src -lshmem
-DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to use header only library
+#DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to use header only library
 INCS += -I../src -I../common
 
 FIGURES = ./figures/
