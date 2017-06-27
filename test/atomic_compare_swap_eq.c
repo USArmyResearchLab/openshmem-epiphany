@@ -28,7 +28,7 @@
  */
 
 /*
- * Performance test for shmem_int_cswap
+ * Performance test for shmem_int_atomic_compare_swap
  */
 
 #include <shmem.h>
@@ -57,7 +57,7 @@ int main (void)
 	int cond = nxtpe;
 
 	if (me == 0) {
-		host_printf("# SHMEM Atomic CSwap (equal) Performance for variable NPES\n" \
+		host_printf("# SHMEM Atomic Compare-and-Swap (equal) Performance for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
@@ -69,7 +69,7 @@ int main (void)
 		if (me < npe) {
 			t = ctimer();
 			for (i = 0; i < NLOOP; i++) {
-				shmem_cswap(&dest, cond, nxtpe, nxtpe);
+				shmem_atomic_compare_swap(&dest, cond, nxtpe, nxtpe);
 			}
 			t -= ctimer();
 			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);

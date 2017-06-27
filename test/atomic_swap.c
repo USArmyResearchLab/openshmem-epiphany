@@ -28,7 +28,7 @@
  */
 
 /*
- * Performance test for shmem_int_swap
+ * Performance test for shmem_int_atomic_swap
  */
 
 #include <shmem.h>
@@ -68,7 +68,7 @@ int main (void)
 		if (me < npe) {
 			t = ctimer();
 			for (i = 0; i < NLOOP; i++) {
-				prev = shmem_swap(&dest, nxtpe, nxtpe);
+				prev = shmem_atomic_swap(&dest, nxtpe, nxtpe);
 			}
 			t -= ctimer();
 			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);

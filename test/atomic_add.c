@@ -28,7 +28,7 @@
  */
 
 /*
- * Performance test for shmem_int_add
+ * Performance test for shmem_int_atomic_add
  */
 
 #include <shmem.h>
@@ -67,7 +67,7 @@ int main (void)
 		if (me < npe) {
 			t = ctimer();
 			for (i = 0; i < NLOOP; i++) {
-				shmem_add(&dest, nxtpe, nxtpe);
+				shmem_atomic_add(&dest, nxtpe, nxtpe);
 			}
 			t -= ctimer();
 			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);

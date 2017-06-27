@@ -28,7 +28,7 @@
  */
 
 /*
- * Performance test for shmem_int_fetch
+ * Performance test for shmem_int_atomic_fetch
  */
 
 #include <shmem.h>
@@ -67,7 +67,7 @@ int main (void)
 		if (me < npe) {
 			t = ctimer();
 			for (i = 0; i < NLOOP; i++) {
-				shmem_fetch(&dest, nxtpe);
+				shmem_atomic_fetch(&dest, nxtpe);
 			}
 			t -= ctimer();
 			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);
