@@ -501,6 +501,9 @@ DECL_SHMEM_X_IGET(iget128,void)
 
 SHMEM_SCOPE void shmem_init(void);
 SHMEM_SCOPE void shmem_finalize(void);
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 20112L)
+_Noreturn
+#endif
 SHMEM_SCOPE void shmem_global_exit(int status);
 SHMEM_SCOPE void shmem_info_get_version(int *major, int *minor);
 SHMEM_SCOPE void shmem_info_get_name(char *name);
