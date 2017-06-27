@@ -33,9 +33,9 @@
 #include "internals.h"
 
 #define SHMEM_MAJOR_VERSION             1
-#define SHMEM_MINOR_VERSION             3
+#define SHMEM_MINOR_VERSION             4
 #define SHMEM_MAX_NAME_LEN              64
-#define SHMEM_VENDOR_STRING             "ARL OpenSHMEM for Epiphany, version 1.3"
+#define SHMEM_VENDOR_STRING             "ARL OpenSHMEM for Epiphany, version 1.4"
 #define SHMEM_INTERNAL_F2C_SCALE        __INTERNAL_F2C_SCALE
 #define SHMEM_BCAST_SYNC_SIZE           __BCAST_SYNC_SIZE
 #define SHMEM_BARRIER_SYNC_SIZE         __BARRIER_SYNC_SIZE
