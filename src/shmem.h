@@ -79,15 +79,15 @@
 extern "C" {
 #endif
 
-enum shmem_cmp_constants
+typedef enum shmem_cmp
 {
 	SHMEM_CMP_EQ = 0,
 	SHMEM_CMP_NE,
 	SHMEM_CMP_GT,
-	SHMEM_CMP_LE,
+	SHMEM_CMP_GE,
 	SHMEM_CMP_LT,
-	SHMEM_CMP_GE
-};
+	SHMEM_CMP_LE
+} shmem_cmp_t;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);
@@ -171,6 +171,11 @@ F(char,char) \
 F(short,short) \
 DECL_EXTENDED_AMO(F)
 
+#define DECL_P2P(F) \
+F(short,short) \
+F(ushort,unsigned short) \
+DECL_STANDARD_AMO(F)
+
 #define DECL_GENERIC_STANDARD_AMO(A,F) \
 DECL_GENERIC((A), \
 DECL_ARG12((A), \
@@ -248,6 +253,25 @@ DECL_ARG24((A), \
 	ptrdiff_t*, F(ptrdiff) \
 ))
 
+#define DECL_GENERIC_P2P(A,F) \
+DECL_GENERIC((A), \
+DECL_ARG14((A), \
+	short*, F(short), \
+	int*, F(int), \
+	long*, F(long), \
+	long long*, F(longlong), \
+	unsigned short*, F(ushort), \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int32_t*, F(int32), \
+	int64_t*, F(int64), \
+	uint32_t*, F(uint32), \
+	uint64_t*, F(uint64), \
+	size_t*, F(size), \
+	ptrdiff_t*, F(ptrdiff) \
+))
+
 #define SHMEM_ATOMIC_COMPARE_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_compare_swap (T* dest, T cond, T value, int pe);
 #define SHMEM_ATOMIC_FETCH_INC(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_inc (T* dest, int pe);
 #define SHMEM_ATOMIC_INC(N,T) SHMEM_SCOPE void shmem_##N##_atomic_inc (T* dest, int pe);
@@ -282,21 +306,13 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_OR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_XOR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 
-#define DECL_SHMEM_X_WAIT(N,T) \
-SHMEM_SCOPE void shmem_##N (T *ivar, T cmp_value);
-DECL_SHMEM_X_WAIT(int_wait,int)
-DECL_SHMEM_X_WAIT(long_wait,long)
-DECL_SHMEM_X_WAIT(longlong_wait,long long)
-DECL_SHMEM_X_WAIT(short_wait,short)
-DECL_SHMEM_X_WAIT(wait,long)
+#define SHMEM_X_WAIT(N,T) SHMEM_SCOPE void shmem_##N##_wait (T *ivar, T cmp_value) __attribute__ ((deprecated));
+#define SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value);
+#define SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value);
 
-#define DECL_SHMEM_X_WAIT_UNTIL(N,T) \
-SHMEM_SCOPE void shmem_##N (T *ivar, int cmp, T cmp_value);
-DECL_SHMEM_X_WAIT_UNTIL(int_wait_until,int)
-DECL_SHMEM_X_WAIT_UNTIL(long_wait_until,long)
-DECL_SHMEM_X_WAIT_UNTIL(longlong_wait_until,long long)
-DECL_SHMEM_X_WAIT_UNTIL(short_wait_until,short)
-DECL_SHMEM_X_WAIT_UNTIL(wait_until,long)
+DECL_P2P(SHMEM_X_WAIT)
+DECL_P2P(SHMEM_X_WAIT_UNTIL)
+DECL_P2P(SHMEM_X_TEST)
 
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
@@ -458,6 +474,9 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define SHMEM_ATOMIC_OR_GENERIC(N) shmem_##N##_atomic_or
 #define SHMEM_ATOMIC_FETCH_XOR_GENERIC(N) shmem_##N##_atomic_fetch_xor
 #define SHMEM_ATOMIC_XOR_GENERIC(N) shmem_##N##_atomic_xor
+#define SHMEM_WAIT_GENERIC(N) shmem_##N##_wait
+#define SHMEM_WAIT_UNTIL_GENERIC(N) shmem_##N##_wait_until
+#define SHMEM_TEST_GENERIC(N) shmem_##N##_test
 #define SHMEM_PUT_NBI_GENERIC(N) shmem_##N##_put_nbi
 #define SHMEM_GET_NBI_GENERIC(N) shmem_##N##_get_nbi
 #define SHMEM_PUT_GENERIC(N) shmem_##N##_put
@@ -480,6 +499,9 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define shmem_atomic_or(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_OR_GENERIC)(dest,value,pe)
 #define shmem_atomic_fetch_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
 #define shmem_atomic_xor(dest,value,pe) DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
+#define shmem_wait(ivar,cmp_value) DECL_GENERIC_P2P(ivar,SHMEM_WAIT_GENERIC)(ivar,cmp_value)
+#define shmem_wait_until(ivar,cmp,cmp_value) DECL_GENERIC_P2P(ivar,SHMEM_WAIT_UNTIL_GENERIC)(ivar,cmp,cmp_value)
+#define shmem_test(ivar,cmp,value) DECL_GENERIC_P2P(ivar,SHMEM_TEST_GENERIC)(ivar,cmp,value)
 #define shmem_finc(...) shmem_atomic_fetch_inc(__VA_ARGS__)
 #define shmem_inc(...) shmem_atomic_inc(__VA_ARGS__)
 #define shmem_fadd(...) shmem_atomic_fetch_add(__VA_ARGS__)

@@ -27,23 +27,15 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
-#ifndef _def_shmem_x_wait_h
-#define _def_shmem_x_wait_h
-
 #include "internals.h"
+#include "def_shmem_x_wait.h"
 
-#define SHMEM_X_WAIT(N,T) \
-SHMEM_SCOPE void __attribute__ ((deprecated)) \
-shmem_##N##_wait (T *ivar, T cmp_value) \
-{ \
-	volatile T* p = (volatile T*)ivar; \
-	while (*p == cmp_value); \
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+SHMEM_X_WAIT(ulong,unsigned long)
+
+#ifdef __cplusplus
 }
-
-#define ALIAS_SHMEM_X_WAIT(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_wait (T *ivar, T cmp_value) \
-__attribute__((alias("shmem_" #A "_wait"), deprecated));
-
 #endif

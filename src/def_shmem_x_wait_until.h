@@ -32,10 +32,11 @@
 #define _def_shmem_x_wait_until_h
 
 #include "internals.h"
+#include "shmem.h"
 
 #define SHMEM_X_WAIT_UNTIL(N,T) \
 SHMEM_SCOPE void \
-shmem_##N (T *ivar, int cmp, T cmp_value) \
+shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value) \
 { \
 	volatile T* p = (volatile T*)ivar; \
 	switch (cmp) { \
@@ -63,7 +64,7 @@ shmem_##N (T *ivar, int cmp, T cmp_value) \
 
 #define ALIAS_SHMEM_X_WAIT_UNTIL(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N (T *ivar, int cmp, T cmp_value) \
-__attribute__((alias("shmem_" #A)));
+shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value) \
+__attribute__((alias("shmem_" #A "_wait_until")));
 
 #endif
