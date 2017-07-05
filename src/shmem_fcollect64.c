@@ -29,6 +29,7 @@
 
 #include "internals.h"
 #include "shmem.h"
+#include "shmemx.h"
 #include "def_shmem_fcollect_n.h"
 
 #ifdef __cplusplus
