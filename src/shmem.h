@@ -306,13 +306,13 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_OR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_XOR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 
-#define SHMEM_X_WAIT(N,T) SHMEM_SCOPE void shmem_##N##_wait (T *ivar, T cmp_value) __attribute__ ((deprecated));
-#define SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value);
-#define SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value);
+#define DECL_SHMEM_X_WAIT(N,T) SHMEM_SCOPE void shmem_##N##_wait (T *ivar, T cmp_value) __attribute__ ((deprecated));
+#define DECL_SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value);
+#define DECL_SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value);
 
-DECL_P2P(SHMEM_X_WAIT)
-DECL_P2P(SHMEM_X_WAIT_UNTIL)
-DECL_P2P(SHMEM_X_TEST)
+DECL_P2P(DECL_SHMEM_X_WAIT)
+DECL_P2P(DECL_SHMEM_X_WAIT_UNTIL)
+DECL_P2P(DECL_SHMEM_X_TEST)
 
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
