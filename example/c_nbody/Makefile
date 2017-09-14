@@ -1,6 +1,7 @@
 DEFS = -DECORE=16 -DNPARTICLE=4096 -DSTEPS=32 -DSIZE=1 -std=c99
 
 CCFLAGS += -O3 $(DEFS)
+EFLAGS += -ffast-math -ftree-vectorize -funroll-loops -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
 
 COPRTHR = /usr/local/browndeer/coprthr2
 SHMEM = ../../src
@@ -23,7 +24,7 @@ main.x: main.o
 	$(CC) -o main.x main.o $(LIBS)
 
 .c.e32:
-	coprcc $(INCS) $(DEFS) $(ELIBS) $< -o $@
+	coprcc $(INCS) $(DEFS) $(EFLAGS) $(ELIBS) $< -o $@
 
 .c.o:
 	$(CC) $(CCFLAGS) $(INCS) -c $<

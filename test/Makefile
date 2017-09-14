@@ -1,4 +1,4 @@
-DEFS = -fhost -fno-unroll-loops
+DEFS = -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
 CFLAGS = -O3
 CORES = 16
 NP = $(shell seq 1 $(CORES))

@@ -54,6 +54,8 @@
 #define SHMEM_MAX_PES_LOG2 4
 #define SHMEM_ROW_SHIFT    2
 #define SHMEM_ROW_MASK     0x3
+#define SHMEM_BASE_COREID  2056
+
 #if defined(SHMEM_USE_HEAP_START)
 #define SHMEM_HEAP_START   (SHMEM_USE_HEAP_START)
 #else
