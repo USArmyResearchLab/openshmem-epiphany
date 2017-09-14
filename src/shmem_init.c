@@ -141,8 +141,13 @@ shmem_init(void)
 	);
 #if defined(__coprthr_device__)
 	__shmem.n_pes = coprthr_get_num_threads();
+	__shmem.my_pe = coprthr_get_thread_id();
 #else
 	__shmem.n_pes = e_group_config.group_rows * e_group_config.group_cols;
+	unsigned int coreid = __shmem.coreid - e_group_config.group_id;
+	unsigned int row = (coreid >> 6) & 0x3f;
+	unsigned int col = (coreid) & 0x3f;
+	__shmem.my_pe = row*e_group_config.group_rows + col;
 #endif
 	// log2_ceil of n_pes precalculated once
 	unsigned int x = __shmem.n_pes - 1;
@@ -150,10 +155,6 @@ shmem_init(void)
 		__shmem.n_pes_log2++;
 		x >>= 1;
 	}
-	unsigned int coreid = __shmem.coreid - e_group_config.group_id;
-	unsigned int row = (coreid >> 6) & 0x3f;
-	unsigned int col = (coreid) & 0x3f;
-	__shmem.my_pe = row*e_group_config.group_rows + col;
 	__shmem.dma_start = ((int)(&__shmem.dma_desc) << 16) | 0x8;
 #ifdef SHMEM_USE_WAND_BARRIER
 	__shmem_wand_barrier_init();

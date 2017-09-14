@@ -39,7 +39,7 @@ shmem_ptr(const void* dest, int pe)
 {
 	unsigned int row = pe >> SHMEM_ROW_SHIFT;
 	unsigned int col = pe & SHMEM_ROW_MASK;
-	unsigned int coreid = (row*0x40 + col) + e_group_config.group_id;
+	unsigned int coreid = (row*0x40 + col) + SHMEM_BASE_COREID;
 	void* remote = (void*)((coreid << 20) | (unsigned int) dest);
 	return remote;
 }
