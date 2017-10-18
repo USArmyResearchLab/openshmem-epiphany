@@ -31,8 +31,8 @@
  * Performance test for shmem_int_set
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NLOOP 10000

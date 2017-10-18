@@ -31,8 +31,12 @@
  * Performance test for shmem_collect32
  */
 
-#include <shmem.h>
+#ifdef SHMEM_USE_HEADER_ONLY
+#undef SHMEM_USE_HEADER_ONLY
+#endif
+
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 2048
@@ -54,8 +58,8 @@ int main (void)
 	int pWrk_elems = NELEMENT/2 + 1;
 	pWrk_elems = (pWrk_elems > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? pWrk_elems : SHMEM_REDUCE_MIN_WRKDATA_SIZE;
 
-	int* source = (int*)shmem_malloc(NELEMENT * sizeof (*source));
-	int* target = (int*)shmem_malloc(NELEMENT * sizeof (*target));
+	int* source = (int*)shmem_align(NELEMENT * sizeof (*source), 0x2000);
+	int* target = (int*)shmem_align(NELEMENT * sizeof (*target), 0x2000);
 	int* pWrk   = (int*)shmem_malloc(pWrk_elems * sizeof(*pWrk));
 	for (i = 0; i < NELEMENT; i++) {
 		source[i] = i;

@@ -29,11 +29,10 @@
 
 /*
  * Performance test for shmem_put (latency and bandwidth)
- *
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 1024
@@ -55,8 +54,8 @@ int main (void)
 
 	int nxtpe = (me + 1) % npes;
 
-	long long* source = (long long*)shmem_malloc(NELEMENT*sizeof(long long));
-	long long* target = (long long*)shmem_malloc(NELEMENT*sizeof(long long));
+	long long* source = (long long*)shmem_align(NELEMENT * sizeof(long long), 0x2000);
+	long long* target = (long long*)shmem_align(NELEMENT * sizeof(long long), 0x2000);
 	for (i = 0; i < NELEMENT; i++) {
 		source[i] = i + 1;
 	}

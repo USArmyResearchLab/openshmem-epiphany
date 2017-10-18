@@ -27,25 +27,36 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include <shmem.h>
+/*
+ * "Hello, World" of OpenSHMEM
+ */
+
 #include <host_stdio.h>
+#include <shmem.h>
 
 int main(int argc, char* argv[])
 {
 	int major, minor;
 	char name[SHMEM_MAX_NAME_LEN];
+
 	// Starts/Initializes SHMEM/OpenSHMEM
-	// Some implementations use the deprecated shmem_start(0)
+	// Some implementations use the deprecated start_pes(0)
 	shmem_init();
+
 	// Fetch the number or processes
 	// Some implementations use the deprecated num_pes()
 	int n_pes = shmem_n_pes();
+
 	// Assign my process ID to me
 	int me = shmem_my_pe();
 	shmem_info_get_name(name);
 	shmem_info_get_version(&major, &minor);
+
 	if (me == 0) host_printf("%s (%d.%d)\n", SHMEM_VENDOR_STRING, major, minor);
+
 	shmem_barrier_all();
-	host_printf("Hello World from %d of %d\n", me, n_pes);
+
+	host_printf("Hello, World from %d of %d\n", me, n_pes);
+
 	return 0;
 }

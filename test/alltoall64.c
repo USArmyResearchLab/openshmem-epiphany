@@ -32,8 +32,8 @@
  *
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 64

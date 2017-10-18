@@ -31,8 +31,8 @@
  * Performance test for shmem_fcollect32
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 256

@@ -29,11 +29,10 @@
 
 /*
  * Performance test for shmem_getmem_nbi (latency and bandwidth)
- *
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 8192
@@ -55,8 +54,8 @@ int main (void)
 
 	int nxtpe = (me + 1) % npes;
 
-	char* source = (char*)shmem_malloc(NELEMENT);
-	char* target = (char*)shmem_malloc(NELEMENT);
+	char* source = (char*)shmem_align(NELEMENT * sizeof(char), 0x2000);
+	char* target = (char*)shmem_align(NELEMENT * sizeof(char), 0x2000);
 	for (i = 0; i < NELEMENT; i++) {
 		source[i] = (char)(i + 1);
 	}
