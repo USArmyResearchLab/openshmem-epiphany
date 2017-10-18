@@ -62,7 +62,7 @@ shmem_broadcast##N (void *dest, const void *source, size_t nelems, int PE_root, 
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
 			long* remote_lock_receive_finished = (long*)shmem_ptr((void*)&__shmem.lock_receive_finished, PE_to); \
 			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
-			shmemx_memcpy((void*)remote_dest, (void*)psrc, nelems * (N >> 3)); \
+			shmemx_memcpy##N((void*)remote_dest, (void*)psrc, nelems); \
 			*remote_lock_receive_finished = 1; /* clear lock_receive_finished on receiving PE */ \
 		} \
 		else { \

@@ -44,12 +44,12 @@ shmem_alltoall##N(void* dest, const void* source, size_t nelems, int PE_start, i
 	int PE_end = PE_size_stride + PE_start; \
 	T* psrc = (T*)source; \
 	T* pdsto = (T*)dest + dst_offset; \
-	shmemx_memcpy((void*)pdsto, (void*)psrc, nelems * (N >> 3)); \
+	shmemx_memcpy##N((void*)pdsto, (void*)psrc, nelems); \
 	for (j = 1; j < PE_size; j++) { \
 		int PE_to = __shmem.my_pe + j*step; \
 		if (PE_to >= PE_end) PE_to -= PE_size_stride; \
 		T* pdst = (T*)shmem_ptr(pdsto, PE_to); \
-		shmemx_memcpy((void*)pdst, (void*)psrc, nelems * (N >> 3)); \
+		shmemx_memcpy##N((void*)pdst, (void*)psrc, nelems); \
 	} \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
 }

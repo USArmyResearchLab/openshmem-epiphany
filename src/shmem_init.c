@@ -97,21 +97,20 @@ __shmem_dissemination_barrier_init(void)
 
 shmem_ipi_args_t shmem_ipi_args = {
 	.lock = 0,
+	.pmemcpy = shmemx_memcpy,
 	.source = 0,
 	.dest = 0,
-	.nbytes = 0,
-	.pe = -1,
+	.nelems = 0,
+	.pcomplete = 0,
 	.complete = 0
 };
 
 SHMEM_SCOPE void __attribute__((interrupt ("swi"))) 
 __shmem_user_isr(int signum)
 {
-	shmem_putmem(shmem_ipi_args.dest, shmem_ipi_args.source, 
-		shmem_ipi_args.nbytes, shmem_ipi_args.pe);
-	volatile int* remote_complete = shmem_ptr(&(shmem_ipi_args.complete), 
-		shmem_ipi_args.pe);
-	*remote_complete = 1; // inform remote PE
+	shmem_ipi_args.pmemcpy(shmem_ipi_args.dest, shmem_ipi_args.source, shmem_ipi_args.nelems);
+	*(shmem_ipi_args.pcomplete) = 1; // inform remote PE
+	shmem_ipi_args.lock = 0; // free lock
 }
 
 SHMEM_SCOPE void SHMEM_INLINE
