@@ -36,21 +36,21 @@ extern "C" {
 #endif
 
 SHMEM_SCOPE void
-shmemx_memcpy_nbi(void *dest, const void *src, size_t nbytes)
+shmemx_memcpy_nbi(void *dst, const void *src, size_t nbytes)
 {
 	static const unsigned char dma_data_shift[8] = { 3,0,1,0,2,0,1,0 };
-	unsigned int data_shift = (unsigned int)dma_data_shift[(((unsigned int)dest) | ((unsigned int)src) | (unsigned int)nbytes) & 0x7];
+	unsigned int data_shift = (unsigned int)dma_data_shift[(((unsigned int)dst) | ((unsigned int)src) | (unsigned int)nbytes) & 0x7];
 	unsigned int data_size = (data_shift<<5);
 	unsigned int stride = 0x10001 << data_shift;
 	unsigned int count = 0x10000 | ((unsigned int)nbytes >> data_shift);
 	unsigned int config = 0x3 | data_size;
 	unsigned char* csrc = (unsigned char*)src;
 	unsigned char value = ~csrc[nbytes-1];
-	unsigned char* cdst = (unsigned char*)dest + nbytes - 1;
+	unsigned char* cdst = (unsigned char*)dst + nbytes - 1;
 	*cdst = value;
 	__shmem.dma_desc.count = count;
 	__shmem.dma_desc.src_addr = (char*)src;
-	__shmem.dma_desc.dst_addr = (char*)dest;
+	__shmem.dma_desc.dst_addr = (char*)dst;
 	__shmem.dma_desc.inner_stride = stride,
 	__shmem.dma_desc.outer_stride = stride,
 	__shmem.dma_desc.config = config;

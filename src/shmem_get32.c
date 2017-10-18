@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_GET(get32,void,2)
+SHMEM_X_GET(get32,void,32)
 
 ALIAS_SHMEM_X_GET(int_get,int,get32)
 ALIAS_SHMEM_X_GET(long_get,long,get32)

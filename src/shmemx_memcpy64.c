@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,19 +35,15 @@ extern "C" {
 #endif
 
 /*
- * This routine handles aligned memory copying in a high performance manner. If
- * the src and desination arrays have byte offsets but are dword aligned at
- * some point, the routine copies the initial offset amounts, performs dword
- * copies in the middle, and then copies the remaining bytes. If the arrays are
- * misaligned, it performs a slow copy.
+ * This routine handles aligned memory copying of 64-bit aligned data in a high
+ * performance manner.
  * -JAR
  *
  * Register Key:
  *  r0  = dst, destination pointer
- *  r1  = src, source pointer which we copy and then use as remainder
- *  r2  = nbytes, bytes and temporary register
+ *  r1  = src, source pointer
+ *  r2  = nelem, number of elements
  *  r3  = temporary register
- *  r55 = store the src here to free up r1 for 16-bit instructions
  *  r56 = r56-r57 used as dword src data
  *  r58 = r58-r59 used as dword src data
  *  r60 = r60-r61 used as dword src data
@@ -56,35 +52,10 @@ extern "C" {
 */
 
 SHMEM_SCOPE void
-shmemx_memcpy(void* dst, const void* src, size_t nbytes)
-{
+shmemx_memcpy64(void* dst, const void* src, size_t nelem)
+{ // assumes dst and src are 64-bit aligned
 	__asm__ __volatile__(
-	"mov r55, %[src]                  \n" // this saves program space at cost of one instruction
-	"mov %[src], %[nbytes]            \n"
-	"lsr r3, %[nbytes], #3            \n"
-	"beq .LByteHandler%=              \n"
-	"orr r3, %[dst], r55              \n"
-	"lsl r3, r3, #29                  \n" // No bytes, just double words
-	"beq .LDwordHandler%=             \n"
-	"mov %[nbytes], #8                \n"
-	"lsr r3, r3, #29                  \n"
-	"sub %[nbytes], %[nbytes], r3     \n" // Correction for misalignment (8-r3)
-	"eor r3, %[dst], r55              \n"
-	"lsl r3, r3, #29                  \n" // Can the array alignment be corrected?
-	"beq .LByteHandler%=              \n"
-	"mov %[nbytes], %[src]            \n" // perform full misaligned copy (slow)
-	".LByteHandler%=:                 \n"
-	"sub %[src], %[src], %[nbytes]    \n"
-	"b .LSubtractByte%=               \n"
-	".LBloop%=:                       \n"
-	"ldrb r3, [r55], #1               \n"
-	"strb r3, [%[dst]], #1            \n"
-	".LSubtractByte%=:                \n"
-	"sub %[nbytes], %[nbytes], #1     \n"
-	"bgte .LBloop%=                   \n"
-	".LDwordHandler%=:                \n"
-	"mov %[nbytes], #7                \n" // This is here for alignment and is used below
-	"lsr r3, %[src], #5               \n" // Checking number dwords >= 4
+	"lsr r3, %[nelem], #2             \n" // Checking number dwords >= 4
 	"beq .LDremainder%=               \n"
 	"gid                              \n"
 	"movts lc, r3                     \n"
@@ -94,35 +65,31 @@ shmemx_memcpy(void* dst, const void* src, size_t nbytes)
 	"movts le, r3                     \n"
 	".balignw 8,0x01a2                \n" // If alignment is correct, no need for nops
 	".LDstart%=:                      \n"
-	"ldrd r56, [r55], #1              \n"
-	"ldrd r58, [r55], #1              \n"
+	"ldrd r56, [%[src]], #1           \n"
+	"ldrd r58, [%[src]], #1           \n"
 	"strd r56, [%[dst]], #1           \n"
-	"ldrd r60, [r55], #1              \n"
+	"ldrd r60, [%[src]], #1           \n"
 	"strd r58, [%[dst]], #1           \n"
-	"ldrd r62, [r55], #1              \n"
+	"ldrd r62, [%[src]], #1           \n"
 	"strd r60, [%[dst]], #1           \n"
 	"strd r62, [%[dst]], #1           \n"
 	".LDend%=:                        \n"
 	"gie                              \n"
 	".LDremainder%=:                  \n"
-	"lsl r3, %[src], #27              \n"
-	"lsr r3, r3, #30                  \n"
+	"lsl %[nelem], %[nelem], #30      \n"
+	"lsr %[nelem], %[nelem], #30      \n"
 	"beq .LDdone%=                    \n"
 	".LDloop%=:                       \n"
-	"sub r3, r3, #1                   \n"
-	"ldrd r56, [r55], #1              \n"
+	"sub %[nelem], %[nelem], #1       \n"
+	"ldrd r56, [%[src]], #1           \n"
 	"strd r56, [%[dst]], #1           \n"
 	"bne .LDloop%=                    \n"
 	".LDdone%=:                       \n"
-	"and %[nbytes], %[src], %[nbytes] \n"
-	"sub %[src], %[nbytes], #0        \n"
-	"bgt .LByteHandler%=              \n"
-			: [dst] "+r" (dst), [src] "+r" (src), [nbytes] "+r" (nbytes)
+			: [dst] "+r" (dst), [src] "+r" (src), [nelem] "+r" (nelem)
 			:
-			: "r3", "r55",
+			: "r3",
 			  "r56", "r57", "r58", "r59",
-			  "r60", "r61", "r62", "r63",
-			  "ls", "le", "lc", "memory"
+			  "r60", "r61", "r62", "r63"
 		);
 }
 

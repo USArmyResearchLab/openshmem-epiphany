@@ -51,10 +51,11 @@ __attribute__((alias("shmem_" #A "_nbi")));
 typedef struct
 {
 	volatile long   lock;
+	volatile void (*pmemcpy)(void*,void*,size_t);
 	volatile void*  source;
 	volatile void*  dest;
-	volatile size_t nbytes;
-	volatile int    pe;
+	volatile size_t nelems;
+	volatile int*   pcomplete;
 	volatile int    complete;
 } shmem_ipi_args_t;
 
@@ -64,21 +65,21 @@ extern shmem_ipi_args_t shmem_ipi_args;
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 { \
-	if ((nelems << S) < 128) { \
-		shmemx_memcpy((void*)dest, shmem_ptr(src,pe), nelems << S); \
+	if (nelems < (1024/S)) { \
+		shmemx_memcpy##S((void*)dest, shmem_ptr(src,pe), nelems); \
 	} \
 	else { \
 		volatile unsigned int* remote_ilatst = shmem_ptr((void*)0xf042c, pe); \
 		shmem_ipi_args_t* remote_args = (shmem_ipi_args_t*)shmem_ptr((void*)&shmem_ipi_args, pe); \
 		__shmem_set_lock(&(remote_args->lock)); /* spin until prior transfers complete */ \
-		remote_args->source = src; /* setting parameters */ \
+		remote_args->pmemcpy = shmemx_memcpy##S; /* setting parameters */ \
+		remote_args->source = src; \
 		remote_args->dest = dest; \
-		remote_args->nbytes = (nelems << S); \
-		remote_args->pe = __shmem.my_pe; \
+		remote_args->nelems = nelems; \
+		remote_args->pcomplete = (void*)((__shmem.coreid << 20) | (unsigned int) &(shmem_ipi_args.complete)); \
 		*remote_ilatst = 0x0200; /* cause remote user interrupt */ \
 		while(!(shmem_ipi_args.complete)); /* spin until remote core signals it's done */ \
 		shmem_ipi_args.complete = 0; /* reset interrupt completion */ \
-		remote_args->lock = 0; /* clear remote interrupt lock */ \
 	} \
 }
 
@@ -87,7 +88,7 @@ shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 #define SHMEM_X_GET(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy((void*)dest, shmem_ptr((void*)src,pe), nelems << S); }
+{ shmemx_memcpy##S((void*)dest, shmem_ptr((void*)src,pe), nelems); }
 
 #endif
 

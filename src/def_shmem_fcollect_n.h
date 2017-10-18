@@ -43,12 +43,12 @@ shmem_fcollect##N (void* dest, const void* source, size_t nelems, int PE_start, 
 	const void* target = dest + offset; \
 	int pe = my_pe; \
 	do { \
-		shmemx_memcpy(shmem_ptr(target,pe), source, nbytes); \
+		shmemx_memcpy##N(shmem_ptr(target,pe), source, nelems); \
 		pe += step; \
 	} while (pe < pe_end); \
 	pe -= pe_shift; \
 	while (pe < my_pe) { \
-		shmemx_memcpy(shmem_ptr(target,pe), source, nbytes); \
+		shmemx_memcpy##N(shmem_ptr(target,pe), source, nelems); \
 		pe += step; \
 	} \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \

@@ -29,11 +29,10 @@
 
 /*
  * Performance test for shmem_fcollect64
- *
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NELEMENT 128

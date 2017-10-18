@@ -31,8 +31,8 @@
  * Performance test for shmem_int_atomic_fetch
  */
 
-#include <shmem.h>
 #include <host_stdio.h>
+#include <shmem.h>
 #include "ctimer.h"
 
 #define NLOOP 10000
