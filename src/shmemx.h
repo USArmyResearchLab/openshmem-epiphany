@@ -42,7 +42,6 @@ SHMEM_SCOPE int shmemx_test_lock_pe(volatile long* lock, int pe);
 SHMEM_SCOPE void shmemx_clear_lock_pe(volatile long* lock, int pe);
 
 SHMEM_SCOPE void shmemx_memcpy(void* dst, const void* src, size_t nbytes);
-SHMEM_SCOPE void shmemx_memcpy8(void *dst, const void *src, size_t nelems) __attribute__((alias("shmemx_memcpy")));
 SHMEM_SCOPE void shmemx_memcpy16(void* dst, const void* src, size_t nelem);
 SHMEM_SCOPE void shmemx_memcpy32(void* dst, const void* src, size_t nelem);
 SHMEM_SCOPE void shmemx_memcpy64(void* dst, const void* src, size_t nelem);
