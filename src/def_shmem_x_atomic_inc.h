@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -44,12 +44,18 @@ shmem_##N##_atomic_inc (T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_inc(ptr, pe); \
-}
+} \
+static void \
+shmem_ctx_##N##_atomic_inc (shmem_ctx_t ctx, T *dest, int pe) \
+{ shmem_##N##_atomic_inc(dest, pe); }
 
 #define ALIAS_SHMEM_X_ATOMIC_INC(N,T,A) \
 SHMEM_SCOPE void \
 shmem_##N##_atomic_inc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_inc")));
+__attribute__((alias("shmem_" #A "_atomic_inc"))); \
+static void \
+shmem_ctx_##N##_atomic_inc (shmem_ctx_t ctx, T *dest, int pe) \
+__attribute__((alias("shmem_ctx_" #A "_atomic_inc")));
 
 #define ALIAS_SHMEM_X_INC(N,T,A) \
 SHMEM_SCOPE void \

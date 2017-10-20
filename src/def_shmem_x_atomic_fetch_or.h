@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -47,11 +47,17 @@ shmem_##N##_atomic_fetch_or (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_fetch_or(ptr, value, pe); \
-}
+} \
+static T \
+shmem_ctx_##N##_atomic_fetch_or (shmem_ctx_t ctx, T *dest, T value, int pe) \
+{ return shmem_##N##_atomic_fetch_or(dest, value, pe); }
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_OR(N,T,A) \
 SHMEM_SCOPE T \
 shmem_##N##_atomic_fetch_or (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch_or")));
+__attribute__((alias("shmem_" #A "_atomic_fetch_or"))); \
+static T \
+shmem_ctx_##N##_atomic_fetch_or (shmem_ctx_t ctx, T *dest, T value, int pe) \
+__attribute__((alias("shmem_ctx_" #A "_atomic_fetch_or")));
 
 #endif

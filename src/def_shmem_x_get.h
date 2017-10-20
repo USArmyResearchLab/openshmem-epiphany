@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,13 +37,19 @@ extern "C" {
 
 #define SHMEM_X_GET_NBI(N,T,S) \
 SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(src,pe), nelems << S); }
+shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
+{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(source,pe), nelems << S); } \
+static void \
+shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
+{ shmem_##N##_nbi(dest, source, nelems, pe); }
 
 #define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A "_nbi")));
+shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
+__attribute__((alias("shmem_" #A "_nbi"))); \
+static void \
+shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
+__attribute__((alias("shmem_ctx_" #A "_nbi")));
 
 
 #ifdef SHMEM_USE_IPI_GET
@@ -63,17 +69,17 @@ extern shmem_ipi_args_t shmem_ipi_args;
 
 #define SHMEM_X_GET(N,T,S) \
 SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
+shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
 { \
 	if (nelems < (1024/S)) { \
-		shmemx_memcpy##S((void*)dest, shmem_ptr(src,pe), nelems); \
+		shmemx_memcpy##S((void*)dest, shmem_ptr(source,pe), nelems); \
 	} \
 	else { \
 		volatile unsigned int* remote_ilatst = shmem_ptr((void*)0xf042c, pe); \
 		shmem_ipi_args_t* remote_args = (shmem_ipi_args_t*)shmem_ptr((void*)&shmem_ipi_args, pe); \
 		__shmem_set_lock(&(remote_args->lock)); /* spin until prior transfers complete */ \
 		remote_args->pmemcpy = shmemx_memcpy##S; /* setting parameters */ \
-		remote_args->source = src; \
+		remote_args->source = source; \
 		remote_args->dest = dest; \
 		remote_args->nelems = nelems; \
 		remote_args->pcomplete = (void*)((__shmem.coreid << 20) | (unsigned int) &(shmem_ipi_args.complete)); \
@@ -81,21 +87,30 @@ shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
 		while(!(shmem_ipi_args.complete)); /* spin until remote core signals it's done */ \
 		shmem_ipi_args.complete = 0; /* reset interrupt completion */ \
 	} \
-}
+} \
+static void \
+shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
+{ shmem_##N(dest, source, nelems, pe); }
 
 #else
 
 #define SHMEM_X_GET(N,T,S) \
 SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy##S((void*)dest, shmem_ptr((void*)src,pe), nelems); }
+shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
+{ shmemx_memcpy##S((void*)dest, shmem_ptr((void*)source,pe), nelems); } \
+static void \
+shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
+{ shmem_##N(dest, source, nelems, pe); }
 
 #endif
 
 #define ALIAS_SHMEM_X_GET(N,T,A) \
 SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A)));
+shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
+__attribute__((alias("shmem_" #A))); \
+static void \
+shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
+__attribute__((alias("shmem_ctx_" #A)));
 
 #ifdef __cplusplus
 }

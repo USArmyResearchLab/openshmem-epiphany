@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,6 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #ifndef _def_shmem_x_atomic_swap_h
 #define _def_shmem_x_atomic_swap_h
 
@@ -47,12 +46,18 @@ shmem_##N##_atomic_swap (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_swap(ptr, value, pe); \
-}
+} \
+static T \
+shmem_ctx_##N##_atomic_swap (shmem_ctx_t ctx, T *dest, T value, int pe) \
+{ return shmem_##N##_atomic_swap(dest, value, pe); }
 
 #define ALIAS_SHMEM_X_ATOMIC_SWAP(N,T,A) \
 SHMEM_SCOPE T \
 shmem_##N##_atomic_swap (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_swap")));
+__attribute__((alias("shmem_" #A "_atomic_swap"))); \
+static T \
+shmem_ctx_##N##_atomic_swap (shmem_ctx_t ctx, T *dest, T value, int pe) \
+__attribute__((alias("shmem_ctx_" #A "_atomic_swap")));
 
 #define ALIAS_SHMEM_X_SWAP(N,T,A) \
 SHMEM_SCOPE T \

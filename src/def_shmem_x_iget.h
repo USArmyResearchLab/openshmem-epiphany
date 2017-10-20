@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,16 +35,22 @@ SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
 { \
    int it, is, n = dst*nelems; \
-   T* src = (T*)shmem_ptr(source, pe); \
+   T* psrc = (T*)shmem_ptr(source, pe); \
    for (it = 0, is = 0; it < n; it += dst, is += sst) { \
-      dest[it] = src[is]; \
+      dest[it] = psrc[is]; \
    } \
-}
+} \
+static void \
+shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_##N(dest, source, dst, sst, nelems, pe); }
 
 #define ALIAS_SHMEM_X_IGET(N,T,A) \
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A)));
+__attribute__((alias("shmem_" #A))); \
+static void \
+shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+__attribute__((alias("shmem_ctx_" #A)));
 
 #endif
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,12 +39,18 @@ shmem_##N##_atomic_set (T *dest, T value, int pe) \
 { \
 	volatile T* ptr = (volatile T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_set(ptr, value, pe); \
-}
+} \
+static void \
+shmem_ctx_##N##_atomic_set (shmem_ctx_t ctx, T *dest, T value, int pe) \
+{ shmem_##N##_atomic_set(dest, value, pe); }
 
 #define ALIAS_SHMEM_X_ATOMIC_SET(N,T,A) \
 SHMEM_SCOPE void \
 shmem_##N##_atomic_set (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_set")));
+__attribute__((alias("shmem_" #A "_atomic_set"))); \
+static void \
+shmem_ctx_##N##_atomic_set (shmem_ctx_t ctx, T *dest, T value, int pe) \
+__attribute__((alias("shmem_ctx_" #A "_atomic_set")));
 
 #define ALIAS_SHMEM_X_SET(N,T,A) \
 SHMEM_SCOPE void \

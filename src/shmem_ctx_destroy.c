@@ -27,42 +27,19 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#ifndef _def_shmem_x_atomic_fetch_inc_h
-#define _def_shmem_x_atomic_fetch_inc_h
+#include "shmem.h"
+#include "internals.h"
 
-#define SHMEM_X_ATOMIC_FETCH_INC(N,T) \
-static T \
-__shmem_##N##_atomic_fetch_inc (T *ptr, int pe) \
-{ \
-	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
-	__shmem_set_lock(x); \
-	T r = *ptr; \
-	T incr = r + 1; \
-	*ptr = incr; \
-	__shmem_clear_lock(x); \
-	return r; \
-} \
-SHMEM_SCOPE T \
-shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
-{ \
-	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
-	return __shmem_##N##_atomic_fetch_inc(ptr, pe); \
-} \
-static T \
-shmem_ctx_##N##_atomic_fetch_inc (shmem_ctx_t ctx, T *dest, int pe) \
-{ return shmem_##N##_atomic_fetch_inc(dest, pe); }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define ALIAS_SHMEM_X_ATOMIC_FETCH_INC(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch_inc")));\
-static T \
-shmem_ctx_##N##_atomic_fetch_inc (shmem_ctx_t ctx, T *dest, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_fetch_inc")));
+SHMEM_SCOPE void
+shmem_ctx_destroy(shmem_ctx_t *ctx)
+{
+	return;
+}
 
-#define ALIAS_SHMEM_X_FINC(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_finc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch_inc"), deprecated));
-
+#ifdef __cplusplus
+}
 #endif

@@ -29,6 +29,8 @@
 #include "shmem_complexd_sum_to_all.c"
 #include "shmem_complexf_prod_to_all.c"
 #include "shmem_complexf_sum_to_all.c"
+#include "shmem_ctx_create.c"
+#include "shmem_ctx_destroy.c"
 #include "shmem_double_atomic_fetch.c"
 #include "shmem_double_atomic_set.c"
 #include "shmem_double_atomic_swap.c"
