@@ -126,6 +126,8 @@ shmemx_memcpy(void* dst, const void* src, size_t nbytes)
 		);
 }
 
+SHMEM_SCOPE void shmemx_memcpy8(void *dst, const void *src, size_t nelems) __attribute__((alias("shmemx_memcpy")));
+
 #ifdef __cplusplus
 }
 #endif
