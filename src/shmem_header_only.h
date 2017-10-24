@@ -156,7 +156,7 @@
 #include "shmem_short_xor_to_all.c"
 #include "shmem_test_lock.c"
 #include "shmemx_clear_lock_pe.c"
-#include "shmemx_memcpy.c"
+#include "shmemx_memcpy8.c"
 #include "shmemx_memcpy16.c"
 #include "shmemx_memcpy32.c"
 #include "shmemx_memcpy64.c"
