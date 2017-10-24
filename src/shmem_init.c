@@ -171,12 +171,15 @@ shmem_init(void)
 	__shmem.local_mem_base = (intptr_t)shmemx_sbrk(0);
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
-	//	linear barrier
+#if defined(__coprthr_device__)
+	shmem_barrier (0, 0, __shmem.n_pes, (long*)__shmem.barrier_sync);
+#else // linear barrier
 	if (__shmem.n_pes == 1) return;
 	if (!__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
 	while(*__shmem.barrier_sync == SHMEM_SYNC_VALUE);
 	if (__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
 	*__shmem.barrier_sync = SHMEM_SYNC_VALUE;
+#endif
 }
 
 #ifdef __cplusplus
