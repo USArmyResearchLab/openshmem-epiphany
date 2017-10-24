@@ -586,9 +586,10 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define __ctx_atomic_xor(ctx,dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_XOR_GENERIC)(ctx,dest,value,pe)
 
 #define GET_MACRO2(_2,_1,_0,F,...) F
-#define GET_MACRO3(...) GET_MACRO2(_3,__VA_ARGS__)
-#define GET_MACRO4(...) GET_MACRO3(_4,__VA_ARGS__)
-#define GET_MACRO6(...) GET_MACRO4(_6,_5,__VA_ARGS__)
+#define GET_MACRO3(_3,_2,_1,_0,F,...) F
+#define GET_MACRO4(_4,_3,_2,_1,_0,F,...) F
+#define GET_MACRO5(_5,_4,_3,_2,_1,_0,F,...) F
+#define GET_MACRO6(_6,_5,_4,_3,_2,_1,_0,F,...) F
 
 #define shmem_atomic_fetch_inc(...)    GET_MACRO2(__VA_ARGS__, __ctx_atomic_fetch_inc,    __atomic_fetch_inc)(__VA_ARGS__);
 #define shmem_atomic_inc(...)          GET_MACRO2(__VA_ARGS__, __ctx_atomic_inc,          __atomic_inc)(__VA_ARGS__);
