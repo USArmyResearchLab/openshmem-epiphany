@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_PUT(put64,void,3)
+SHMEM_X_PUT(put64,void,64)
 
 ALIAS_SHMEM_X_PUT(long_put,long,put64)
 ALIAS_SHMEM_X_PUT(longlong_put,long long,put64)

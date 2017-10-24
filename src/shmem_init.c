@@ -172,6 +172,7 @@ shmem_init(void)
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
 	//	linear barrier
+	if (__shmem.n_pes == 1) return;
 	if (!__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
 	while(*__shmem.barrier_sync == SHMEM_SYNC_VALUE);
 	if (__shmem.my_pe) *__shmem.barrier_psync[0] = 1;

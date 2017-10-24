@@ -229,7 +229,7 @@
 #include "shmem_ushort_wait.c"
 #include "shmem_ushort_wait_until.c"
 #include "shmemx_clear_lock_pe.c"
-#include "shmemx_memcpy.c"
+#include "shmemx_memcpy8.c"
 #include "shmemx_memcpy16.c"
 #include "shmemx_memcpy32.c"
 #include "shmemx_memcpy64.c"

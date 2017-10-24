@@ -50,7 +50,7 @@ __attribute__((alias("shmem_ctx_" #A "_nbi")));
 #define SHMEM_X_PUT(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
-{ shmemx_memcpy(shmem_ptr(dest,pe), (void*)source, nelems << S); } \
+{ shmemx_memcpy##S(shmem_ptr(dest,pe), (void*)source, nelems); } \
 static void \
 shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
 { shmem_##N##_nbi(dest, source, nelems, pe); }
