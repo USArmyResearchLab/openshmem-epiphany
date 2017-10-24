@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -103,6 +103,7 @@ typedef struct shmem_ctx
 } shmem_ctx_t;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
+SHMEM_SCOPE void* __attribute__((malloc)) shmem_calloc(size_t count, size_t size);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size);
 SHMEM_SCOPE void shmem_free(const void *ptr);
@@ -333,6 +334,9 @@ DECL_P2P(DECL_SHMEM_X_TEST)
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
 
+#define shmem_sync(...) shmem_barrier(__VA_ARGS__)
+#define shmem_sync_all(...) shmem_barrier_all(__VA_ARGS__)
+
 #define DECL_SHMEM_X_TO_ALL(N,T) \
 SHMEM_SCOPE void shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
 
@@ -530,9 +534,9 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define SHMEM_CTX_ATOMIC_XOR_GENERIC(N)          shmem_ctx_##N##_atomic_xor
 
 #define SHMEM_WAIT_GENERIC(N)       shmem_##N##_wait
-#define SHMEM_WAIT_GENERIC(N)       shmem_##N##_wait
 #define SHMEM_WAIT_UNTIL_GENERIC(N) shmem_##N##_wait_until
 #define SHMEM_TEST_GENERIC(N)       shmem_##N##_test
+
 #define SHMEM_PUT_NBI_GENERIC(N)    shmem_##N##_put_nbi
 #define SHMEM_GET_NBI_GENERIC(N)    shmem_##N##_get_nbi
 #define SHMEM_PUT_GENERIC(N)        shmem_##N##_put
@@ -542,10 +546,6 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define SHMEM_IPUT_GENERIC(N)       shmem_##N##_iput
 #define SHMEM_IGET_GENERIC(N)       shmem_##N##_iget
 
-#define SHMEM_CTX_WAIT_GENERIC(N)       shmem_ctx_##N##_wait
-#define SHMEM_CTX_WAIT_GENERIC(N)       shmem_ctx_##N##_wait
-#define SHMEM_CTX_WAIT_UNTIL_GENERIC(N) shmem_ctx_##N##_wait_until
-#define SHMEM_CTX_TEST_GENERIC(N)       shmem_ctx_##N##_test
 #define SHMEM_CTX_PUT_NBI_GENERIC(N)    shmem_ctx_##N##_put_nbi
 #define SHMEM_CTX_GET_NBI_GENERIC(N)    shmem_ctx_##N##_get_nbi
 #define SHMEM_CTX_PUT_GENERIC(N)        shmem_ctx_##N##_put
@@ -555,35 +555,55 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define SHMEM_CTX_IPUT_GENERIC(N)       shmem_ctx_##N##_iput
 #define SHMEM_CTX_IGET_GENERIC(N)       shmem_ctx_##N##_iget
 
-#define shmem_atomic_fetch_inc(dest,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_INC_GENERIC)(dest,pe)
-#define shmem_atomic_inc(dest,pe)                     DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_INC_GENERIC)(dest,pe)
-#define shmem_atomic_fetch_add(dest,value,pe)         DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_ADD_GENERIC)(dest,value,pe)
-#define shmem_atomic_add(dest,value,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_ADD_GENERIC)(dest,value,pe)
-#define shmem_atomic_compare_swap(dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_COMPARE_SWAP_GENERIC)(dest,cond,value,pe)
-#define shmem_atomic_swap(dest,value,pe)              DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SWAP_GENERIC)(dest,value,pe)
-#define shmem_atomic_fetch(dest,pe)                   DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_FETCH_GENERIC)(dest,pe)
-#define shmem_atomic_set(dest,value,pe)               DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SET_GENERIC)(dest,value,pe)
-#define shmem_atomic_fetch_and(dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_AND_GENERIC)(dest,value,pe)
-#define shmem_atomic_and(dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_AND_GENERIC)(dest,value,pe)
-#define shmem_atomic_fetch_or(dest,value,pe)          DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_OR_GENERIC)(dest,value,pe)
-#define shmem_atomic_or(dest,value,pe)                DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_OR_GENERIC)(dest,value,pe)
-#define shmem_atomic_fetch_xor(dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
-#define shmem_atomic_xor(dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
+#define __atomic_fetch_inc(dest,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_INC_GENERIC)(dest,pe)
+#define __atomic_inc(dest,pe)                     DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_INC_GENERIC)(dest,pe)
+#define __atomic_fetch_add(dest,value,pe)         DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_FETCH_ADD_GENERIC)(dest,value,pe)
+#define __atomic_add(dest,value,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_ADD_GENERIC)(dest,value,pe)
+#define __atomic_compare_swap(dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_ATOMIC_COMPARE_SWAP_GENERIC)(dest,cond,value,pe)
+#define __atomic_swap(dest,value,pe)              DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SWAP_GENERIC)(dest,value,pe)
+#define __atomic_fetch(dest,pe)                   DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_FETCH_GENERIC)(dest,pe)
+#define __atomic_set(dest,value,pe)               DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_ATOMIC_SET_GENERIC)(dest,value,pe)
+#define __atomic_fetch_and(dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_AND_GENERIC)(dest,value,pe)
+#define __atomic_and(dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_AND_GENERIC)(dest,value,pe)
+#define __atomic_fetch_or(dest,value,pe)          DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_OR_GENERIC)(dest,value,pe)
+#define __atomic_or(dest,value,pe)                DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_OR_GENERIC)(dest,value,pe)
+#define __atomic_fetch_xor(dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
+#define __atomic_xor(dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
 
-#define shmem_atomic_fetch_inc(ctx,dest,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_INC_GENERIC)(ctx,dest,pe)
-#define shmem_atomic_inc(ctx,dest,pe)                     DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_INC_GENERIC)(ctx,dest,pe)
-#define shmem_atomic_fetch_add(ctx,dest,value,pe)         DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_ADD_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_add(ctx,dest,value,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_ADD_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_compare_swap(ctx,dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_COMPARE_SWAP_GENERIC)(ctx,dest,cond,value,pe)
-#define shmem_atomic_swap(ctx,dest,value,pe)              DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_SWAP_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_fetch(ctx,dest,pe)                   DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_GENERIC)(ctx,dest,pe)
-#define shmem_atomic_set(ctx,dest,value,pe)               DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_SET_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_fetch_and(ctx,dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_AND_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_and(ctx,dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_AND_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_fetch_or(ctx,dest,value,pe)          DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_OR_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_or(ctx,dest,value,pe)                DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_OR_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_fetch_xor(ctx,dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_XOR_GENERIC)(ctx,dest,value,pe)
-#define shmem_atomic_xor(ctx,dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_XOR_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_fetch_inc(ctx,dest,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_INC_GENERIC)(ctx,dest,pe)
+#define __ctx_atomic_inc(ctx,dest,pe)                     DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_INC_GENERIC)(ctx,dest,pe)
+#define __ctx_atomic_fetch_add(ctx,dest,value,pe)         DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_ADD_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_add(ctx,dest,value,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_ADD_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_compare_swap(ctx,dest,cond,value,pe) DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_COMPARE_SWAP_GENERIC)(ctx,dest,cond,value,pe)
+#define __ctx_atomic_swap(ctx,dest,value,pe)              DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_SWAP_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_fetch(ctx,dest,pe)                   DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_GENERIC)(ctx,dest,pe)
+#define __ctx_atomic_set(ctx,dest,value,pe)               DECL_GENERIC_EXTENDED_AMO(dest,SHMEM_CTX_ATOMIC_SET_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_fetch_and(ctx,dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_AND_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_and(ctx,dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_AND_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_fetch_or(ctx,dest,value,pe)          DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_OR_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_or(ctx,dest,value,pe)                DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_OR_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_fetch_xor(ctx,dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_XOR_GENERIC)(ctx,dest,value,pe)
+#define __ctx_atomic_xor(ctx,dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_CTX_ATOMIC_XOR_GENERIC)(ctx,dest,value,pe)
+
+#define GET_MACRO2(_2,_1,_0,F,...) F
+#define GET_MACRO3(...) GET_MACRO2(_3,__VA_ARGS__)
+#define GET_MACRO4(...) GET_MACRO3(_4,__VA_ARGS__)
+#define GET_MACRO6(...) GET_MACRO4(_6,_5,__VA_ARGS__)
+
+#define shmem_atomic_fetch_inc(...)    GET_MACRO2(__VA_ARGS__, __ctx_atomic_fetch_inc,    __atomic_fetch_inc)(__VA_ARGS__);
+#define shmem_atomic_inc(...)          GET_MACRO2(__VA_ARGS__, __ctx_atomic_inc,          __atomic_inc)(__VA_ARGS__);
+#define shmem_atomic_fetch_add(...)    GET_MACRO3(__VA_ARGS__, __ctx_atomic_fetch_add,    __atomic_fetch_add)(__VA_ARGS__);
+#define shmem_atomic_add(...)          GET_MACRO3(__VA_ARGS__, __ctx_atomic_add,          __atomic_add)(__VA_ARGS__);
+#define shmem_atomic_compare_swap(...) GET_MACRO4(__VA_ARGS__, __ctx_atomic_compare_swap, __atomic_compare_swap)(__VA_ARGS__);
+#define shmem_atomic_swap(...)         GET_MACRO3(__VA_ARGS__, __ctx_atomic_swap,         __atomic_swap)(__VA_ARGS__);
+#define shmem_atomic_fetch(...)        GET_MACRO2(__VA_ARGS__, __ctx_atomic_fetch,        __atomic_fetch)(__VA_ARGS__);
+#define shmem_atomic_set(...)          GET_MACRO3(__VA_ARGS__, __ctx_atomic_set,          __atomic_set)(__VA_ARGS__);
+#define shmem_atomic_fetch_and(...)    GET_MACRO3(__VA_ARGS__, __ctx_atomic_fetch_and,    __atomic_fetch_and)(__VA_ARGS__);
+#define shmem_atomic_and(...)          GET_MACRO3(__VA_ARGS__, __ctx_atomic_and,          __atomic_and)(__VA_ARGS__);
+#define shmem_atomic_fetch_or(...)     GET_MACRO3(__VA_ARGS__, __ctx_atomic_fetch_or,     __atomic_fetch_or)(__VA_ARGS__);
+#define shmem_atomic_or(...)           GET_MACRO3(__VA_ARGS__, __ctx_atomic_or,           __atomic_or)(__VA_ARGS__);
+#define shmem_atomic_fetch_xor(...)    GET_MACRO3(__VA_ARGS__, __ctx_atomic_fetch_xor,    __atomic_fetch_xor)(__VA_ARGS__);
+#define shmem_atomic_xor(...)          GET_MACRO3(__VA_ARGS__, __ctx_atomic_xor,          __atomic_xor)(__VA_ARGS__);
 
 #define shmem_wait(ivar,cmp_value)           DECL_GENERIC_P2P(ivar,SHMEM_WAIT_GENERIC)(ivar,cmp_value)
 #define shmem_wait_until(ivar,cmp,cmp_value) DECL_GENERIC_P2P(ivar,SHMEM_WAIT_UNTIL_GENERIC)(ivar,cmp,cmp_value)
@@ -598,14 +618,32 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define shmem_fetch(...) shmem_atomic_fetch(__VA_ARGS__)
 #define shmem_set(...)   shmem_atomic_set(__VA_ARGS__)
 
-#define shmem_put_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_NBI_GENERIC)(dest,source,nelems,pe)
-#define shmem_get_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_NBI_GENERIC)(dest,source,nelems,pe)
-#define shmem_put(dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_GENERIC)(dest,source,nelems,pe)
-#define shmem_get(dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_GENERIC)(dest,source,nelems,pe)
-#define shmem_p(dest,value,pe)                    DECL_GENERIC_STANDARD_RMA(dest,SHMEM_P_GENERIC)(dest,value,pe)
-#define shmem_g(addr,pe)                          DECL_GENERIC_STANDARD_RMA(addr,SHMEM_G_GENERIC)(addr,pe)
-#define shmem_iput(dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_IPUT_GENERIC)(dest,source,dst,sst,nelems,pe)
-#define shmem_iget(dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_IGET_GENERIC)(dest,source,dst,sst,nelems,pe)
+#define __put_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_NBI_GENERIC)(dest,source,nelems,pe)
+#define __get_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_NBI_GENERIC)(dest,source,nelems,pe)
+#define __put(dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_GENERIC)(dest,source,nelems,pe)
+#define __get(dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_GENERIC)(dest,source,nelems,pe)
+#define __p(dest,value,pe)                    DECL_GENERIC_STANDARD_RMA(dest,SHMEM_P_GENERIC)(dest,value,pe)
+#define __g(addr,pe)                          DECL_GENERIC_STANDARD_RMA(addr,SHMEM_G_GENERIC)(addr,pe)
+#define __iput(dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_IPUT_GENERIC)(dest,source,dst,sst,nelems,pe)
+#define __iget(dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_IGET_GENERIC)(dest,source,dst,sst,nelems,pe)
+
+#define __ctx_put_nbi(ctx,dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_PUT_NBI_GENERIC)(ctx,dest,source,nelems,pe)
+#define __ctx_get_nbi(ctx,dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_GET_NBI_GENERIC)(ctx,dest,source,nelems,pe)
+#define __ctx_put(ctx,dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_PUT_GENERIC)(ctx,dest,source,nelems,pe)
+#define __ctx_get(ctx,dest,source,nelems,pe)          DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_GET_GENERIC)(ctx,dest,source,nelems,pe)
+#define __ctx_p(ctx,dest,value,pe)                    DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_P_GENERIC)(ctx,dest,value,pe)
+#define __ctx_g(ctx,addr,pe)                          DECL_GENERIC_STANDARD_RMA(addr,SHMEM_CTX_G_GENERIC)(ctx,addr,pe)
+#define __ctx_iput(ctx,dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_IPUT_GENERIC)(ctx,dest,source,dst,sst,nelems,pe)
+#define __ctx_iget(ctx,dest,source,dst,sst,nelems,pe) DECL_GENERIC_STANDARD_RMA(dest,SHMEM_CTX_IGET_GENERIC)(ctx,dest,source,dst,sst,nelems,pe)
+
+#define shmem_put_nbi(...) GET_MACRO4(__VA_ARGS__, __ctx_put_nbi, __put_nbi)(__VA_ARGS__)
+#define shmem_get_nbi(...) GET_MACRO4(__VA_ARGS__, __ctx_get_nbi, __get_nbi)(__VA_ARGS__)
+#define shmem_put(...)     GET_MACRO4(__VA_ARGS__, __ctx_put,     __put)(__VA_ARGS__)
+#define shmem_get(...)     GET_MACRO4(__VA_ARGS__, __ctx_get,     __get)(__VA_ARGS__)
+#define shmem_p(...)       GET_MACRO3(__VA_ARGS__, __ctx_p,       __p)(__VA_ARGS__)
+#define shmem_g(...)       GET_MACRO2(__VA_ARGS__, __ctx_g,       __g)(__VA_ARGS__)
+#define shmem_iput(...)    GET_MACRO6(__VA_ARGS__, __ctx_iput,    __iput)(__VA_ARGS__)
+#define shmem_iget(...)    GET_MACRO6(__VA_ARGS__, __ctx_iget,    __iget)(__VA_ARGS__)
 
 #endif
 
