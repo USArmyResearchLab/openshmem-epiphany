@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 
 	// Load program to cores
 	e_load_group("e_task.elf", &dev, 0, 0, platform.rows, platform.cols, E_FALSE);
+	e_reset_group(&dev);
 
 	// Clear the "done" flag for every core and set "n"
 	for (i=0; i<platform.rows; i++) {
