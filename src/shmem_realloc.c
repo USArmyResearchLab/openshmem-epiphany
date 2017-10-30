@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 SHMEM_SCOPE void*
-shmem_realloc(const void* ptr, size_t size)
+shmem_realloc(void* ptr, size_t size)
 {
 	shmemx_brk(ptr);
 	return shmemx_sbrk(size);

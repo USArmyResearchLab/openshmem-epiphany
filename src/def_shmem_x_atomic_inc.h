@@ -44,10 +44,7 @@ shmem_##N##_atomic_inc (T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_inc(ptr, pe); \
-} \
-static void \
-shmem_ctx_##N##_atomic_inc (shmem_ctx_t ctx, T *dest, int pe) \
-{ shmem_##N##_atomic_inc(dest, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_INC(N,T,A) \
 SHMEM_SCOPE void \

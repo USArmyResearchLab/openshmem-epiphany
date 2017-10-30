@@ -1,6 +1,6 @@
 CC = e-gcc
 AR = e-ar
-DEFS = -O3
+DEFS = -O3 -Wall -Wno-unused-function
 INCS =
 LIBS =
 

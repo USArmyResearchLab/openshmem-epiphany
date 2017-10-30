@@ -35,8 +35,6 @@ extern "C" {
 #endif
 
 SHMEM_X_TEST(int,int)
-ALIAS_SHMEM_X_TEST(int32,int32_t,int)
-ALIAS_SHMEM_X_TEST(ptrdiff,ptrdiff_t,int)
 
 #ifdef __cplusplus
 }

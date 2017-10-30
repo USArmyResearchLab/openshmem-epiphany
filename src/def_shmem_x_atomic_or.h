@@ -44,17 +44,6 @@ shmem_##N##_atomic_or (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_or(ptr, value, pe); \
-} \
-static void \
-shmem_ctx_##N##_atomic_or (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ shmem_##N##_atomic_or(dest, value, pe); }
-
-#define ALIAS_SHMEM_X_ATOMIC_OR(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_atomic_or (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_or"))); \
-static void \
-shmem_ctx_##N##_atomic_or (shmem_ctx_t ctx, T *dest, T value, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_or")));
+}
 
 #endif

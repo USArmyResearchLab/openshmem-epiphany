@@ -47,10 +47,7 @@ shmem_##N##_atomic_fetch_or (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_fetch_or(ptr, value, pe); \
-} \
-static T \
-shmem_ctx_##N##_atomic_fetch_or (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ return shmem_##N##_atomic_fetch_or(dest, value, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_OR(N,T,A) \
 SHMEM_SCOPE T \

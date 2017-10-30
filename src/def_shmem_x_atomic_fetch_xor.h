@@ -47,10 +47,7 @@ shmem_##N##_atomic_fetch_xor (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_fetch_xor(ptr, value, pe); \
-} \
-static T \
-shmem_ctx_##N##_atomic_fetch_xor (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ return shmem_##N##_atomic_fetch_xor(dest, value, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_XOR(N,T,A) \
 SHMEM_SCOPE T \

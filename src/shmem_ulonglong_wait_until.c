@@ -35,7 +35,6 @@ extern "C" {
 #endif
 
 SHMEM_X_WAIT_UNTIL(ulonglong,unsigned long long)
-ALIAS_SHMEM_X_WAIT_UNTIL(uint64,uint64_t,ulonglong)
 
 #ifdef __cplusplus
 }

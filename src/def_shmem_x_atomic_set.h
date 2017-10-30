@@ -39,10 +39,7 @@ shmem_##N##_atomic_set (T *dest, T value, int pe) \
 { \
 	volatile T* ptr = (volatile T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_set(ptr, value, pe); \
-} \
-static void \
-shmem_ctx_##N##_atomic_set (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ shmem_##N##_atomic_set(dest, value, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_SET(N,T,A) \
 SHMEM_SCOPE void \

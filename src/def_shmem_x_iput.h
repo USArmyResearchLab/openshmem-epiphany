@@ -30,27 +30,18 @@
 #ifndef _def_shmem_x_iput_h
 #define _def_shmem_x_iput_h
 
-#define SHMEM_X_IPUT(N,T) \
+#include <stdint.h>
+
+#define SHMEM_X_IPUT(SIZE) \
 SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+shmem_iput##SIZE (void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
 { \
 	int it, is, n = dst*nelems; \
-	T* pdst = (T*)shmem_ptr(dest, pe); \
+	int##SIZE##_t* pdst = (int##SIZE##_t*)shmem_ptr(dest, pe); \
+	int##SIZE##_t* psrc = (int##SIZE##_t*)source; \
 	for (it = 0, is = 0; it < n; it += dst, is += sst) { \
-		pdst[it] = source[is]; \
+		pdst[it] = psrc[is]; \
 	} \
-} \
-static void \
-shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
-{ shmem_##N(dest, source, dst, sst, nelems, pe); }
-
-#define ALIAS_SHMEM_X_IPUT(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A))); \
-static void \
-shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
-__attribute__((alias("shmem_ctx_" #A)));
+}
 
 #endif
-

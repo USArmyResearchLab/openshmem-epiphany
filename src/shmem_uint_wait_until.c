@@ -35,8 +35,6 @@ extern "C" {
 #endif
 
 SHMEM_X_WAIT_UNTIL(uint,unsigned int)
-ALIAS_SHMEM_X_WAIT_UNTIL(uint32,uint32_t,uint)
-ALIAS_SHMEM_X_WAIT_UNTIL(size,size_t,uint)
 
 #ifdef __cplusplus
 }

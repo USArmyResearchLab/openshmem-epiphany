@@ -97,7 +97,7 @@ __shmem_dissemination_barrier_init(void)
 
 shmem_ipi_args_t shmem_ipi_args = {
 	.lock = 0,
-	.pmemcpy = shmemx_memcpy,
+	.pmemcpy = (volatile void (*)(void*,const void*,size_t))shmemx_memcpy8,
 	.source = 0,
 	.dest = 0,
 	.nelems = 0,
@@ -106,9 +106,10 @@ shmem_ipi_args_t shmem_ipi_args = {
 };
 
 SHMEM_SCOPE void __attribute__((interrupt ("swi"))) 
-__shmem_user_isr(int signum)
+__shmem_user_isr(void)
 {
-	shmem_ipi_args.pmemcpy(shmem_ipi_args.dest, shmem_ipi_args.source, shmem_ipi_args.nelems);
+	void (*pmemcpy)(void*,const void*,size_t) = (void (*)(void*,const void*,size_t))shmem_ipi_args.pmemcpy;
+	pmemcpy((void*)shmem_ipi_args.dest, (const void*)shmem_ipi_args.source, (size_t)shmem_ipi_args.nelems);
 	*(shmem_ipi_args.pcomplete) = 1; // inform remote PE
 	shmem_ipi_args.lock = 0; // free lock
 }
@@ -171,12 +172,15 @@ shmem_init(void)
 	__shmem.local_mem_base = (intptr_t)shmemx_sbrk(0);
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
-	//	linear barrier
+#if defined(__coprthr_device__)
+	shmem_barrier (0, 0, __shmem.n_pes, (long*)__shmem.barrier_sync);
+#else // linear barrier
 	if (__shmem.n_pes == 1) return;
 	if (!__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
 	while(*__shmem.barrier_sync == SHMEM_SYNC_VALUE);
 	if (__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
 	*__shmem.barrier_sync = SHMEM_SYNC_VALUE;
+#endif
 }
 
 #ifdef __cplusplus

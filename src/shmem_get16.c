@@ -37,8 +37,6 @@ extern "C" {
 
 SHMEM_X_GET(get16,void,16)
 
-ALIAS_SHMEM_X_GET(short_get,short,get16)
-
 #ifdef __cplusplus
 }
 #endif

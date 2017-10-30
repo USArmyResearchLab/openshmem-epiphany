@@ -97,17 +97,14 @@ typedef enum shmem_cmp
 	SHMEM_CMP_LE
 } shmem_cmp_t;
 
-typedef struct shmem_ctx
-{
-	long options;
-} shmem_ctx_t;
+typedef void* shmem_ctx_t;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_calloc(size_t count, size_t size);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size);
-SHMEM_SCOPE void shmem_free(const void *ptr);
-SHMEM_SCOPE void* shmem_realloc(const void* ptr, size_t size);
+SHMEM_SCOPE void shmem_free(void *ptr);
+SHMEM_SCOPE void* shmem_realloc(void* ptr, size_t size);
 
 #define shmem_fence(...) shmem_quiet(__VA_ARGS__)
 #define shmem_ctx_fence(ctx) shmem_ctx_quiet(ctx)
@@ -143,16 +140,6 @@ SHMEM_SCOPE int shmem_test_lock (long* lock);
 #define DECL_ARG12(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG11(X,__VA_ARGS__))
 #define DECL_ARG13(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG12(X,__VA_ARGS__))
 #define DECL_ARG14(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG13(X,__VA_ARGS__))
-#define DECL_ARG15(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG14(X,__VA_ARGS__))
-#define DECL_ARG16(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG15(X,__VA_ARGS__))
-#define DECL_ARG17(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG16(X,__VA_ARGS__))
-#define DECL_ARG18(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG17(X,__VA_ARGS__))
-#define DECL_ARG19(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG18(X,__VA_ARGS__))
-#define DECL_ARG20(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG19(X,__VA_ARGS__))
-#define DECL_ARG21(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG20(X,__VA_ARGS__))
-#define DECL_ARG22(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG21(X,__VA_ARGS__))
-#define DECL_ARG23(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG22(X,__VA_ARGS__))
-#define DECL_ARG24(X,T,F,...) DECL_GENERIC_TYPE(X,T,F,DECL_ARG23(X,__VA_ARGS__))
 
 #define DECL_STANDARD_AMO(F) \
 F(int,int) \
@@ -178,15 +165,9 @@ F(uint,unsigned int) \
 F(ulong,unsigned long) \
 F(ulonglong,unsigned long long) \
 F(int32,int32_t) \
-F(int64,int64_t) \
+F(int64,int64_t) /*\
 F(uint32,uint32_t) \
-F(uint64,uint64_t)
-
-#define DECL_STANDARD_RMA(F) \
-F(longdouble,long double) \
-F(char,char) \
-F(short,short) \
-DECL_EXTENDED_AMO(F)
+F(uint64,uint64_t)*/
 
 #define DECL_P2P(F) \
 F(short,short) \
@@ -195,24 +176,18 @@ DECL_STANDARD_AMO(F)
 
 #define DECL_GENERIC_STANDARD_AMO(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG12((A), \
+DECL_ARG6((A), \
 	int*, F(int), \
 	long*, F(long), \
 	long long*, F(longlong), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
-	unsigned long long*, F(ulonglong), \
-	int32_t*, F(int32), \
-	int64_t*, F(int64), \
-	uint32_t*, F(uint32), \
-	uint64_t*, F(uint64), \
-	size_t*, F(size), \
-	ptrdiff_t*, F(ptrdiff) \
+	unsigned long long*, F(ulonglong) \
 ))
 
 #define DECL_GENERIC_EXTENDED_AMO(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG14((A), \
+DECL_ARG8((A), \
 	float*, F(float), \
 	double*, F(double), \
 	int*, F(int), \
@@ -220,30 +195,20 @@ DECL_ARG14((A), \
 	long long*, F(longlong), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
-	unsigned long long*, F(ulonglong), \
-	int32_t*, F(int32), \
-	int64_t*, F(int64), \
-	uint32_t*, F(uint32), \
-	uint64_t*, F(uint64), \
-	size_t*, F(size), \
-	ptrdiff_t*, F(ptrdiff) \
+	unsigned long long*, F(ulonglong) \
 ))
 
 #define DECL_GENERIC_BITWISE_AMO(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG7((A), \
+DECL_ARG3((A), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
 	unsigned long long*, F(ulonglong), \
-	int32_t*, F(int), \
-	int64_t*, F(longlong), \
-	uint32_t*, F(uint), \
-	uint64_t*, F(ulonglong) \
 ))
 
 #define DECL_GENERIC_STANDARD_RMA(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG24((A), \
+DECL_ARG14((A), \
 	float*, F(float), \
 	double*, F(double), \
 	long double*, F(longdouble), \
@@ -257,22 +222,12 @@ DECL_ARG24((A), \
 	unsigned short*, F(ushort), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
-	unsigned long long*, F(ulonglong), \
-	int8_t*, F(int8), \
-	int16_t*, F(int16), \
-	int32_t*, F(int32), \
-	int64_t*, F(int64), \
-	uint8_t*, F(uint8), \
-	uint16_t*, F(uint16), \
-	uint32_t*, F(uint32), \
-	uint64_t*, F(uint64), \
-	size_t*, F(size), \
-	ptrdiff_t*, F(ptrdiff) \
+	unsigned long long*, F(ulonglong) \
 ))
 
 #define DECL_GENERIC_P2P(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG14((A), \
+DECL_ARG8((A), \
 	short*, F(short), \
 	int*, F(int), \
 	long*, F(long), \
@@ -280,31 +235,53 @@ DECL_ARG14((A), \
 	unsigned short*, F(ushort), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
-	unsigned long long*, F(ulonglong), \
-	int32_t*, F(int32), \
-	int64_t*, F(int64), \
-	uint32_t*, F(uint32), \
-	uint64_t*, F(uint64), \
-	size_t*, F(size), \
-	ptrdiff_t*, F(ptrdiff) \
+	unsigned long long*, F(ulonglong) \
 ))
 
-#define SHMEM_ATOMIC_COMPARE_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_compare_swap (T* dest, T cond, T value, int pe);
-#define SHMEM_ATOMIC_FETCH_INC(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_inc (T* dest, int pe);
-#define SHMEM_ATOMIC_INC(N,T) SHMEM_SCOPE void shmem_##N##_atomic_inc (T* dest, int pe);
-#define SHMEM_ATOMIC_FETCH_ADD(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_add (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_ADD(N,T) SHMEM_SCOPE void shmem_##N##_atomic_add (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_COMPARE_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_compare_swap (T* dest, T cond, T value, int pe); \
+static T shmem_ctx_##N##_atomic_compare_swap (shmem_ctx_t ctx, T *dest, T cond, T value, int pe) \
+{ return shmem_##N##_atomic_compare_swap(dest, cond, value, pe); }
+#define SHMEM_ATOMIC_FETCH_INC(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_inc (T* dest, int pe); \
+static T shmem_ctx_##N##_atomic_fetch_inc (shmem_ctx_t ctx, T* dest, int pe) \
+{ return shmem_##N##_atomic_fetch_inc(dest, pe); }
+#define SHMEM_ATOMIC_INC(N,T) SHMEM_SCOPE void shmem_##N##_atomic_inc (T* dest, int pe); \
+static void shmem_ctx_##N##_atomic_inc (shmem_ctx_t ctx, T* dest, int pe) \
+{ shmem_##N##_atomic_inc(dest, pe); }
+#define SHMEM_ATOMIC_FETCH_ADD(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_add (T* dest, T value, int pe); \
+static T shmem_ctx_##N##_atomic_fetch_add (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ return shmem_##N##_atomic_fetch_add(dest, value, pe); }
+#define SHMEM_ATOMIC_ADD(N,T) SHMEM_SCOPE void shmem_##N##_atomic_add (T* dest, T value, int pe); \
+static void shmem_ctx_##N##_atomic_add (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ shmem_##N##_atomic_add(dest, value, pe); }
 
-#define SHMEM_ATOMIC_FETCH(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch (const T* dest, int pe);
-#define SHMEM_ATOMIC_SET(N,T) SHMEM_SCOPE void shmem_##N##_atomic_set (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_swap (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_FETCH(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch (const T* dest, int pe); \
+static T shmem_ctx_##N##_atomic_fetch (shmem_ctx_t ctx, const T* dest, int pe) \
+{ return shmem_##N##_atomic_fetch(dest, pe); }
+#define SHMEM_ATOMIC_SET(N,T) SHMEM_SCOPE void shmem_##N##_atomic_set (T* dest, T value, int pe); \
+static void shmem_ctx_##N##_atomic_set (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ shmem_##N##_atomic_set(dest, value, pe); }
+#define SHMEM_ATOMIC_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_swap (T* dest, T value, int pe); \
+static T shmem_ctx_##N##_atomic_swap (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ return shmem_##N##_atomic_swap(dest, value, pe); }
 
-#define SHMEM_ATOMIC_FETCH_AND(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_and (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_AND(N,T) SHMEM_SCOPE void shmem_##N##_atomic_and (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_FETCH_OR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_or (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_OR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_or (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_FETCH_XOR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_xor (T* dest, T value, int pe);
-#define SHMEM_ATOMIC_XOR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_xor (T* dest, T value, int pe);
+#define SHMEM_ATOMIC_FETCH_AND(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_and (T* dest, T value, int pe); \
+static T shmem_ctx_##N##_atomic_fetch_and (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ return shmem_##N##_atomic_fetch_and(dest, value, pe); }
+#define SHMEM_ATOMIC_AND(N,T) SHMEM_SCOPE void shmem_##N##_atomic_and (T* dest, T value, int pe); \
+static void shmem_ctx_##N##_atomic_and (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ shmem_##N##_atomic_and(dest, value, pe); }
+#define SHMEM_ATOMIC_FETCH_OR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_or (T* dest, T value, int pe); \
+static T shmem_ctx_##N##_atomic_fetch_or (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ return shmem_##N##_atomic_fetch_or(dest, value, pe); }
+#define SHMEM_ATOMIC_OR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_or (T* dest, T value, int pe); \
+static void shmem_ctx_##N##_atomic_or (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ shmem_##N##_atomic_or(dest, value, pe); }
+#define SHMEM_ATOMIC_FETCH_XOR(N,T) SHMEM_SCOPE T shmem_##N##_atomic_fetch_xor (T* dest, T value, int pe); \
+static T shmem_ctx_##N##_atomic_fetch_xor (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ return shmem_##N##_atomic_fetch_xor(dest, value, pe); }
+#define SHMEM_ATOMIC_XOR(N,T) SHMEM_SCOPE void shmem_##N##_atomic_xor (T* dest, T value, int pe); \
+static void shmem_ctx_##N##_atomic_xor (shmem_ctx_t ctx, T* dest, T value, int pe) \
+{ shmem_##N##_atomic_xor(dest, value, pe); }
 
 DECL_STANDARD_AMO(SHMEM_ATOMIC_COMPARE_SWAP)
 DECL_STANDARD_AMO(SHMEM_ATOMIC_FETCH_INC)
@@ -330,7 +307,28 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 DECL_P2P(DECL_SHMEM_X_WAIT)
 DECL_P2P(DECL_SHMEM_X_WAIT_UNTIL)
 DECL_P2P(DECL_SHMEM_X_TEST)
+/*
+ALIAS_SHMEM_X_TEST(int32,int32_t,int)
+ALIAS_SHMEM_X_TEST(int64,int64_t,longlong)
+ALIAS_SHMEM_X_TEST(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_TEST(uint64,uint64_t,ulonglong)
+ALIAS_SHMEM_X_TEST(size,size_t,uint)
+ALIAS_SHMEM_X_TEST(ptrdiff,ptrdiff_t,int)
 
+ALIAS_SHMEM_X_WAIT(int32,int32_t,int)
+ALIAS_SHMEM_X_WAIT(int64,int64_t,longlong)
+ALIAS_SHMEM_X_WAIT(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_WAIT(uint64,uint64_t,ulonglong)
+ALIAS_SHMEM_X_WAIT(size,size_t,uint)
+ALIAS_SHMEM_X_WAIT(ptrdiff,ptrdiff_t,int)
+
+ALIAS_SHMEM_X_WAIT_UNTIL(int32,int32_t,int)
+ALIAS_SHMEM_X_WAIT_UNTIL(int64,int64_t,longlong)
+ALIAS_SHMEM_X_WAIT_UNTIL(uint32,uint32_t,uint)
+ALIAS_SHMEM_X_WAIT_UNTIL(uint64,uint64_t,ulonglong)
+ALIAS_SHMEM_X_WAIT_UNTIL(size,size_t,uint)
+ALIAS_SHMEM_X_WAIT_UNTIL(ptrdiff,ptrdiff_t,int)
+*/
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
 
@@ -407,99 +405,99 @@ SHMEM_SCOPE void shmem_alltoall64(void* dest, const void* source, size_t nelems,
 SHMEM_SCOPE void shmem_alltoalls32(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_alltoalls64(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync);
 
-#define SHMEM_PUT_NBI(N,T) \
-SHMEM_SCOPE void shmem_##N##_put_nbi (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_put_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_PUT_NBI)
-#define DECL_SHMEM_X_PUT_NBI(N,T) \
-SHMEM_SCOPE void shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_SHMEM_X_PUT_NBI(putmem,void)
-DECL_SHMEM_X_PUT_NBI(put8,void)
-DECL_SHMEM_X_PUT_NBI(put16,void)
-DECL_SHMEM_X_PUT_NBI(put32,void)
-DECL_SHMEM_X_PUT_NBI(put64,void)
-DECL_SHMEM_X_PUT_NBI(put128,void)
+#define DECL_SHMEM_SIZE_RMAS(SIZE) \
+SHMEM_SCOPE void shmem_put##SIZE##_nbi (void *dest, const void *source, size_t nelems, int pe); \
+static void shmem_ctx_put##SIZE##_nbi (shmem_ctx_t ctx, void *dest, const void *source, size_t nelems, int pe) \
+{ shmem_put##SIZE##_nbi (dest, source, nelems, pe); } \
+SHMEM_SCOPE void shmem_get##SIZE##_nbi (void *dest, const void *source, size_t nelems, int pe); \
+static void shmem_ctx_get##SIZE##_nbi (shmem_ctx_t ctx, void *dest, const void *source, size_t nelems, int pe) \
+{ shmem_get##SIZE##_nbi (dest, source, nelems, pe); } \
+SHMEM_SCOPE void shmem_put##SIZE (void *dest, const void *source, size_t nelems, int pe); \
+static void shmem_ctx_put##SIZE (shmem_ctx_t ctx, void *dest, const void *source, size_t nelems, int pe) \
+{ shmem_put##SIZE (dest, source, nelems, pe); } \
+SHMEM_SCOPE void shmem_get##SIZE (void *dest, const void *source, size_t nelems, int pe); \
+static void shmem_ctx_get##SIZE (shmem_ctx_t ctx, void *dest, const void *source, size_t nelems, int pe) \
+{ shmem_get##SIZE (dest, source, nelems, pe); } \
+SHMEM_SCOPE void shmem_iput##SIZE (void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
+static void shmem_ctx_iput##SIZE (shmem_ctx_t ctx, void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iput##SIZE (dest, source, dst, sst, nelems, pe); } \
+SHMEM_SCOPE void shmem_iget##SIZE (void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
+static void shmem_ctx_iget##SIZE (shmem_ctx_t ctx, void *dest, const void *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iget##SIZE (dest, source, dst, sst, nelems, pe); }
 
-#define SHMEM_GET_NBI(N,T) \
-SHMEM_SCOPE void shmem_##N##_get_nbi (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_get_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_GET_NBI)
-#define DECL_SHMEM_X_GET_NBI(N,T) \
-SHMEM_SCOPE void shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_SHMEM_X_GET_NBI(getmem,void)
-DECL_SHMEM_X_GET_NBI(get8,void)
-DECL_SHMEM_X_GET_NBI(get16,void)
-DECL_SHMEM_X_GET_NBI(get32,void)
-DECL_SHMEM_X_GET_NBI(get64,void)
-DECL_SHMEM_X_GET_NBI(get128,void)
+DECL_SHMEM_SIZE_RMAS(8)
+DECL_SHMEM_SIZE_RMAS(16)
+DECL_SHMEM_SIZE_RMAS(32)
+DECL_SHMEM_SIZE_RMAS(64)
+DECL_SHMEM_SIZE_RMAS(128)
 
-#define SHMEM_PUT(N,T) \
-SHMEM_SCOPE void shmem_##N##_put (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_put (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_PUT)
-#define DECL_SHMEM_X_PUT(N,T) \
-SHMEM_SCOPE void shmem_##N (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_SHMEM_X_PUT(putmem,void)
-DECL_SHMEM_X_PUT(put8,void)
-DECL_SHMEM_X_PUT(put16,void)
-DECL_SHMEM_X_PUT(put32,void)
-DECL_SHMEM_X_PUT(put64,void)
-DECL_SHMEM_X_PUT(put128,void)
+#define shmem_putmem_nbi(...) shmem_put8_nbi(__VA_ARGS__)
+#define shmem_getmem_nbi(...) shmem_get8_nbi(__VA_ARGS__)
+#define shmem_putmem(...) shmem_put8(__VA_ARGS__)
+#define shmem_getmem(...) shmem_get8(__VA_ARGS__)
+#define shmem_ctx_putmem_nbi(ctx,...) shmem_put8_nbi(__VA_ARGS__)
+#define shmem_ctx_getmem_nbi(...) shmem_get8_nbi(__VA_ARGS__)
+#define shmem_ctx_putmem(ctx,...) shmem_put8(__VA_ARGS__)
+#define shmem_ctx_getmem(ctx,...) shmem_get8(__VA_ARGS__)
 
-#define SHMEM_GET(N,T) \
-SHMEM_SCOPE void shmem_##N##_get (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N##_get (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_GET)
-#define DECL_SHMEM_X_GET(N,T) \
-SHMEM_SCOPE void shmem_##N (T *dest, const T *source, size_t nelems, int pe); \
-static void shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe);
-DECL_SHMEM_X_GET(getmem,void)
-DECL_SHMEM_X_GET(get8,void)
-DECL_SHMEM_X_GET(get16,void)
-DECL_SHMEM_X_GET(get32,void)
-DECL_SHMEM_X_GET(get64,void)
-DECL_SHMEM_X_GET(get128,void)
+#define DECL_SHMEM_TYPE_RMA(TYPE,TYPENAME,SIZE) \
+static void shmem_##TYPENAME##_put_nbi (TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_put##SIZE##_nbi (dest, source, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_put_nbi (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_put##SIZE##_nbi (dest, source, nelems, pe); } \
+static void shmem_##TYPENAME##_get_nbi (TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_get##SIZE##_nbi (dest, source, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_get_nbi (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_get##SIZE##_nbi (dest, source, nelems, pe); } \
+static void shmem_##TYPENAME##_put (TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_put##SIZE (dest, source, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_put (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_put##SIZE (dest, source, nelems, pe); } \
+static void shmem_##TYPENAME##_get (TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_get##SIZE (dest, source, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_get (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, size_t nelems, int pe) \
+{ shmem_get##SIZE (dest, source, nelems, pe); } \
+static void shmem_##TYPENAME##_p (TYPE *dest, TYPE value, int pe) \
+{ TYPE* ptr = (TYPE*)shmem_ptr((void*)dest, pe); *ptr = value; } \
+static void shmem_ctx_##TYPENAME##_p (shmem_ctx_t ctx, TYPE *dest, TYPE value, int pe) \
+{ shmem_##TYPENAME##_p (dest, value, pe); } \
+static TYPE shmem_##TYPENAME##_g (TYPE *source, int pe) \
+{ return *((TYPE*)shmem_ptr((void*)source, pe)); } \
+static TYPE shmem_ctx_##TYPENAME##_g (TYPE *source, int pe) \
+{ return shmem_##TYPENAME##_g (source, pe); } \
+static void shmem_##TYPENAME##_iput (TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iput##SIZE (dest, source, dst, sst, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_iput (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iput##SIZE (dest, source, dst, sst, nelems, pe); } \
+static void shmem_##TYPENAME##_iget (TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iget##SIZE (dest, source, dst, sst, nelems, pe); } \
+static void shmem_ctx_##TYPENAME##_iget (shmem_ctx_t ctx, TYPE *dest, const TYPE *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe) \
+{ shmem_iget##SIZE (dest, source, dst, sst, nelems, pe); }
 
-#define SHMEM_P(X,T) \
-static void shmem_##X##_p (T *dest, T value, int pe) \
-{ T* ptr = (T*)shmem_ptr((void*)dest, pe); *ptr = value; } \
-static void shmem_ctx_##X##_p (shmem_ctx_t ctx, T *dest, T value, int pe);
-DECL_STANDARD_RMA(SHMEM_P)
-
-#define SHMEM_G(X,T) \
-static T shmem_##X##_g (T *addr, int pe) \
-{ return *((T*)shmem_ptr((void*)addr, pe)); } \
-static T shmem_ctx_##X##_g (T *addr, int pe);
-DECL_STANDARD_RMA(SHMEM_G)
-
-#define SHMEM_IPUT(N,T) \
-SHMEM_SCOPE void shmem_##N##_iput (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
-static void shmem_ctx_##N##_iput (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_IPUT)
-#define DECL_SHMEM_X_IPUT(N,T) \
-SHMEM_SCOPE void shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
-static void shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
-DECL_SHMEM_X_IPUT(iput8,void)
-DECL_SHMEM_X_IPUT(iput16,void)
-DECL_SHMEM_X_IPUT(iput32,void)
-DECL_SHMEM_X_IPUT(iput64,void)
-DECL_SHMEM_X_IPUT(iput128,void)
-
-#define SHMEM_IGET(N,T) \
-SHMEM_SCOPE void shmem_##N##_iget (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
-static void shmem_ctx_##N##_iget (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
-DECL_STANDARD_RMA(SHMEM_IGET)
-#define DECL_SHMEM_X_IGET(N,T) \
-SHMEM_SCOPE void shmem_##N (T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe); \
-static void shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, ptrdiff_t dst, ptrdiff_t sst, size_t nelems, int pe);
-DECL_SHMEM_X_IGET(iget8,void)
-DECL_SHMEM_X_IGET(iget16,void)
-DECL_SHMEM_X_IGET(iget32,void)
-DECL_SHMEM_X_IGET(iget64,void)
-DECL_SHMEM_X_IGET(iget128,void)
+DECL_SHMEM_TYPE_RMA(float,              float,       32)
+DECL_SHMEM_TYPE_RMA(double,             double,      64)
+DECL_SHMEM_TYPE_RMA(long double,        longdouble, 128)
+DECL_SHMEM_TYPE_RMA(char,               char,         8)
+DECL_SHMEM_TYPE_RMA(signed char,        schar,        8)
+DECL_SHMEM_TYPE_RMA(short,              short,       16)
+DECL_SHMEM_TYPE_RMA(int,                int,         32)
+DECL_SHMEM_TYPE_RMA(long,               long,        32)
+DECL_SHMEM_TYPE_RMA(long long,          longlong,    64)
+DECL_SHMEM_TYPE_RMA(unsigned char,      uchar,        8)
+DECL_SHMEM_TYPE_RMA(unsigned short,     ushort,      16)
+DECL_SHMEM_TYPE_RMA(unsigned int,       uint,        32)
+DECL_SHMEM_TYPE_RMA(unsigned long,      ulong,       32)
+DECL_SHMEM_TYPE_RMA(unsigned long long, ulonglong,   64)
+DECL_SHMEM_TYPE_RMA(int8_t,             int8,         8)
+DECL_SHMEM_TYPE_RMA(int16_t,            int16,       16)
+DECL_SHMEM_TYPE_RMA(int32_t,            int32,       32)
+DECL_SHMEM_TYPE_RMA(int64_t,            int64,       64)
+DECL_SHMEM_TYPE_RMA(uint8_t,            uint8,        8)
+DECL_SHMEM_TYPE_RMA(uint16_t,           uint16,      16)
+DECL_SHMEM_TYPE_RMA(uint32_t,           uint32,      32)
+DECL_SHMEM_TYPE_RMA(uint64_t,           uint64,      64)
+DECL_SHMEM_TYPE_RMA(size_t,             size,        32)
+DECL_SHMEM_TYPE_RMA(ptrdiff_t,          ptrdiff,     32)
 
 #ifndef __cplusplus
 
@@ -570,6 +568,7 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define __atomic_fetch_xor(dest,value,pe)         DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_FETCH_XOR_GENERIC)(dest,value,pe)
 #define __atomic_xor(dest,value,pe)               DECL_GENERIC_BITWISE_AMO(dest,SHMEM_ATOMIC_XOR_GENERIC)(dest,value,pe)
 
+
 #define __ctx_atomic_fetch_inc(ctx,dest,pe)               DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_INC_GENERIC)(ctx,dest,pe)
 #define __ctx_atomic_inc(ctx,dest,pe)                     DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_INC_GENERIC)(ctx,dest,pe)
 #define __ctx_atomic_fetch_add(ctx,dest,value,pe)         DECL_GENERIC_STANDARD_AMO(dest,SHMEM_CTX_ATOMIC_FETCH_ADD_GENERIC)(ctx,dest,value,pe)
@@ -588,7 +587,6 @@ DECL_SHMEM_X_IGET(iget128,void)
 #define GET_MACRO2(_2,_1,_0,F,...) F
 #define GET_MACRO3(_3,_2,_1,_0,F,...) F
 #define GET_MACRO4(_4,_3,_2,_1,_0,F,...) F
-#define GET_MACRO5(_5,_4,_3,_2,_1,_0,F,...) F
 #define GET_MACRO6(_6,_5,_4,_3,_2,_1,_0,F,...) F
 
 #define shmem_atomic_fetch_inc(...)    GET_MACRO2(__VA_ARGS__, __ctx_atomic_fetch_inc,    __atomic_fetch_inc)(__VA_ARGS__);

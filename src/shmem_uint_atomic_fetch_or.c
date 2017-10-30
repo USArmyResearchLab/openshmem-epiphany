@@ -36,7 +36,6 @@ extern "C" {
 #endif
 
 SHMEM_X_ATOMIC_FETCH_OR(uint,unsigned int)
-ALIAS_SHMEM_X_ATOMIC_FETCH_OR(uint32,uint32_t,uint)
 
 #ifdef __cplusplus
 }

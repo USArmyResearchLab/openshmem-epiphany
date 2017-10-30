@@ -36,8 +36,6 @@ extern "C" {
 #endif
 
 SHMEM_X_ATOMIC_SET(longlong,long long)
-ALIAS_SHMEM_X_SET(longlong,long long,longlong)
-ALIAS_SHMEM_X_ATOMIC_SET(int64,int64_t,longlong)
 
 #ifdef __cplusplus
 }

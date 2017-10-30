@@ -37,7 +37,7 @@ __shmem_##N##_atomic_fetch_add (T *ptr, T value, int pe) \
 	long* x = (long*)shmem_ptr((void*)&__shmem.lock_atomic_##N, pe); \
 	__shmem_set_lock(x); \
 	T r = *ptr; \
-	T incr = r +  value; \
+	T incr = r + value; \
 	*ptr = incr; \
 	__shmem_clear_lock(x); \
 	return r; \
@@ -47,10 +47,7 @@ shmem_##N##_atomic_fetch_add (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_fetch_add(ptr, value, pe); \
-} \
-static T \
-shmem_ctx_##N##_atomic_fetch_add (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ return shmem_##N##_atomic_fetch_add(dest, value, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_ADD(N,T,A) \
 SHMEM_SCOPE T \

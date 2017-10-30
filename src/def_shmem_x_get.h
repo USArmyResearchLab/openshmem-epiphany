@@ -38,26 +38,19 @@ extern "C" {
 #define SHMEM_X_GET_NBI(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(source,pe), nelems << S); } \
-static void \
-shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
-{ shmem_##N##_nbi(dest, source, nelems, pe); }
+{ shmemx_memcpy_nbi((void*)dest, shmem_ptr(source,pe), nelems << S); }
 
 #define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
 SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A "_nbi"))); \
-static void \
-shmem_ctx_##N##_nbi (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_nbi")));
-
+__attribute__((alias("shmem_" #A "_nbi")));
 
 #ifdef SHMEM_USE_IPI_GET
 
 typedef struct
 {
 	volatile long   lock;
-	volatile void (*pmemcpy)(void*,void*,size_t);
+	volatile void (*pmemcpy)(void*,const void*,size_t);
 	volatile void*  source;
 	volatile void*  dest;
 	volatile size_t nelems;
@@ -78,8 +71,8 @@ shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
 		volatile unsigned int* remote_ilatst = shmem_ptr((void*)0xf042c, pe); \
 		shmem_ipi_args_t* remote_args = (shmem_ipi_args_t*)shmem_ptr((void*)&shmem_ipi_args, pe); \
 		__shmem_set_lock(&(remote_args->lock)); /* spin until prior transfers complete */ \
-		remote_args->pmemcpy = shmemx_memcpy##S; /* setting parameters */ \
-		remote_args->source = source; \
+		remote_args->pmemcpy = (volatile void (*)(void*,const void*,size_t))shmemx_memcpy##S; /* setting parameters */ \
+		remote_args->source = (volatile void*)source; \
 		remote_args->dest = dest; \
 		remote_args->nelems = nelems; \
 		remote_args->pcomplete = (void*)((__shmem.coreid << 20) | (unsigned int) &(shmem_ipi_args.complete)); \
@@ -87,20 +80,14 @@ shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
 		while(!(shmem_ipi_args.complete)); /* spin until remote core signals it's done */ \
 		shmem_ipi_args.complete = 0; /* reset interrupt completion */ \
 	} \
-} \
-static void \
-shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
-{ shmem_##N(dest, source, nelems, pe); }
+}
 
 #else
 
 #define SHMEM_X_GET(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
-{ shmemx_memcpy##S((void*)dest, shmem_ptr((void*)source,pe), nelems); } \
-static void \
-shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
-{ shmem_##N(dest, source, nelems, pe); }
+{ shmemx_memcpy##S((void*)dest, shmem_ptr((void*)source,pe), nelems); }
 
 #endif
 

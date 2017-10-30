@@ -1,5 +1,5 @@
 DEFS = -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
-CFLAGS = -O3
+CFLAGS = -O3 -Wall -Wno-unused-function
 CORES = 16
 NP = $(shell seq 1 $(CORES))
 
@@ -48,10 +48,6 @@ report: report.pdf
 %.x: %.c $(DEPENDS)
 	coprcc $(DEFS) $(INCS) $(LIBS) $< $(DEPENDS) -o $@
 
-%.o: %.x
-	coprcc --extract $< -o $@
-	coprcc-info -j -l 100 $@
-
 .S.o:
 	e-gcc -c $<
 
@@ -92,6 +88,6 @@ clean:
 	rm -f *.o
 	rm -f *.dat
 
-distclean: clean 
+distclean: clean
 	rm -f *.x
 	rm -f *.pdf

@@ -47,10 +47,7 @@ shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	return __shmem_##N##_atomic_fetch_inc(ptr, pe); \
-} \
-static T \
-shmem_ctx_##N##_atomic_fetch_inc (shmem_ctx_t ctx, T *dest, int pe) \
-{ return shmem_##N##_atomic_fetch_inc(dest, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_FETCH_INC(N,T,A) \
 SHMEM_SCOPE T \

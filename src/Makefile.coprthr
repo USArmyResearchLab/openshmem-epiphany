@@ -1,5 +1,6 @@
 CC = coprcc
 AR = e-ar
+CFLAGS = -Wall -Wno-unused-function
 DEFS = -fno-unroll-loops -mfp-mode=caller
 INCS =
 LIBS =

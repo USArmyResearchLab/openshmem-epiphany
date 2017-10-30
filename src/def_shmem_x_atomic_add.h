@@ -44,10 +44,7 @@ shmem_##N##_atomic_add (T *dest, T value, int pe) \
 { \
 	T* ptr = (T*)shmem_ptr((void*)dest, pe); \
 	__shmem_##N##_atomic_add(ptr, value, pe); \
-} \
-static void \
-shmem_ctx_##N##_atomic_add (shmem_ctx_t ctx, T *dest, T value, int pe) \
-{ shmem_##N##_atomic_add(dest, value, pe); }
+}
 
 #define ALIAS_SHMEM_X_ATOMIC_ADD(N,T,A) \
 SHMEM_SCOPE void \
