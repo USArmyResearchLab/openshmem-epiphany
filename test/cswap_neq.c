@@ -53,11 +53,6 @@ int main (void)
 	int npes = shmem_n_pes();
 	dest = me;
 
-	int nxtpe = me + 1;
-	if (nxtpe >= npes) nxtpe -= npes;
-
-	int cond = -1;
-
 	if (me == 0) {
 		host_printf("# SHMEM Atomic CSwap (not equal) Performance for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
@@ -65,6 +60,11 @@ int main (void)
 
 	for (npe = 2; npe <= npes; npe++)
 	{
+		int nxtpe = me + 1;
+		if (nxtpe >= npe) nxtpe -= npe;
+
+		int cond = -1;
+
 		shmem_barrier_all();
 		ctimer_start();
 

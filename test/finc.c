@@ -52,9 +52,6 @@ int main (void)
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
-	int nxtpe = me + 1;
-	if (nxtpe >= npes) nxtpe -= npes;
-
 	if (me == 0) {
 		host_printf("# SHMEM Atomic Fetch-and-Increment Performance for variable NPES\n" \
 			"# NPES\tLatency (nanoseconds)\n");
@@ -62,6 +59,9 @@ int main (void)
 
 	for (npe = 2; npe <= npes; npe++)
 	{
+		int nxtpe = me + 1;
+		if (nxtpe >= npe) nxtpe -= npe;
+
 		shmem_barrier_all();
 		ctimer_start();
 

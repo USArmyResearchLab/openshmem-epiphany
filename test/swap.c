@@ -60,7 +60,7 @@ int main (void)
 	for (npe = 2; npe <= npes; npe++)
 	{
 		int nxtpe = me + 1;
-		if (nxtpe >= npes) nxtpe -= npes;
+		if (nxtpe >= npe) nxtpe -= npe;
 
 		int prev = 0;
 		dest = -me;
