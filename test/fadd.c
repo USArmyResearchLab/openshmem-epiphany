@@ -60,7 +60,9 @@ int main (void)
 	for (npe = 2; npe <= npes; npe++)
 	{
 		dest = 0;
-		int nxtpe = (me + 1) % npe;
+		int nxtpe = me + 1;
+		if (nxtpe >= npes) nxtpe -= npes;
+
 		shmem_barrier_all();
 		ctimer_start();
 

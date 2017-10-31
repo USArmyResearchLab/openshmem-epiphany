@@ -53,7 +53,9 @@ int main (void)
 	int npes = shmem_n_pes();
 	dest = me;
 
-	int nxtpe = (me + 1) % npes;
+	int nxtpe = me + 1;
+	if (nxtpe >= npes) nxtpe -= npes;
+
 	int cond = nxtpe;
 
 	if (me == 0) {

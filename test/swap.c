@@ -59,7 +59,9 @@ int main (void)
 
 	for (npe = 2; npe <= npes; npe++)
 	{
-		int nxtpe = (me + 1) % npe;
+		int nxtpe = me + 1;
+		if (nxtpe >= npes) nxtpe -= npes;
+
 		int prev = 0;
 		dest = -me;
 		shmem_barrier_all();
