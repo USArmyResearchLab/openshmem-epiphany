@@ -52,7 +52,8 @@ int main (void)
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
 
-	int nxtpe = (me + 1) % npes;
+	int nxtpe = me + 1;
+	if (nxtpe >= npes) nxtpe -= npes;
 
 	int* source = (int*)shmem_align(NELEMENT * sizeof(int), 0x2000);
 	int* target = (int*)shmem_align(NELEMENT * sizeof(int), 0x2000);
