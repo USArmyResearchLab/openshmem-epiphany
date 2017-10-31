@@ -88,8 +88,8 @@ enum shmem_cmp_constants
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_malloc(size_t size);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_align(size_t alignment, size_t size);
-SHMEM_SCOPE void shmem_free(const void *ptr);
-SHMEM_SCOPE void* shmem_realloc(const void* ptr, size_t size);
+SHMEM_SCOPE void shmem_free(void *ptr);
+SHMEM_SCOPE void* shmem_realloc(void* ptr, size_t size);
 
 #define shmem_fence(...) shmem_quiet(__VA_ARGS__)
 SHMEM_SCOPE void shmem_quiet(void);

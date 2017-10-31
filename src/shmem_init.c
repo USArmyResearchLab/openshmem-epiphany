@@ -106,7 +106,7 @@ shmem_ipi_args_t shmem_ipi_args = {
 };
 
 SHMEM_SCOPE void __attribute__((interrupt ("swi"))) 
-__shmem_user_isr(int signum)
+__shmem_user_isr(void)
 {
 	shmem_ipi_args.pmemcpy(shmem_ipi_args.dest, shmem_ipi_args.source, shmem_ipi_args.nelems);
 	*(shmem_ipi_args.pcomplete) = 1; // inform remote PE
