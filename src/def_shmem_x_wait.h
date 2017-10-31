@@ -41,9 +41,4 @@ shmem_##N##_wait (T *ivar, T cmp_value) \
 	while (*p == cmp_value); \
 }
 
-#define ALIAS_SHMEM_X_WAIT(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_wait (T *ivar, T cmp_value) \
-__attribute__((alias("shmem_" #A "_wait"), deprecated));
-
 #endif

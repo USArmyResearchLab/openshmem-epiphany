@@ -48,17 +48,4 @@ shmem_##N##_atomic_swap (T *dest, T value, int pe) \
 	return __shmem_##N##_atomic_swap(ptr, value, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_SWAP(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_atomic_swap (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_swap"))); \
-static T \
-shmem_ctx_##N##_atomic_swap (shmem_ctx_t ctx, T *dest, T value, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_swap")));
-
-#define ALIAS_SHMEM_X_SWAP(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_swap (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_swap"), deprecated));
-
 #endif

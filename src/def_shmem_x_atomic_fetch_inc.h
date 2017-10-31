@@ -49,17 +49,4 @@ shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
 	return __shmem_##N##_atomic_fetch_inc(ptr, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_FETCH_INC(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_atomic_fetch_inc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch_inc")));\
-static T \
-shmem_ctx_##N##_atomic_fetch_inc (shmem_ctx_t ctx, T *dest, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_fetch_inc")));
-
-#define ALIAS_SHMEM_X_FINC(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_finc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch_inc"), deprecated));
-
 #endif

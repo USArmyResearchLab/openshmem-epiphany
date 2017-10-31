@@ -41,17 +41,4 @@ shmem_##N##_atomic_set (T *dest, T value, int pe) \
 	__shmem_##N##_atomic_set(ptr, value, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_SET(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_atomic_set (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_set"))); \
-static void \
-shmem_ctx_##N##_atomic_set (shmem_ctx_t ctx, T *dest, T value, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_set")));
-
-#define ALIAS_SHMEM_X_SET(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_set (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_set"), deprecated));
-
 #endif

@@ -41,17 +41,4 @@ shmem_##N##_atomic_fetch (const T *dest, int pe) \
 	return __shmem_##N##_atomic_fetch(ptr, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_FETCH(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_atomic_fetch (const T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch"))); \
-static T \
-shmem_ctx_##N##_atomic_fetch (shmem_ctx_t ctx, const T *dest, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_fetch")));
-
-#define ALIAS_SHMEM_X_FETCH(N,T,A) \
-SHMEM_SCOPE T \
-shmem_##N##_fetch (const T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_fetch"), deprecated));
-
 #endif

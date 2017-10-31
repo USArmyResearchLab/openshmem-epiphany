@@ -62,9 +62,4 @@ shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value) \
 	return 0; \
 }
 
-#define ALIAS_SHMEM_X_TEST(N,T,A) \
-SHMEM_SCOPE int \
-shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value) \
-__attribute__((alias("shmem_" #A "_test")));
-
 #endif

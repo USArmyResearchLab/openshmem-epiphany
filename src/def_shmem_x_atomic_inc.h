@@ -46,17 +46,4 @@ shmem_##N##_atomic_inc (T *dest, int pe) \
 	__shmem_##N##_atomic_inc(ptr, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_INC(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_atomic_inc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_inc"))); \
-static void \
-shmem_ctx_##N##_atomic_inc (shmem_ctx_t ctx, T *dest, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_inc")));
-
-#define ALIAS_SHMEM_X_INC(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_inc (T *dest, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_inc"), deprecated));
-
 #endif

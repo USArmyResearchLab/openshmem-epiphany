@@ -36,20 +36,10 @@ SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
 { shmemx_memcpy_nbi(shmem_ptr(dest,pe), (void*)source, nelems << S); }
 
-#define ALIAS_SHMEM_X_PUT_NBI(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A "_nbi")));
-
 #define SHMEM_X_PUT(N,T,S) \
 SHMEM_SCOPE void \
 shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
 { shmemx_memcpy##S(shmem_ptr(dest,pe), (void*)source, nelems); }
-
-#define ALIAS_SHMEM_X_PUT(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A)));
 
 #endif
 

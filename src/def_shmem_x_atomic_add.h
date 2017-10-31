@@ -46,17 +46,4 @@ shmem_##N##_atomic_add (T *dest, T value, int pe) \
 	__shmem_##N##_atomic_add(ptr, value, pe); \
 }
 
-#define ALIAS_SHMEM_X_ATOMIC_ADD(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_atomic_add (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_add"))); \
-static void \
-shmem_ctx_##N##_atomic_add (shmem_ctx_t ctx, T *dest, T value, int pe) \
-__attribute__((alias("shmem_ctx_" #A "_atomic_add")));
-
-#define ALIAS_SHMEM_X_ADD(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_add (T *dest, T value, int pe) \
-__attribute__((alias("shmem_" #A "_atomic_add"), deprecated));
-
 #endif

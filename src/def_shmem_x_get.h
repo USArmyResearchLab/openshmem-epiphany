@@ -40,11 +40,6 @@ SHMEM_SCOPE void \
 shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
 { shmemx_memcpy_nbi((void*)dest, shmem_ptr(source,pe), nelems << S); }
 
-#define ALIAS_SHMEM_X_GET_NBI(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A "_nbi")));
-
 #ifdef SHMEM_USE_IPI_GET
 
 typedef struct
@@ -90,14 +85,6 @@ shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
 { shmemx_memcpy##S((void*)dest, shmem_ptr((void*)source,pe), nelems); }
 
 #endif
-
-#define ALIAS_SHMEM_X_GET(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A))); \
-static void \
-shmem_ctx_##N (shmem_ctx_t ctx, T *dest, const T *source, size_t nelems, int pe) \
-__attribute__((alias("shmem_ctx_" #A)));
 
 #ifdef __cplusplus
 }

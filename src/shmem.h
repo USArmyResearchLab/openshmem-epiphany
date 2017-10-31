@@ -307,28 +307,7 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 DECL_P2P(DECL_SHMEM_X_WAIT)
 DECL_P2P(DECL_SHMEM_X_WAIT_UNTIL)
 DECL_P2P(DECL_SHMEM_X_TEST)
-/*
-ALIAS_SHMEM_X_TEST(int32,int32_t,int)
-ALIAS_SHMEM_X_TEST(int64,int64_t,longlong)
-ALIAS_SHMEM_X_TEST(uint32,uint32_t,uint)
-ALIAS_SHMEM_X_TEST(uint64,uint64_t,ulonglong)
-ALIAS_SHMEM_X_TEST(size,size_t,uint)
-ALIAS_SHMEM_X_TEST(ptrdiff,ptrdiff_t,int)
 
-ALIAS_SHMEM_X_WAIT(int32,int32_t,int)
-ALIAS_SHMEM_X_WAIT(int64,int64_t,longlong)
-ALIAS_SHMEM_X_WAIT(uint32,uint32_t,uint)
-ALIAS_SHMEM_X_WAIT(uint64,uint64_t,ulonglong)
-ALIAS_SHMEM_X_WAIT(size,size_t,uint)
-ALIAS_SHMEM_X_WAIT(ptrdiff,ptrdiff_t,int)
-
-ALIAS_SHMEM_X_WAIT_UNTIL(int32,int32_t,int)
-ALIAS_SHMEM_X_WAIT_UNTIL(int64,int64_t,longlong)
-ALIAS_SHMEM_X_WAIT_UNTIL(uint32,uint32_t,uint)
-ALIAS_SHMEM_X_WAIT_UNTIL(uint64,uint64_t,ulonglong)
-ALIAS_SHMEM_X_WAIT_UNTIL(size,size_t,uint)
-ALIAS_SHMEM_X_WAIT_UNTIL(ptrdiff,ptrdiff_t,int)
-*/
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
 
