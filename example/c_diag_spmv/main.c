@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 	// allocate memory on device and write a value
 	int o = (d-1)/2;
 	float* A = (float*)malloc(n*d*sizeof(float));
-	float* xp = (float*)calloc((n+d-1),sizeof(float)); // padded x-vector
+	float* xp = (float*)calloc(n*(2*d-1),sizeof(float)); // padded x-vector
 	float* x = xp + o; // x vector with offset
 	float* y = (float*)calloc(n,sizeof(float));
 
