@@ -62,13 +62,14 @@
 #include <coprthr.h>
 #include <host_stdio.h>
 #include <shmem.h>
+#include <stdint.h>
 
 #define N 512
 
 // global arrays to use in separate subroutines
 long pSync[SHMEM_BARRIER_SYNC_SIZE];
-int shared_data0[N];
-int shared_data1[N];
+int32_t shared_dataA[N];
+int32_t shared_dataB[N];
 
 #define FNX(X) \
 void __dynamic_call fn##X(void) \
@@ -77,9 +78,9 @@ void __dynamic_call fn##X(void) \
 void __dynamic_call fn##X(void) \
 { \
 	int next_pe = (shmem_my_pe() + 1) % 5; \
-	shmem_put(shared_data1, shared_data0, N, next_pe); \
+	shmem_put32(shared_dataB, shared_dataA, N, next_pe); \
 	shmem_barrier(START,0,SIZE,pSync); \
-	host_printf("fn%d shared_data1[%d] = %d\n", X, N-1, shared_data1[N-1]); \
+	host_printf("fn%d shared_dataB[%d] = %d\n", X, N-1, shared_dataB[N-1]); \
 }
 
 FNXB(0,0,5) FNXB(1,0,5) FNXB(2,0,5) FNXB(3,0,5) FNXB(4,0,5)
@@ -105,10 +106,10 @@ int main(void)
 	// initializing data
 	for (i = 0; i < SHMEM_BARRIER_SYNC_SIZE; i++)
 		pSync[i] = SHMEM_SYNC_VALUE;
-	int val = (me < 5) ? me : 0;
+	int32_t val = (me < 5) ? me : 0;
 	for (i = 0; i < N; i++) {
-		shared_data0[i] = val;
-		shared_data1[i] = 0;
+		shared_dataA[i] = val;
+		shared_dataB[i] = 0;
 	}
 
 	// waiting for all PEs to initialize data
