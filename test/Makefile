@@ -84,7 +84,17 @@ report.pdf: figures version.dat git.dat pes.dat report.tex
 	pdflatex report.tex # re-running to get indexes right
 
 run: $(TARGETS)
-	@$(foreach x,$(TARGETS),$(foreach n,$(NP),echo -e "-------------------\ncoprsh -np $(n) ./$(x)" && coprsh -np $(n) ./$(x) &&)) echo "Complete"
+	@$(foreach x,$(TARGETS),coprsh -np $(CORES) ./$(x) 2> /dev/null &&) echo "Complete"
+
+test: $(TARGETS)
+	@$(foreach x,$(TARGETS), \
+		$(foreach n,$(NP), \
+			printf "%-3d%-17.17s " $(n) "$(x) ................" && coprsh -np $(n) ./$(x) 2> /dev/null | \
+				grep -i ERROR &> /dev/null && \
+					echo -e "[\\033[1;31mFAIL\\033[0m]" || echo -e "[\\033[1;32mpass\\033[0m]" && \
+		) \
+	) \
+	echo "Complete"
 
 clean:
 	rm -f *.aux
