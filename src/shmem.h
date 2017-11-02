@@ -56,6 +56,12 @@
 #define _SHMEM_REDUCE_MIN_WRKDATA_SIZE  SHMEM_REDUCE_MIN_WRKDATA_SIZE
 #define _SHMEM_SYNC_VALUE               SHMEM_SYNC_VALUE
 #define _SHMEM_COLLECT_SYNC_SIZE        SHMEM_COLLECT_SYNC_SIZE
+#define _SHMEM_CMP_EQ                   SHMEM_CMP_EQ
+#define _SHMEM_CMP_NE                   SHMEM_CMP_NE
+#define _SHMEM_CMP_GT                   SHMEM_CMP_GT
+#define _SHMEM_CMP_GE                   SHMEM_CMP_GE
+#define _SHMEM_CMP_LT                   SHMEM_CMP_LT
+#define _SHMEM_CMP_LE                   SHMEM_CMP_LE
 #define _my_pe(...)                     shmem_my_pe(__VA_ARGS__)
 #define _num_pes(...)                   shmem_n_pes(__VA_ARGS__)
 #define shmalloc(...)                   shmem_malloc(__VA_ARGS__)
