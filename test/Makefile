@@ -89,7 +89,7 @@ run: $(TARGETS)
 test: $(TARGETS)
 	@$(foreach x,$(TARGETS), \
 		$(foreach n,$(NP), \
-			printf "%-3d%-17.17s " $(n) "$(x) ................" && coprsh -np $(n) ./$(x) 2> /dev/null | \
+			printf "%-3d%-27.27s " $(n) "$(x) .........................." && coprsh -np $(n) ./$(x) 2> /dev/null | \
 				grep -i ERROR &> /dev/null && \
 					echo -e "[\\033[1;31mFAIL\\033[0m]" || echo -e "[\\033[1;32mpass\\033[0m]" && \
 		) \
