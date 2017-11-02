@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 shmem_internals_t __shmem = { 0 };
+const shmem_ctx_t SHMEM_CTX_DEFAULT = __CTX_DEFAULT;
 
 #ifdef SHMEM_USE_WAND_BARRIER
 

@@ -104,7 +104,7 @@ typedef enum shmem_cmp
 
 typedef long shmem_ctx_t;
 
-extern const shmem_ctx_t SHMEM_CTX_DEFAULT = __CTX_DEFAULT;
+extern const shmem_ctx_t SHMEM_CTX_DEFAULT;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_calloc(size_t count, size_t size);
