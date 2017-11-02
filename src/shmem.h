@@ -54,7 +54,6 @@
 #define SHMEM_THREAD_FUNNELED           __THREAD_FUNNELED
 #define SHMEM_THREAD_SERIALIZED         __THREAD_SERIALIZED
 #define SHMEM_THREAD_MULTIPLE           __THREAD_MULTIPLE
-#define SHMEM_CTX_DEFAULT               __CTX_DEFAULT
 #define SHMEM_CTX_SERIALIZED            __CTX_SERIALIZED
 #define SHMEM_CTX_PRIVATE               __CTX_PRIVATE
 #define SHMEM_CTX_NOSTORE               __CTX_NOSTORE
@@ -103,7 +102,9 @@ typedef enum shmem_cmp
 	SHMEM_CMP_LE
 } shmem_cmp_t;
 
-typedef void* shmem_ctx_t;
+typedef long shmem_ctx_t;
+
+extern const shmem_ctx_t SHMEM_CTX_DEFAULT = __CTX_DEFAULT;
 
 SHMEM_SCOPE void* shmem_ptr(const void* dest, int pe);
 SHMEM_SCOPE void* __attribute__((malloc)) shmem_calloc(size_t count, size_t size);
@@ -115,8 +116,7 @@ SHMEM_SCOPE void* shmem_realloc(void* ptr, size_t size);
 #define shmem_fence(...) shmem_quiet(__VA_ARGS__)
 #define shmem_ctx_fence(ctx) shmem_ctx_quiet(ctx)
 SHMEM_SCOPE void shmem_quiet(void);
-static void shmem_ctx_quiet(shmem_ctx_t ctx)
-{ shmem_quiet(); }
+SHMEM_SCOPE void shmem_ctx_quiet(shmem_ctx_t ctx);
 
 SHMEM_SCOPE void shmem_clear_lock (long* lock);
 SHMEM_SCOPE void shmem_set_lock (long* lock);

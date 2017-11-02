@@ -85,7 +85,7 @@
 #define  __THREAD_SERIALIZED 2
 #define  __THREAD_MULTIPLE   3
 
-#define  __CTX_DEFAULT    NULL
+#define  __CTX_DEFAULT    0
 #define  __CTX_SERIALIZED 1
 #define  __CTX_PRIVATE    2
 #define  __CTX_NOSTORE    4

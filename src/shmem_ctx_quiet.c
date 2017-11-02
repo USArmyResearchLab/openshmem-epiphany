@@ -27,18 +27,17 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-#include "shmem.h"
 #include "internals.h"
+#include "shmem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_SCOPE int
-shmem_ctx_create(long options, shmem_ctx_t *ctx)
+SHMEM_SCOPE void
+shmem_ctx_quiet(shmem_ctx_t ctx)
 {
-	*ctx = options;
-	return 0;
+	if (!(ctx | SHMEM_CTX_NOSTORE)) shmem_quiet();
 }
 
 #ifdef __cplusplus
