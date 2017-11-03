@@ -56,7 +56,7 @@ int main (void)
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
-	for (npe = 2; npe <= npes; npe++)
+	for (npe = 1; npe <= npes; npe++)
 	{
 		shmem_barrier_all();
 		ctimer_start();

@@ -5,6 +5,6 @@ set title "Epiphany-III OpenSHMEM Barrier Performance (Dissemination)"
 set xlabel "Number of Processing Elements"
 set ylabel "Latency (μsec)"
 set key bottom right
-set xr [2:16]
+set xr [1:16]
 set style circle
 plot "barrier.dat" using 1:($2/1000) title 'Runtime w/ variable #PEs' with linespoints,
