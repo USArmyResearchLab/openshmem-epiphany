@@ -1,6 +1,7 @@
 # Object files
 *.o
 *.elf
+*.e32
 
 # Libraries
 *.a
