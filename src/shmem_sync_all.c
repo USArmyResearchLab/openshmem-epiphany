@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,13 +34,36 @@
 extern "C" {
 #endif
 
+#ifdef SHMEM_USE_WAND_BARRIER
+
 SHMEM_SCOPE void
-shmem_barrier_all(void)
+shmem_sync_all(void)
 {
-	shmem_quiet();
-	shmem_sync_all();
-	__shmem.dma_used = 0; // reset
+	__asm__ __volatile__ (
+		"gid               \n" // disable interrupts
+		"wand              \n" // wait on AND
+		".balignw 8,0x01a2 \n" // nop align gie/idle pair to block
+		"gie               \n" // enable interrupts
+		"idle              \n" // to go sleep
+	);
 }
+
+#else
+
+SHMEM_SCOPE void
+shmem_sync_all(void)
+{
+	int c;
+	for (c = 0; c < __shmem.n_pes_log2; c++)
+	{
+		volatile long* lock = (volatile long*)(__shmem.barrier_sync + c);
+		*(__shmem.barrier_psync[c]) = 1;
+		while (*lock == SHMEM_SYNC_VALUE);
+		*lock = SHMEM_SYNC_VALUE;
+	}
+}
+
+#endif
 
 #ifdef __cplusplus
 }

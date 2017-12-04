@@ -49,12 +49,15 @@ shmem_quiet(void)
 			"   bne .Loop%=          \n" // spin until both complete
 			: : : "r0", "r1", "r2", "cc"
 		);
+		// XXX This isn't a great way to guarantee the data has finished
 		if (__shmem.cdst0) {
-			while(*__shmem.cdst0 == __shmem.csrc0);
+			if(*__shmem.cdst0 == __shmem.csrc0);
+				*__shmem.cdst0 = ~__shmem.csrc0;
 			__shmem.cdst0 = 0;
 		}
 		if (__shmem.cdst1) {
-			while(*__shmem.cdst1 == __shmem.csrc1);
+			if(*__shmem.cdst1 == __shmem.csrc1);
+				*__shmem.cdst1 = ~__shmem.csrc1;
 			__shmem.cdst1 = 0;
 		}
 	}

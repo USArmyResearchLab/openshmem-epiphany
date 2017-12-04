@@ -171,9 +171,9 @@ F(uint,unsigned int) \
 F(ulong,unsigned long) \
 F(ulonglong,unsigned long long) \
 F(int32,int32_t) \
-F(int64,int64_t) /*\
+F(int64,int64_t) \
 F(uint32,uint32_t) \
-F(uint64,uint64_t)*/
+F(uint64,uint64_t)
 
 #define DECL_P2P(F) \
 F(short,short) \
@@ -317,8 +317,8 @@ DECL_P2P(DECL_SHMEM_X_TEST)
 SHMEM_SCOPE void shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync);
 SHMEM_SCOPE void shmem_barrier_all(void);
 
-#define shmem_sync(...) shmem_barrier(__VA_ARGS__)
-#define shmem_sync_all(...) shmem_barrier_all(__VA_ARGS__)
+SHMEM_SCOPE void shmem_sync(int PE_start, int logPE_stride, int PE_size, long *pSync);
+SHMEM_SCOPE void shmem_sync_all(void);
 
 #define DECL_SHMEM_X_TO_ALL(N,T) \
 SHMEM_SCOPE void shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync);
@@ -593,14 +593,45 @@ DECL_SHMEM_TYPE_RMA(ptrdiff_t,          ptrdiff,     32)
 #define shmem_wait_until(ivar,cmp,cmp_value) DECL_GENERIC_P2P(ivar,SHMEM_WAIT_UNTIL_GENERIC)(ivar,cmp,cmp_value)
 #define shmem_test(ivar,cmp,value)           DECL_GENERIC_P2P(ivar,SHMEM_TEST_GENERIC)(ivar,cmp,value)
 
-#define shmem_finc(...)  shmem_atomic_fetch_inc(__VA_ARGS__)
-#define shmem_inc(...)   shmem_atomic_inc(__VA_ARGS__)
-#define shmem_fadd(...)  shmem_atomic_fetch_add(__VA_ARGS__)
-#define shmem_add(...)   shmem_atomic_add(__VA_ARGS__)
-#define shmem_cswap(...) shmem_atomic_compare_swap(__VA_ARGS__)
-#define shmem_swap(...)  shmem_atomic_swap(__VA_ARGS__)
-#define shmem_fetch(...) shmem_atomic_fetch(__VA_ARGS__)
-#define shmem_set(...)   shmem_atomic_set(__VA_ARGS__)
+#define shmem_add   shmem_atomic_add
+#define shmem_cswap shmem_atomic_compare_swap
+#define shmem_fadd  shmem_atomic_fetch_add
+#define shmem_fetch shmem_atomic_fetch
+#define shmem_finc  shmem_atomic_fetch_inc
+#define shmem_inc   shmem_atomic_inc
+#define shmem_set   shmem_atomic_set
+#define shmem_swap  shmem_atomic_swap
+
+#define shmem_int_add        shmem_int_atomic_add
+#define shmem_long_add       shmem_long_atomic_add
+#define shmem_longlong_add   shmem_longlong_atomic_add
+#define shmem_int_cswap      shmem_int_atomic_compare_swap
+#define shmem_long_cswap     shmem_long_atomic_compare_swap
+#define shmem_longlong_cswap shmem_longlong_atomic_compare_swap
+#define shmem_int_fadd       shmem_int_atomic_fetch_add
+#define shmem_long_fadd      shmem_long_atomic_fetch_add
+#define shmem_longlong_fadd  shmem_longlong_atomic_fetch_add
+#define shmem_int_fetch      shmem_int_atomic_fetch
+#define shmem_long_fetch     shmem_long_atomic_fetch
+#define shmem_longlong_fetch shmem_longlong_atomic_fetch
+#define shmem_float_fetch    shmem_float_atomic_fetch
+#define shmem_double_fetch   shmem_double_atomic_fetch
+#define shmem_int_finc       shmem_int_atomic_fetch_inc
+#define shmem_long_finc      shmem_long_atomic_fetch_inc
+#define shmem_longlong_finc  shmem_longlong_atomic_fetch_inc
+#define shmem_int_inc        shmem_int_atomic_inc
+#define shmem_long_inc       shmem_long_atomic_inc
+#define shmem_longlong_inc   shmem_longlong_atomic_inc
+#define shmem_int_set        shmem_int_atomic_set
+#define shmem_long_set       shmem_long_atomic_set
+#define shmem_longlong_set   shmem_longlong_atomic_set
+#define shmem_float_set      shmem_float_atomic_set
+#define shmem_double_set     shmem_double_atomic_set
+#define shmem_int_swap       shmem_int_atomic_swap
+#define shmem_long_swap      shmem_long_atomic_swap
+#define shmem_longlong_swap  shmem_longlong_atomic_swap
+#define shmem_float_swap     shmem_float_atomic_swap
+#define shmem_double_swap    shmem_double_atomic_swap
 
 #define __put_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_PUT_NBI_GENERIC)(dest,source,nelems,pe)
 #define __get_nbi(dest,source,nelems,pe)      DECL_GENERIC_STANDARD_RMA(dest,SHMEM_GET_NBI_GENERIC)(dest,source,nelems,pe)

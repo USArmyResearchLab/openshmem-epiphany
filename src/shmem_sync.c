@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,12 +34,39 @@
 extern "C" {
 #endif
 
+SHMEM_SCOPE void SHMEM_INLINE
+__shmem_sync_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync)
+{ /* Routine for PE_size <= 2. Looping over shmem_barrier() for npes = 2 may
+	* not work correctly.  Solution requires using testset because only
+	* sychronization stage may not be reset before subsequent call */
+	if (PE_size == 1) return;
+	int PE_step = 0x1 << logPE_stride;
+	if (__shmem.my_pe != PE_start) PE_step *= -1;
+	int to = __shmem.my_pe + PE_step;
+	volatile long* lock = (volatile long*)pSync;
+	__shmem_set_lock((long*)shmem_ptr((void*)lock, to));
+	while (*lock == SHMEM_SYNC_VALUE);
+	*lock = 0;
+}
+
 SHMEM_SCOPE void
-shmem_barrier_all(void)
+shmem_sync(int PE_start, int logPE_stride, int PE_size, long *pSync)
 {
-	shmem_quiet();
-	shmem_sync_all();
-	__shmem.dma_used = 0; // reset
+	if (PE_size < 3) return __shmem_sync_lte2(PE_start, logPE_stride, PE_size, pSync);
+	int PE_size_stride = PE_size << logPE_stride;
+	int PE_end = PE_size_stride + PE_start;
+
+	int c, r;
+	for (c = 0, r = (1 << logPE_stride); r < PE_size_stride; c++, r <<= 1)
+	{
+		int to = __shmem.my_pe + r;
+		if (to >= PE_end) to -= PE_size_stride;
+		volatile long* lock = (volatile long*)(pSync + c);
+		long * remote_lock = (long*)shmem_ptr((void*)lock, to);
+		*remote_lock = 1;
+		while (*lock == SHMEM_SYNC_VALUE);
+		*lock = SHMEM_SYNC_VALUE;
+	}
 }
 
 #ifdef __cplusplus

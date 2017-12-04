@@ -202,6 +202,8 @@
 #include "shmem_size_atomic_inc.c"
 #include "shmem_size_atomic_set.c"
 #include "shmem_size_atomic_swap.c"
+#include "shmem_sync.c"
+#include "shmem_sync_all.c"
 #include "shmem_test_lock.c"
 #include "shmem_uint32_atomic_add.c"
 #include "shmem_uint32_atomic_and.c"
