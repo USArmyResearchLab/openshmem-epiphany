@@ -69,7 +69,7 @@ SHMEMRandomAccessPowerOf2( my_args_t* args )
 		int k = k_global & kmask1;
 		int q = k_global >> peshift; // the processor number
 		if (N > 11) { // The percentage of errors is high for small N...
-			uint64_t* ptk = shmem_ptr(t + k, q);
+			uint32_t* ptk = (uint32_t*)shmem_ptr(t + k, q);
 			*ptk ^= a;
 		} else { // ...so use atomic xor to be error-free
 			shmem_uint32_atomic_xor(t + k, a, q);
