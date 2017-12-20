@@ -82,7 +82,7 @@ report.pdf: figures version.dat git.dat pes.dat report.tex
 run: $(TARGETS)
 	@$(foreach x,$(TARGETS),coprsh -np $(CORES) ./$(x) 2> /dev/null &&) echo "Complete"
 
-test: $(TARGETS)
+check: $(TARGETS)
 	@$(foreach x,$(TARGETS), \
 		$(foreach n,$(NP), \
 			printf "%-3d%-27.27s " $(n) "$(x) .........................." && coprsh -np $(n) ./$(x) 2> /dev/null | \

@@ -17,6 +17,9 @@ TARGETS = main.x $(KERNEL)
 
 all: $(TARGETS)
 
+run: main.x
+	./$<
+
 .PHONY: clean distclean
 
 .SUFFIXES:

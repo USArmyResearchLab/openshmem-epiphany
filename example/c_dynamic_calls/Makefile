@@ -14,6 +14,11 @@ TARGETS = $(SRC_FILES:.c=.x)
 
 all: $(TARGETS)
 
+run: all
+	@$(foreach x,$(TARGETS), \
+		./run.sh \
+	)
+
 info: all $(OBJ_FILES)
 
 .PHONY: clean install uninstall

@@ -14,6 +14,8 @@ OBJS = $(SRC_FILES:.c=.o) $(ASM_FILES:.S=.o)
 
 all: $(TARGETS)
 
+run:
+
 .PHONY: clean install uninstall
 
 .SUFFIXES:
