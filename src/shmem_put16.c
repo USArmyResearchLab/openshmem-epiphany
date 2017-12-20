@@ -37,8 +37,6 @@ extern "C" {
 
 SHMEM_X_PUT(put16,void,16)
 
-ALIAS_SHMEM_X_PUT(short_put,short,put16)
-
 #ifdef __cplusplus
 }
 #endif

@@ -35,6 +35,10 @@
 extern "C" {
 #endif
 
+// C11 _Noreturn function specifier to shmem_global_exit
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 20112L)
+_Noreturn
+#endif
 SHMEM_SCOPE void
 shmem_global_exit(int status)
 {

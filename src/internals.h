@@ -78,6 +78,17 @@
 #define __COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
 #define __ALLTOALL_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
 #define __ALLTOALLS_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
+#define __SYNC_SIZE                 ( __REDUCE_SYNC_SIZE ) // maximum of SYNC_SIZEs
+
+#define  __THREAD_SINGLE     0
+#define  __THREAD_FUNNELED   1
+#define  __THREAD_SERIALIZED 2
+#define  __THREAD_MULTIPLE   3
+
+#define  __CTX_DEFAULT    0
+#define  __CTX_SERIALIZED 1
+#define  __CTX_PRIVATE    2
+#define  __CTX_NOSTORE    4
 
 #if __cplusplus
 extern "C" {
@@ -104,6 +115,15 @@ typedef struct {
 	volatile long lock_atomic_int;
 	volatile long lock_atomic_long;
 	volatile long lock_atomic_longlong;
+	volatile long lock_atomic_uint;
+	volatile long lock_atomic_ulong;
+	volatile long lock_atomic_ulonglong;
+	volatile long lock_atomic_int32;
+	volatile long lock_atomic_int64;
+	volatile long lock_atomic_uint32;
+	volatile long lock_atomic_uint64;
+	volatile long lock_atomic_size;
+	volatile long lock_atomic_ptrdiff;
 	volatile long lock_atomic_float;
 	volatile long lock_atomic_double;
 	volatile long lock_receive_finished;
@@ -132,5 +152,33 @@ SHMEM_SCOPE int __shmem_test_lock (volatile long* x);
 #if __cplusplus
 }
 #endif
+
+#include "def_shmem_alltoall_x.h"
+#include "def_shmem_alltoalls.h"
+#include "def_shmem_broadcastx.h"
+#include "def_shmem_collect_n.h"
+#include "def_shmem_fcollect_n.h"
+#include "def_shmem_x_atomic_add.h"
+#include "def_shmem_x_atomic_and.h"
+#include "def_shmem_x_atomic_compare_swap.h"
+#include "def_shmem_x_atomic_fetch.h"
+#include "def_shmem_x_atomic_fetch_add.h"
+#include "def_shmem_x_atomic_fetch_and.h"
+#include "def_shmem_x_atomic_fetch_inc.h"
+#include "def_shmem_x_atomic_fetch_or.h"
+#include "def_shmem_x_atomic_fetch_xor.h"
+#include "def_shmem_x_atomic_inc.h"
+#include "def_shmem_x_atomic_or.h"
+#include "def_shmem_x_atomic_set.h"
+#include "def_shmem_x_atomic_swap.h"
+#include "def_shmem_x_atomic_xor.h"
+#include "def_shmem_x_get.h"
+#include "def_shmem_x_iget.h"
+#include "def_shmem_x_iput.h"
+#include "def_shmem_x_put.h"
+#include "def_shmem_x_test.h"
+#include "def_shmem_x_to_all.h"
+#include "def_shmem_x_wait.h"
+#include "def_shmem_x_wait_until.h"
 
 #endif

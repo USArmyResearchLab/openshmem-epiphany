@@ -1,5 +1,5 @@
 DEFS = -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
-CFLAGS = -O3
+CFLAGS = -O3 -Wall -Wno-unused-function
 CORES = 16
 NP = $(shell seq 1 $(CORES))
 
@@ -19,12 +19,12 @@ FIGS = $(PLOT_FILES:.gnuplot=.pdf)
 DEPENDS = 
 
 TARGETS = \
-	add.x alltoall64.x barrier.x broadcast32.x broadcast64.x \
-	collect32.x collect64.x cswap_eq.x cswap_neq.x \
-	fadd.x fcollect32.x fcollect64.x fetch.x \
-	finc.x get.x get_ipi.x get_nb.x get_nb_dual.x hello.x inc.x put.x \
-	put32.x put64.x put_nb.x put_nb_dual.x reduce.x set.x \
-	swap.x
+	alltoall64.x atomic_add.x atomic_compare_swap_eq.x \
+	atomic_compare_swap_neq.x atomic_fetch_add.x atomic_fetch.x \
+	atomic_fetch_inc.x atomic_inc.x atomic_set.x atomic_swap.x barrier.x \
+	broadcast32.x broadcast64.x collect32.x collect64.x fcollect32.x \
+	fcollect64.x get.x get_ipi.x get_nb.x get_nb_dual.x hello.x put.x \
+	put32.x put64.x put_nb.x put_nb_dual.x reduce.x
 
 OBJ_FILES = $(DEPENDS) $(SRC_FILES:.c=.o)
 
@@ -36,7 +36,7 @@ info: all $(OBJ_FILES)
 
 report: report.pdf
 
-.PHONY: clean install uninstall
+.PHONY: run test check clean install uninstall
 
 .SUFFIXES:
 .SUFFIXES: .c .o .x .S .dat .pdf .tex
@@ -47,10 +47,6 @@ report: report.pdf
 
 %.x: %.c $(DEPENDS)
 	coprcc $(DEFS) $(INCS) $(LIBS) $< $(DEPENDS) -o $@
-
-%.o: %.x
-	coprcc --extract $< -o $@
-	coprcc-info -j -l 100 $@
 
 .S.o:
 	e-gcc -c $<
@@ -75,7 +71,7 @@ pes.dat:
 %.pdf: %.dat $(FIGURES)%.gnuplot
 	gnuplot -e "filename='$@'; set loadpath '$(FIGURES)'; load '$*.gnuplot'"
 
-atomics.pdf: add.dat cswap_neq.dat cswap_eq.dat swap.dat finc.dat inc.dat fadd.dat fetch.dat set.dat $(FIGURES)atomics.gnuplot
+atomics.pdf: atomic_add.dat atomic_compare_swap_neq.dat atomic_compare_swap_eq.dat atomic_swap.dat atomic_fetch_inc.dat atomic_inc.dat atomic_fetch_add.dat atomic_fetch.dat atomic_set.dat $(FIGURES)atomics.gnuplot
 	gnuplot -e "filename='$@'; set loadpath '$(FIGURES)'; load 'atomics.gnuplot'"
 
 report.pdf: figures version.dat git.dat pes.dat report.tex
@@ -86,7 +82,8 @@ report.pdf: figures version.dat git.dat pes.dat report.tex
 run: $(TARGETS)
 	@$(foreach x,$(TARGETS),coprsh -np $(CORES) ./$(x) 2> /dev/null &&) echo "Complete"
 
-test: $(TARGETS)
+test: check
+check: $(TARGETS)
 	@$(foreach x,$(TARGETS), \
 		$(foreach n,$(NP), \
 			printf "%-3d%-27.27s " $(n) "$(x) .........................." && coprsh -np $(n) ./$(x) 2> /dev/null | \
@@ -102,6 +99,6 @@ clean:
 	rm -f *.o
 	rm -f *.dat
 
-distclean: clean 
+distclean: clean
 	rm -f *.x
 	rm -f *.pdf

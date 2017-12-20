@@ -9,11 +9,14 @@ SHMEM = ../../src
 INCS = -I. -I$(COPRTHR)/include -I$(SHMEM) -I../../common
 LIBS = -L$(COPRTHR)/lib -lcoprthr -lcoprthrcc -lm
 
-ELIBS = -L$(COPRTHR)/lib -lcoprthr_mpi -lcoprthr2_dev -L$(SHMEM) -lshmem_coprthr
+ELIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -L$(SHMEM) -lshmem_coprthr
 
 TARGET = main.x shmem_tfunc.e32
 
 all: $(TARGET)
+
+run: main.x
+	./$<
 
 .PHONY: clean install uninstall $(SUBDIRS)
 

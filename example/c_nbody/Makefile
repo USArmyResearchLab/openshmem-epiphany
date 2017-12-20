@@ -15,6 +15,9 @@ TARGET = main.x shmem_tfunc.e32 shmem_tfunc2.e32
 
 all: $(TARGET)
 
+run: main.x
+	./$<
+
 .PHONY: clean install uninstall $(SUBDIRS)
 
 .SUFFIXES:

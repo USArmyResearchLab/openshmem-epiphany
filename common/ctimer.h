@@ -30,6 +30,8 @@
 #ifndef _ctimer_h
 #define _ctimer_h
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,17 +88,17 @@ ctimer_start(void)
 	gettimeofday(&t0, 0);
 }
 
-static unsigned int
-ctimer_nsec(unsigned int t)
+static uint64_t
+ctimer_nsec(uint64_t t)
 {
 	return t;
 }
 
-static unsigned int inline __attribute__((__always_inline__)) 
+static uint64_t inline __attribute__((__always_inline__)) 
 ctimer(void)
 {
-	const static unsigned int r = 0xffffffff;
-	unsigned int ns; // nanoseconds passed since calling ctimer_start()
+	const static uint64_t r = 0xffffffffffffffff;
+	uint64_t ns; // nanoseconds passed since calling ctimer_start()
 	struct timeval t1;
 	gettimeofday(&t1,0);
 	ns = 1e9 * (t1.tv_sec - t0.tv_sec)

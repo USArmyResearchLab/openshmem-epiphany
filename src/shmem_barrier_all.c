@@ -34,40 +34,13 @@
 extern "C" {
 #endif
 
-#ifdef SHMEM_USE_WAND_BARRIER
-
 SHMEM_SCOPE void
 shmem_barrier_all(void)
 {
 	shmem_quiet();
-	__asm__ __volatile__ (
-		"gid               \n" // disable interrupts
-		"wand              \n" // wait on AND
-		".balignw 8,0x01a2 \n" // nop align gie/idle pair to block
-		"gie               \n" // enable interrupts
-		"idle              \n" // to go sleep
-	);
+	shmem_sync_all();
 	__shmem.dma_used = 0; // reset
 }
-
-#else
-
-SHMEM_SCOPE void
-shmem_barrier_all(void)
-{
-	shmem_quiet();
-	int c;
-	for (c = 0; c < __shmem.n_pes_log2; c++)
-	{
-		volatile long* lock = (volatile long*)(__shmem.barrier_sync + c);
-		*(__shmem.barrier_psync[c]) = 1;
-		while (*lock == SHMEM_SYNC_VALUE);
-		*lock = SHMEM_SYNC_VALUE;
-	}
-	__shmem.dma_used = 0; // reset
-}
-
-#endif
 
 #ifdef __cplusplus
 }

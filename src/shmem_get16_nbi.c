@@ -37,8 +37,6 @@ extern "C" {
 
 SHMEM_X_GET_NBI(get16,void,1)
 
-ALIAS_SHMEM_X_GET_NBI(short_get,short,get16)
-
 #ifdef __cplusplus
 }
 #endif

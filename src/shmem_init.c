@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 shmem_internals_t __shmem = { 0 };
+const shmem_ctx_t SHMEM_CTX_DEFAULT = __CTX_DEFAULT;
 
 #ifdef SHMEM_USE_WAND_BARRIER
 
@@ -97,7 +98,7 @@ __shmem_dissemination_barrier_init(void)
 
 shmem_ipi_args_t shmem_ipi_args = {
 	.lock = 0,
-	.pmemcpy = shmemx_memcpy,
+	.pmemcpy = (volatile void (*)(void*,const void*,size_t))shmemx_memcpy8,
 	.source = 0,
 	.dest = 0,
 	.nelems = 0,
@@ -108,7 +109,8 @@ shmem_ipi_args_t shmem_ipi_args = {
 SHMEM_SCOPE void __attribute__((interrupt ("swi"))) 
 __shmem_user_isr(void)
 {
-	shmem_ipi_args.pmemcpy(shmem_ipi_args.dest, shmem_ipi_args.source, shmem_ipi_args.nelems);
+	void (*pmemcpy)(void*,const void*,size_t) = (void (*)(void*,const void*,size_t))shmem_ipi_args.pmemcpy;
+	pmemcpy((void*)shmem_ipi_args.dest, (const void*)shmem_ipi_args.source, (size_t)shmem_ipi_args.nelems);
 	*(shmem_ipi_args.pcomplete) = 1; // inform remote PE
 	shmem_ipi_args.lock = 0; // free lock
 }

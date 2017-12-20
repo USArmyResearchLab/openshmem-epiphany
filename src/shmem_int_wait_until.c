@@ -28,14 +28,13 @@
  */
 
 #include "internals.h"
-#include "shmem.h"
 #include "def_shmem_x_wait_until.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_WAIT_UNTIL(int_wait_until,int)
+SHMEM_X_WAIT_UNTIL(int,int)
 
 #ifdef __cplusplus
 }

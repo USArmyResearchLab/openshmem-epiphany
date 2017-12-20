@@ -55,7 +55,7 @@ shmemx_memcpy_nbi(void *dst, const void *src, size_t nbytes)
 	__shmem.dma_desc.outer_stride = stride,
 	__shmem.dma_desc.config = config;
 	__shmem.dma_used = 1;
-#if 0 // XXX dual channel DMA may be unstable
+#if 1 // XXX dual channel DMA may be unstable
 	unsigned int dmachannel;
 	__asm__ __volatile__ (
 		"mov r0, #15             \n"

@@ -18,6 +18,9 @@ TARGETS = main.x $(KERNEL)
 
 all: $(TARGETS)
 
+run: main.x
+	./$<
+
 .PHONY: clean distclean
 
 .SUFFIXES:
@@ -25,6 +28,9 @@ all: $(TARGETS)
 
 main.x: main.c
 	$(CC) $(CFLAGS) $(INCS) main.c -o main.x $(LIBS)
+
+foo.x: foo.c
+	$(CC) $(CFLAGS) $(INCS) foo.c -o foo.x $(LIBS)
 
 shmem_tfunc.e32: shmem_tfunc.c dotprod.o
 	coprcc $(INCS) $(EDEFS) $(ELIBS) shmem_tfunc.c dotprod.o -o shmem_tfunc.e32

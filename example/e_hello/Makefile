@@ -16,6 +16,9 @@ OBJS = main.x e_task.elf
 
 all: $(OBJS)
 
+run: main.x
+	./$<
+
 # Build HOST side application
 .c.x:
 	gcc -O3 $< -o $@ $(EINCS) $(ELIBS) -lpthread

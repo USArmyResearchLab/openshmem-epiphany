@@ -35,9 +35,9 @@ extern "C" {
 #endif
 
 SHMEM_SCOPE int
-shmem_test_lock (volatile long* lock)
+shmem_test_lock (long* lock)
 {
-	long* x = __shmem_lock_ptr((const long*)lock);
+	volatile long* x = (volatile long*)__shmem_lock_ptr((const long*)lock);
 	return __shmem_test_lock(x);
 }
 

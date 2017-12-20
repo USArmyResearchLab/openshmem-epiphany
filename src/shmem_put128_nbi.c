@@ -37,8 +37,6 @@ extern "C" {
 
 SHMEM_X_PUT_NBI(put128,void,4)
 
-ALIAS_SHMEM_X_PUT_NBI(longdouble_put,long double,put128)
-
 #ifdef __cplusplus
 }
 #endif

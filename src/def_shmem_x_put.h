@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,23 +33,13 @@
 
 #define SHMEM_X_PUT_NBI(N,T,S) \
 SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy_nbi(shmem_ptr(dest,pe), (void*)src, nelems << S); }
-
-#define ALIAS_SHMEM_X_PUT_NBI(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N##_nbi (T *dest, const T *src, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A "_nbi")));
+shmem_##N##_nbi (T *dest, const T *source, size_t nelems, int pe) \
+{ shmemx_memcpy_nbi(shmem_ptr(dest,pe), (void*)source, nelems << S); }
 
 #define SHMEM_X_PUT(N,T,S) \
 SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-{ shmemx_memcpy##S(shmem_ptr(dest,pe), (void*)src, nelems); }
-
-#define ALIAS_SHMEM_X_PUT(N,T,A) \
-SHMEM_SCOPE void \
-shmem_##N (T *dest, const T *src, size_t nelems, int pe) \
-__attribute__((alias("shmem_" #A)));
+shmem_##N (T *dest, const T *source, size_t nelems, int pe) \
+{ shmemx_memcpy##S(shmem_ptr(dest,pe), (void*)source, nelems); }
 
 #endif
 

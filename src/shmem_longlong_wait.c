@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_WAIT(longlong_wait,long long)
+SHMEM_X_WAIT(longlong,long long)
 
 #ifdef __cplusplus
 }
