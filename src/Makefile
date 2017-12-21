@@ -37,4 +37,4 @@ clean:
 	rm -f *.elf *.o
 
 distclean: clean 
-	rm -f $(TARGETS)
+	rm -f *.a
