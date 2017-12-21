@@ -1,5 +1,15 @@
-SUBDIRS_ = $(wildcard */.)
-SUBDIRS  = $(SUBDIRS_:/.=)
+#SUBDIRS_ = $(wildcard */.)
+#SUBDIRS  = $(SUBDIRS_:/.=)
+
+SHMEM_ESDK = ../src/libshmem_esdk.a
+ifneq ("$(wildcard $(SHMEM_ESDK))","")
+SUBDIRS = e_hello
+endif
+
+COPRCC := $(shell command -v coprcc 2> /dev/null)
+ifdef COPRCC
+SUBDIRS += c_conjugate_gradient c_diag_spmv c_dynamic_calls c_gups c_nbody
+endif
 
 .PHONY: all $(SUBDIRS) clean distclean
 
