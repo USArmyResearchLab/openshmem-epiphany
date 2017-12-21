@@ -37,7 +37,7 @@ eSDK.
 Using
 -----
 
-You may type `make` to build all directories, or `make [source|example|test]`
+You may type `make` to build all directories, or `make [src|example|test]`
 to build individual subdirectories. Running `make run` will run example codes
 and a selection of test codes. Running `make check` will run all of the test
 codes with various parameters. There is no installation, but you should link to
