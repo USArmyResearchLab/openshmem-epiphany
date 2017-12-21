@@ -36,7 +36,7 @@
 
 #define SHMEM_X_WAIT_UNTIL(N,T) \
 SHMEM_SCOPE void \
-shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value) \
+shmem_##N##_wait_until (T *ivar, int cmp, T cmp_value) \
 { \
 	volatile T* p = (volatile T*)ivar; \
 	switch (cmp) { \

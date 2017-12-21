@@ -36,7 +36,7 @@
 
 #define SHMEM_X_TEST(N,T) \
 SHMEM_SCOPE int \
-shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value) \
+shmem_##N##_test (T *ivar, int cmp, T cmp_value) \
 { \
 	volatile T* p = (volatile T*)ivar; \
 	switch (cmp) { \

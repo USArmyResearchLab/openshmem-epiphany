@@ -92,7 +92,7 @@
 extern "C" {
 #endif
 
-typedef enum shmem_cmp
+enum shmem_cmp_constants
 {
 	SHMEM_CMP_EQ = 0,
 	SHMEM_CMP_NE,
@@ -100,7 +100,7 @@ typedef enum shmem_cmp
 	SHMEM_CMP_GE,
 	SHMEM_CMP_LT,
 	SHMEM_CMP_LE
-} shmem_cmp_t;
+};
 
 typedef long shmem_ctx_t;
 
@@ -307,8 +307,8 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_FETCH_XOR)
 DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 
 #define DECL_SHMEM_X_WAIT(N,T) SHMEM_SCOPE void shmem_##N##_wait (T *ivar, T cmp_value) __attribute__ ((deprecated));
-#define DECL_SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, shmem_cmp_t cmp, T cmp_value);
-#define DECL_SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, shmem_cmp_t cmp, T cmp_value);
+#define DECL_SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, int cmp, T cmp_value);
+#define DECL_SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, int cmp, T cmp_value);
 
 DECL_P2P(DECL_SHMEM_X_WAIT)
 DECL_P2P(DECL_SHMEM_X_WAIT_UNTIL)
