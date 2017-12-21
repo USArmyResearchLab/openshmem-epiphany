@@ -7,9 +7,10 @@ the *ARL OpenSHMEM for Epiphany* implementation for optimized one-sided
 communication, atomic, and collective operations for the
 [Adapteva](http://adapteva.com) Epiphany microarchitecture on the [Parallella
 board](http://parallella.org) (see [./src](./src)). Also included are
-microbenchmarks and test codes (see [./test](./test)). These codes require the
-COPRTHR-2 SDK. The library may be used without COPRTHR-2 and has been tested
-with the Parabuntu 2016.11 release.
+microbenchmarks (see [./example](./example)) and test codes (see
+[./test](./test)). These codes require the COPRTHR-2 SDK. The library may be
+used without COPRTHR-2 and has been tested with the Parabuntu 2016.11.1
+release.
 
 The OpenSHMEM implementation is based on the [OpenSHMEM 1.4
 Specification](http://openshmem.org/site/sites/default/site\_files/OpenSHMEM-1.4.pdf)
@@ -31,7 +32,7 @@ SDK](http://www.browndeertechnology.com/coprthr2.htm) to be able to run the
 non-commercial use.
 
 Although it's not required to build the library, a
-(Makefile)[./src/Makefile.esdk] is provided if you're using the vendor-provided
+[Makefile](./src/Makefile.esdk) is provided if you're using the vendor-provided
 eSDK.
 
 Using
