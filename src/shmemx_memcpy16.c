@@ -47,11 +47,11 @@ extern "C" {
  *  r1  = src, source pointer which we copy and then use as remainder
  *  r2  = nelem, number of elements and temporary register
  *  r3  = temporary register
- *  r55 = store the src here to free up r1 for 16-bit instructions
- *  r56 = r56-r57 used as dword src data
- *  r58 = r58-r59 used as dword src data
- *  r60 = r60-r61 used as dword src data
- *  r62 = r62-r63 used as dword src data
+ *  r16 = r16-r17 used as dword src data
+ *  r18 = r18-r19 used as dword src data
+ *  r20 = r20-r21 used as dword src data
+ *  r22 = r22-r23 used as dword src data
+ *  r24 = store the src here to free up r1 for 16-bit instructions
  *
 */
 
@@ -59,17 +59,17 @@ SHMEM_SCOPE void
 shmemx_memcpy16(void* dst, const void* src, size_t nelem)
 { // assumes dst and src are 16-bit aligned
 	__asm__ __volatile__(
-	"mov r55, %[src]                  \n" // this saves program space at cost of one instruction
+	"mov r24, %[src]                  \n" // this saves program space at cost of one instruction
 	"mov %[src], %[nelem]             \n"
 	"lsr r3, %[nelem], #2             \n"
 	"beq .LShortHandler%=             \n"
-	"orr r3, %[dst], r55              \n"
+	"orr r3, %[dst], r24              \n"
 	"lsl r3, r3, #29                  \n" // No shorts, just double words
 	"beq .LDwordHandler%=             \n"
 	"mov %[nelem], #4                 \n"
 	"lsr r3, r3, #30                  \n"
 	"sub %[nelem], %[nelem], r3       \n" // Correction for misalignment (4-r3)
-	"eor r3, %[dst], r55              \n"
+	"eor r3, %[dst], r24              \n"
 	"lsl r3, r3, #29                  \n" // Can the array alignment be corrected?
 	"beq .LShortHandler%=             \n"
 	"mov %[nelem], %[src]             \n" // perform full misaligned copy (slow)
@@ -77,7 +77,7 @@ shmemx_memcpy16(void* dst, const void* src, size_t nelem)
 	"sub %[src], %[src], %[nelem]     \n"
 	"b .LSubtractShort%=              \n"
 	".LSloop%=:                       \n"
-	"ldrh r3, [r55], #1               \n"
+	"ldrh r3, [r24], #1               \n"
 	"strh r3, [%[dst]], #1            \n"
 	".LSubtractShort%=:               \n"
 	"sub %[nelem], %[nelem], #1       \n"
@@ -94,14 +94,14 @@ shmemx_memcpy16(void* dst, const void* src, size_t nelem)
 	"movts le, r3                     \n"
 	".balignw 8,0x01a2                \n" // If alignment is correct, no need for nops
 	".LDstart%=:                      \n"
-	"ldrd r56, [r55], #1              \n"
-	"ldrd r58, [r55], #1              \n"
-	"strd r56, [%[dst]], #1           \n"
-	"ldrd r60, [r55], #1              \n"
-	"strd r58, [%[dst]], #1           \n"
-	"ldrd r62, [r55], #1              \n"
-	"strd r60, [%[dst]], #1           \n"
-	"strd r62, [%[dst]], #1           \n"
+	"ldrd r16, [r24], #1              \n"
+	"ldrd r18, [r24], #1              \n"
+	"strd r16, [%[dst]], #1           \n"
+	"ldrd r20, [r24], #1              \n"
+	"strd r18, [%[dst]], #1           \n"
+	"ldrd r22, [r24], #1              \n"
+	"strd r20, [%[dst]], #1           \n"
+	"strd r22, [%[dst]], #1           \n"
 	".LDend%=:                        \n"
 	"gie                              \n"
 	".LDremainder%=:                  \n"
@@ -110,8 +110,8 @@ shmemx_memcpy16(void* dst, const void* src, size_t nelem)
 	"beq .LDdone%=                    \n"
 	".LDloop%=:                       \n"
 	"sub r3, r3, #1                   \n"
-	"ldrd r56, [r55], #1              \n"
-	"strd r56, [%[dst]], #1           \n"
+	"ldrd r16, [r24], #1              \n"
+	"strd r16, [%[dst]], #1           \n"
 	"bne .LDloop%=                    \n"
 	".LDdone%=:                       \n"
 	"and %[nelem], %[src], %[nelem]   \n"
@@ -119,9 +119,9 @@ shmemx_memcpy16(void* dst, const void* src, size_t nelem)
 	"bgt .LShortHandler%=             \n"
 			: [dst] "+r" (dst), [src] "+r" (src), [nelem] "+r" (nelem)
 			:
-			: "r3", "r55",
-			  "r56", "r57", "r58", "r59",
-			  "r60", "r61", "r62", "r63"
+			: "r3", "r24",
+			  "r16", "r17", "r18", "r19",
+			  "r20", "r21", "r22", "r23"
 		);
 }
 

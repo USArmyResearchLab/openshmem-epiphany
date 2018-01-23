@@ -44,10 +44,10 @@ extern "C" {
  *  r1  = src, source pointer
  *  r2  = nelem, number of elements
  *  r3  = temporary register
- *  r56 = r56-r57 used as dword src data
- *  r58 = r58-r59 used as dword src data
- *  r60 = r60-r61 used as dword src data
- *  r62 = r62-r63 used as dword src data
+ *  r16 = r16-r17 used as dword src data
+ *  r18 = r18-r19 used as dword src data
+ *  r20 = r20-r21 used as dword src data
+ *  r22 = r22-r23 used as dword src data
  *
 */
 
@@ -65,29 +65,29 @@ shmemx_memcpy128(void* dst, const void* src, size_t nelem)
 	"movts le, r3                     \n"
 	".balignw 8,0x01a2                \n" // If alignment is correct, no need for nops
 	".LDstart%=:                      \n"
-	"ldrd r56, [%[src]], #1           \n"
-	"ldrd r58, [%[src]], #1           \n"
-	"strd r56, [%[dst]], #1           \n"
-	"ldrd r60, [%[src]], #1           \n"
-	"strd r58, [%[dst]], #1           \n"
-	"ldrd r62, [%[src]], #1           \n"
-	"strd r60, [%[dst]], #1           \n"
-	"strd r62, [%[dst]], #1           \n"
+	"ldrd r16, [%[src]], #1           \n"
+	"ldrd r18, [%[src]], #1           \n"
+	"strd r16, [%[dst]], #1           \n"
+	"ldrd r20, [%[src]], #1           \n"
+	"strd r18, [%[dst]], #1           \n"
+	"ldrd r22, [%[src]], #1           \n"
+	"strd r20, [%[dst]], #1           \n"
+	"strd r22, [%[dst]], #1           \n"
 	".LDend%=:                        \n"
 	"gie                              \n"
 	".LQremainder%=:                  \n"
 	"lsl %[nelem], %[nelem], #31      \n"
 	"beq .LDdone%=                    \n"
-	"ldrd r56, [%[src]], #1           \n"
-	"ldrd r58, [%[src]], #1           \n"
-	"strd r56, [%[dst]], #1           \n"
-	"strd r58, [%[dst]], #1           \n"
+	"ldrd r16, [%[src]], #1           \n"
+	"ldrd r18, [%[src]], #1           \n"
+	"strd r16, [%[dst]], #1           \n"
+	"strd r18, [%[dst]], #1           \n"
 	".LDdone%=:                       \n"
 			: [dst] "+r" (dst), [src] "+r" (src), [nelem] "+r" (nelem)
 			:
 			: "r3",
-			  "r56", "r57", "r58", "r59",
-			  "r60", "r61", "r62", "r63"
+			  "r16", "r17", "r18", "r19",
+			  "r20", "r21", "r22", "r23"
 		);
 }
 
