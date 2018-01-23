@@ -146,7 +146,6 @@ extern shmem_internals_t __shmem;
 SHMEM_SCOPE long* __shmem_lock_ptr (const long* p);
 SHMEM_SCOPE void __shmem_clear_lock (volatile long* x);
 SHMEM_SCOPE void __shmem_set_lock (volatile long* x);
-SHMEM_SCOPE void __shmem_set_lock_self (long* x);
 SHMEM_SCOPE int __shmem_test_lock (volatile long* x);
 
 #if __cplusplus

@@ -8,7 +8,6 @@
 #include "__shmem_clear_lock.c"
 #include "__shmem_lock_ptr.c"
 #include "__shmem_set_lock.c"
-#include "__shmem_set_lock_self.c"
 #include "__shmem_test_lock.c"
 #include "shmem_align.c"
 #include "shmem_alltoall32.c"
