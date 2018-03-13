@@ -1,5 +1,5 @@
-CC = e-gcc
-AR = e-ar
+CC = epiphany-elf-gcc
+AR = epiphany-elf-ar
 DEFS = -O3 -Wall -Wno-unused-function
 INCS =
 LIBS =
@@ -28,7 +28,7 @@ libshmem.a: libshmem_esdk.a
 	ln -sf $< $@
 
 .S.o:
-	e-gcc -c $<
+	$(CC) -c $<
 
 clean:
 	rm -f *.elf *.o

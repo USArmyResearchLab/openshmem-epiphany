@@ -25,7 +25,7 @@ run: main.x
 
 # Build DEVICE side program
 .c.elf:
-	e-gcc $(EDEFS) -T $(ELDF) $< -o $@ $(SINCS) $(SLIBS) -le-lib -lm -ffast-math
+	epiphany-elf-gcc $(EDEFS) -T $(ELDF) $< -o $@ $(SINCS) $(SLIBS) -le-lib -lm -ffast-math
 
 clean:
 	rm -f $(OBJS)

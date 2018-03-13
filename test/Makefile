@@ -6,7 +6,7 @@ NP = $(shell seq 1 $(CORES))
 COPRTHR = /usr/local/browndeer/coprthr2
 
 INCS = -I. -I$(COPRTHR)/include
-LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall -le-lib
+LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall
 LIBS += -L../src -lshmem
 DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to use header only library
 INCS += -I../src -I../common
@@ -49,7 +49,7 @@ report: report.pdf
 	coprcc $(DEFS) $(INCS) $(LIBS) $< $(DEPENDS) -o $@
 
 .S.o:
-	e-gcc -c $<
+	epiphany-elf-gcc -c $<
 
 %.o: %.x
 	coprcc --extract $< -o $@

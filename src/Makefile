@@ -1,5 +1,5 @@
 CC = coprcc
-AR = e-ar
+AR = epiphany-elf-ar
 CFLAGS = -Wall -Wno-unused-function
 DEFS = -fno-unroll-loops -mfp-mode=caller
 INCS =
@@ -31,7 +31,7 @@ libshmem.a: libshmem_coprthr.a
 	ln -sf $< $@
 
 .S.o:
-	e-gcc -c $<
+	epiphany-elf-gcc -c $<
 
 clean:
 	rm -f *.elf *.o

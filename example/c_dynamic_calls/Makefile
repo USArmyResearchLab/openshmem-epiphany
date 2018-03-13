@@ -37,7 +37,7 @@ info: all $(OBJ_FILES)
 	coprcc-info -j -l 100 $@
 
 .S.o:
-	e-gcc -c $<
+	epiphany-elf-gcc -c $<
 
 clean:
 	rm -f *.o

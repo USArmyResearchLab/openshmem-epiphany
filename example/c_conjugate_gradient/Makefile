@@ -39,7 +39,7 @@ shmem_tfunc.e32: shmem_tfunc.c dotprod.o
 	$(CC) $(CFLAGS) $(INCS) -c $<
 
 .S.o:
-	e-gcc $(ASFLAGS) -c $<
+	epiphany-elf-gcc $(ASFLAGS) -c $<
 
 info: $(KERNEL)
 	coprcc-info -j -l 100 shmem_tfunc.e32 
