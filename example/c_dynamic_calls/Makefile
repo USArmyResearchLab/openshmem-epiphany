@@ -4,7 +4,7 @@ COPRTHR = /usr/local/browndeer/coprthr2
 SHMEM = ../../src
 
 INCS = -I. -I$(COPRTHR)/include
-LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall -le-lib
+LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall
 LIBS += -L$(SHMEM) -lshmem_coprthr
 INCS += -I$(SHMEM)
 
