@@ -15,7 +15,7 @@ DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to u
 DEFS += -DSHMEM_USE_HEAP_START=0x2000
 INCS += -I../src -I../common
 
-DEFS += -DNLOOP=4
+#DEFS += -DNLOOP=4
 
 FIGURES = ./figures/
 SRC_FILES = $(wildcard *.c)

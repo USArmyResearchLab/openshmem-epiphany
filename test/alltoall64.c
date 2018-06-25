@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,8 +36,11 @@
 #include <shmem.h>
 #include "ctimer.h"
 
-#define NELEMENT 64
+#define MAXBYTES 8192
+
+#ifndef NLOOP
 #define NLOOP 10000
+#endif
 
 int main (void)
 {
@@ -52,10 +55,12 @@ int main (void)
 	shmem_init();
 	int me = shmem_my_pe();
 	int npes = shmem_n_pes();
+	int maxelement = MAXBYTES / (npes * sizeof(long long));
+	int sz = maxelement * npes * sizeof(long long);
 
-	long long* source = (long long*)shmem_malloc(NELEMENT * npes * sizeof (*source));
-	long long* target = (long long*)shmem_malloc(NELEMENT * npes * sizeof (*target));
-	for (i = 0; i < NELEMENT * npes; i++) {
+	long long* source = (long long*)shmem_malloc(sz);
+	long long* target = (long long*)shmem_malloc(sz);
+	for (i = 0; i < maxelement * npes; i++) {
 		source[i] = me;
 		target[i] = -90;
 	}
@@ -65,7 +70,7 @@ int main (void)
 			"# Bytes\tLatency (nanoseconds)\n", npes);
 	}
 
-	for (nelement = 1; nelement <= NELEMENT; nelement <<= 1)
+	for (nelement = 1; nelement <= maxelement; nelement <<= 1)
 	{
 		shmem_barrier_all();
 		ctimer_start();
