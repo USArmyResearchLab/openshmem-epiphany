@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,9 @@
 #include <shmem.h>
 #include "ctimer.h"
 
+#ifndef NLOOP
 #define NLOOP 10000
+#endif
 
 int main (void)
 {
