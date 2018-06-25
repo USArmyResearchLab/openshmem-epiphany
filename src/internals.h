@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,34 +32,40 @@
 
 #include <stdint.h>
 
+// SHMEM_MAX_PES_LOG2 should be an even number for alignment
 #if defined(__coprthr_device__) // Using COPRTHR
 
 #include "coprthr2.h"
+#include "ecore.h"
+
+#define SHMEM_MAX_PES_LOG2 10
+#define SHMEM_ROW_SHIFT    (_config.corenum_row_shift)
+#define SHMEM_ROW_MASK     (_config.corenum_col_mask)
+#define SHMEM_BASE_COREID  (_config.core_addr_base >> 20)
 #define SHMEM_LOW_PRIORITY __dynamic_call
-#define shmemx_brk(ptr) coprthr_tls_brk(ptr)
-#define shmemx_sbrk(size) coprthr_tls_sbrk(size)
+#define shmemx_brk(ptr)    coprthr_tls_brk(ptr)
+#define shmemx_sbrk(size)  coprthr_tls_sbrk(size)
 
 #else // Using eSDK
 
 #include "e_coreid.h"
 #include "shmem_mman.h"
-#define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram")))
-#define shmemx_brk(ptr) __shmemx_brk(ptr)
-#define shmemx_sbrk(size) __shmemx_sbrk(size)
-
-#endif
 
 // Values specific to Epiphany-III architecture
-#define SHMEM_MAX_PES      16
 #define SHMEM_MAX_PES_LOG2 4
 #define SHMEM_ROW_SHIFT    2
 #define SHMEM_ROW_MASK     0x3
 #define SHMEM_BASE_COREID  2056
+#define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram")))
+#define shmemx_brk(ptr)    __shmemx_brk(ptr)
+#define shmemx_sbrk(size)  __shmemx_sbrk(size)
+
+#endif
 
 #if defined(SHMEM_USE_HEAP_START)
 #define SHMEM_HEAP_START   (SHMEM_USE_HEAP_START)
 #else
-#define SHMEM_HEAP_START   0x2000
+#define SHMEM_HEAP_START   0x0
 #endif
 #define SHMEM_INLINE       inline __attribute__((__always_inline__))
 
@@ -69,16 +75,17 @@
 #define SHMEM_SCOPE
 #endif
 
-#define __INTERNAL_F2C_SCALE        ( sizeof (long) / sizeof (int) )
-#define __BCAST_SYNC_SIZE           ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __BARRIER_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __REDUCE_SYNC_SIZE          ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE + 2)
-#define __REDUCE_MIN_WRKDATA_SIZE   ( 16 / __INTERNAL_F2C_SCALE )
-#define __SYNC_VALUE                ( 0 )
-#define __COLLECT_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __ALLTOALL_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __ALLTOALLS_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __INTERNAL_F2C_SCALE )
-#define __SYNC_SIZE                 ( __REDUCE_SYNC_SIZE ) // maximum of SYNC_SIZEs
+#define __PAD                     ( 2 ) // extra synchronization scratchpad
+#define __F2C_SCALE               ( sizeof (long) / sizeof (int) )
+#define __BCAST_SYNC_SIZE         ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE )
+#define __BARRIER_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE )
+#define __REDUCE_SYNC_SIZE        ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE + __PAD )
+#define __REDUCE_MIN_WRKDATA_SIZE ( 16 / __F2C_SCALE )
+#define __SYNC_VALUE              ( 0 )
+#define __COLLECT_SYNC_SIZE       ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE + __PAD )
+#define __ALLTOALL_SYNC_SIZE      ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE )
+#define __ALLTOALLS_SYNC_SIZE     ( SHMEM_MAX_PES_LOG2 / __F2C_SCALE )
+#define __SYNC_SIZE               ( __REDUCE_SYNC_SIZE ) // max. of SYNC_SIZEs
 
 #define  __THREAD_SINGLE     0
 #define  __THREAD_FUNNELED   1

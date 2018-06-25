@@ -1,5 +1,8 @@
-DEFS = -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
+
 CFLAGS = -O3 -Wall -Wno-unused-function
+CFLAGS += -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
+CFLAGS += -k
+
 CORES = 16
 NP = $(shell seq 1 $(CORES))
 
@@ -9,7 +12,10 @@ INCS = -I. -I$(COPRTHR)/include
 LIBS = -L$(COPRTHR)/lib -lcoprthr2_dev -lcoprthr_hostcall -lesyscall
 LIBS += -L../src -lshmem
 DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment and comment out preceeding line to use header only library
+DEFS += -DSHMEM_USE_HEAP_START=0x2000
 INCS += -I../src -I../common
+
+DEFS += -DNLOOP=4
 
 FIGURES = ./figures/
 SRC_FILES = $(wildcard *.c)
@@ -43,10 +49,10 @@ report: report.pdf
 #.PRECIOUS: %.dat
 
 .c.o:
-	coprcc -c $(DEFS) $(INCS) $(LIBS) $<
+	coprcc -c $(CFLAGS) $(DEFS) $(INCS) $(LIBS) $<
 
 %.x: %.c $(DEPENDS)
-	coprcc $(DEFS) $(INCS) $(LIBS) $< $(DEPENDS) -o $@
+	coprcc $(CFLAGS) $(DEFS) $(INCS) $(LIBS) $< $(DEPENDS) -o $@
 
 .S.o:
 	epiphany-elf-gcc -c $<
