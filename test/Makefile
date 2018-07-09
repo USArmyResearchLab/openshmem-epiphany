@@ -1,7 +1,6 @@
-
 CFLAGS = -O3 -Wall -Wno-unused-function
-CFLAGS += -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -ffp-contract=fast -mfp-mode=truncate -falign-loops=8 -falign-functions=8 -fno-stack-protector
-CFLAGS += -k
+CFLAGS += -fhost -fno-unroll-loops -ffast-math -ftree-vectorize -falign-loops=8 -falign-functions=8 -fno-stack-protector
+#CFLAGS += -k
 
 CORES = 16
 NP = $(shell seq 1 $(CORES))
@@ -92,7 +91,7 @@ test: check
 check: $(TARGETS)
 	@$(foreach x,$(TARGETS), \
 		$(foreach n,$(NP), \
-			printf "%-3d%-27.27s " $(n) "$(x) .........................." && coprsh -np $(n) ./$(x) 2> /dev/null | \
+			printf "%-5d%-27.27s " $(n) "$(x) .........................." && coprsh -np $(n) ./$(x) 2> /dev/null | \
 				grep -i ERROR &> /dev/null && \
 					echo -e "[\\033[1;31mFAIL\\033[0m]" || echo -e "[\\033[1;32mpass\\033[0m]" && \
 		) \
@@ -104,6 +103,8 @@ clean:
 	rm -f *.log
 	rm -f *.o
 	rm -f *.dat
+	rm -f *.bin
+	rm -f *.out
 
 distclean: clean
 	rm -f *.x
