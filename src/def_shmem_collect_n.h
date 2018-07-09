@@ -44,7 +44,7 @@ shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, i
 	/* The SHMEM_COLLECT_SYNC_SIZE is padded with one extra value for \
 	 * syncronization and is not used in the shmem_barrier */ \
 	volatile long* vSync = pSync + SHMEM_COLLECT_SYNC_SIZE - 2; \
-	long* neighbor = (int*)shmem_ptr((void*)vSync, PE + PE_step); \
+	long* neighbor = (long*)shmem_ptr((void*)vSync, PE + PE_step); \
 	if (PE == PE_start) { \
 		my_offset = 0; \
 		neighbor[0] = nelems; /* XXX casting size_t to long */ \
@@ -60,7 +60,7 @@ shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, i
 	} \
 	vSync[0] = SHMEM_SYNC_VALUE; \
 	vSync[1] = SHMEM_SYNC_VALUE; \
-	int i, j; \
+	int i; \
 	for (i = PE_start; i <= PE_end; i += PE_step) { \
 		T* dst = (T*)dest + my_offset; \
 		if (PE != i) dst = (T*)shmem_ptr((void*)dst, i); \
