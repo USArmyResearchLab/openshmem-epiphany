@@ -38,17 +38,23 @@
 #define NELEMENT 128
 
 #ifndef NLOOP
-#define NLOOP 10000
+#define NLOOP 1000
 #endif
 
 int main (void)
 {
 	int i, j, nelement;
+	static int ti, tsum;
 	static long pSyncA[SHMEM_COLLECT_SYNC_SIZE];
 	static long pSyncB[SHMEM_COLLECT_SYNC_SIZE];
+	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
+	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_COLLECT_SYNC_SIZE; i++) {
 		pSyncA[i] = SHMEM_SYNC_VALUE;
 		pSyncB[i] = SHMEM_SYNC_VALUE;
+	}
+	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+		pSync[i] = SHMEM_SYNC_VALUE;
 	}
 
 	shmem_init();
@@ -73,18 +79,22 @@ int main (void)
 			target[i] = -90;
 		}
 		shmem_barrier_all();
-		ctimer_start();
 
+		ctimer_start();
 		unsigned int t = ctimer();
+
 		for (i = 0; i < NLOOP; i += 2) {
 			shmem_collect64(target, source, nelement, 0, 0, npes, pSyncA);
 			shmem_collect64(target, source, nelement, 0, 0, npes, pSyncB);
 		}
+
 		t -= ctimer();
+		ti = (int)t;
+		shmem_int_sum_to_all(&tsum, &ti, 1, 0, 0, npes, pWrk, pSync);
 
 		if (me == 0) {
 			int bytes = nelement * sizeof(*source);
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));
 			host_printf("%5d %7u\n", bytes, nsec);
 		}
 		int err = 0;

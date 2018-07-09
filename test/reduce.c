@@ -28,12 +28,8 @@
  */
 
 /*
- * Performance test for shmem_collect32
+ * Performance test for shmem_int_sum_to_all
  */
-
-#ifdef SHMEM_USE_HEADER_ONLY
-#undef SHMEM_USE_HEADER_ONLY
-#endif
 
 #include <host_stdio.h>
 #include <shmem.h>
@@ -48,7 +44,7 @@
 int main (void)
 {
 	int i, nelement;
-	static unsigned int t, tsum;
+	static int ti, tsum;
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
 		pSync[i] = SHMEM_SYNC_VALUE;
@@ -75,20 +71,22 @@ int main (void)
 
 	for (nelement = 1; nelement <= NELEMENT; nelement <<= 1)
 	{
-		// reset values for each iteration
-		for (i = 0; i < NELEMENT; i++) {
+		for (i = 0; i < NELEMENT; i++) { // reset values for each iteration
 			target[i] = -90;
 		}
-		shmem_barrier_all();
-		ctimer_start();
 
-		t = ctimer();
+		shmem_barrier_all();
+
+		ctimer_start();
+		unsigned int t = ctimer();
+
 		for (i = 0; i < NLOOP; i++) {
 			shmem_int_sum_to_all(target, source, nelement, 0, 0, npes, pWrk, pSync);
 		}
-		t -= ctimer();
 
-		shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npes, pWrk, pSync);
+		t -= ctimer();
+		ti = (int)t;
+		shmem_int_sum_to_all(&tsum, &ti, 1, 0, 0, npes, pWrk, pSync);
 
 		if (me == 0) {
 			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));

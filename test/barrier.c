@@ -35,17 +35,23 @@
 #include "ctimer.h"
 
 #ifndef NLOOP
-#define NLOOP 10000
+#define NLOOP 1000
 #endif
 
 int main (void)
 {
 	int i, npe;
+	static int ti, tsum;
 	static long pSyncA[SHMEM_BARRIER_SYNC_SIZE];
 	static long pSyncB[SHMEM_BARRIER_SYNC_SIZE];
+	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
+	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_BARRIER_SYNC_SIZE; i++) {
 		pSyncA[i] = SHMEM_SYNC_VALUE;
 		pSyncB[i] = SHMEM_SYNC_VALUE;
+	}
+	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
+		pSync[i] = SHMEM_SYNC_VALUE;
 	}
 
 	shmem_init();
@@ -60,19 +66,23 @@ int main (void)
 	for (npe = 1; npe <= npes; npe++)
 	{
 		shmem_barrier_all();
-		ctimer_start();
 
-		unsigned int t = ctimer();
 		if (me < npe) {
+			ctimer_start();
+			unsigned int t = ctimer();
+
 			for (i = 0; i < NLOOP; i += 2) {
 				shmem_barrier(0, 0, npe, pSyncA);
 				shmem_barrier(0, 0, npe, pSyncB);
 			}
+
+			t -= ctimer();
+			ti = (int)t;
+			shmem_int_sum_to_all(&tsum, &ti, 1, 0, 0, npe, pWrk, pSync);
 		}
-		t -= ctimer();
 
 		if (me == 0) {
-			unsigned int nsec = ctimer_nsec(t / NLOOP);
+			unsigned int nsec = ctimer_nsec(tsum / (npe * NLOOP));
 			host_printf("%5d %7u\n", npe, nsec);
 		}
 	}

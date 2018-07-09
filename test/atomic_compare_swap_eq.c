@@ -36,14 +36,13 @@
 #include "ctimer.h"
 
 #ifndef NLOOP
-#define NLOOP 10000
+#define NLOOP 1000
 #endif
 
 int main (void)
 {
 	int i, npe;
-	static int dest;
-	static unsigned int t, tsum;
+	static int dest, ti, tsum;
 	static int pWrk[SHMEM_REDUCE_MIN_WRKDATA_SIZE];
 	static long pSync[SHMEM_REDUCE_SYNC_SIZE];
 	for (i = 0; i < SHMEM_REDUCE_SYNC_SIZE; i++) {
@@ -60,7 +59,7 @@ int main (void)
 			"# NPES\tLatency (nanoseconds)\n");
 	}
 
-	for (npe = 2; npe <= npes; npe++)
+	for (npe = 1; npe <= npes; npe++)
 	{
 		int nxtpe = me + 1;
 		if (nxtpe >= npe) nxtpe -= npe;
@@ -68,15 +67,18 @@ int main (void)
 		int cond = nxtpe;
 
 		shmem_barrier_all();
-		ctimer_start();
 
 		if (me < npe) {
-			t = ctimer();
+			ctimer_start();
+			unsigned int t = ctimer();
+
 			for (i = 0; i < NLOOP; i++) {
 				shmem_atomic_compare_swap(&dest, cond, nxtpe, nxtpe);
 			}
+
 			t -= ctimer();
-			shmem_int_sum_to_all(&tsum, &t, 1, 0, 0, npe, pWrk, pSync);
+			ti = (int)t;
+			shmem_int_sum_to_all(&tsum, &ti, 1, 0, 0, npe, pWrk, pSync);
 		}
 
 		if (me == 0) {

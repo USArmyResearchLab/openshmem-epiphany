@@ -40,11 +40,9 @@ int main(int argc, char* argv[])
 	char name[SHMEM_MAX_NAME_LEN];
 
 	// Starts/Initializes SHMEM/OpenSHMEM
-	// Some implementations use the deprecated start_pes(0)
 	shmem_init();
 
 	// Fetch the number or processes
-	// Some implementations use the deprecated num_pes()
 	int n_pes = shmem_n_pes();
 
 	// Assign my process ID to me
