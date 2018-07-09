@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,7 +27,6 @@
  * assigned to the US Army Research laboratory as required by contract.
  */
 
-
 #include "shmem.h"
 #include "internals.h"
 #include "def_shmem_x_to_all.h"
@@ -36,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_TO_ALL(complexd_prod,double _Complex,PROD_OP)
+SHMEM_X_TO_ALL(complexd_prod,double _Complex,128,PROD_OP)
 
 #ifdef __cplusplus
 }

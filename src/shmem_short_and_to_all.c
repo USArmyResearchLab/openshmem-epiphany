@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-SHMEM_X_TO_ALL(short_and,short,AND_OP)
+SHMEM_X_TO_ALL(short_and,short,16,AND_OP)
 
 #ifdef __cplusplus
 }

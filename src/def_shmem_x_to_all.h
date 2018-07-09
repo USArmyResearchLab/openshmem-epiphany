@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,6 +38,7 @@
 #define MAX_OP  = (dest[i+j]>pWrk[j])?dest[i+j]:pWrk[j]
 #define MIN_OP  = (dest[i+j]<pWrk[j])?dest[i+j]:pWrk[j]
 
+#if 0
 #define SHMEM_X_TO_ALL(N,T,OP) \
 SHMEM_SCOPE void \
 shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
@@ -55,55 +56,98 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 	*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
 	*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
 	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
+	int start = 1 << logPE_stride; \
+	int end = PE_size_stride; \
+	int step = start; \
+	int to = __shmem.my_pe; \
+	T* data = dest; \
 	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
-		int to = __shmem.my_pe; \
-		for (r = 1; r < PE_size; r++) { \
-			to += PE_step; \
-			if (to >= PE_end) to -= PE_size_stride; \
-			T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
-			long* remote_lock0 = (long*)shmem_ptr((void*)vSync, to); \
-			long* remote_lock1 = (long*)shmem_ptr((void*)(vSync+1), to); \
-			for (i = 0; i < nreduce; i += nwrk) { \
-				int nrem = nreduce - i; \
-				nrem = (nrem > nwrk) ? nwrk : nrem; \
-				__shmem_set_lock(remote_lock0); \
-				for (j = 0; j < nrem; j++) { \
-					remote_work[j] = source[i+j]; \
-				} \
-				__shmem_set_lock(remote_lock1); \
-				while (!vSync[1]); \
-				for (j = 0; j < nrem; j++) { \
-					dest[i+j] OP; \
-				} \
-				vSync[0] = SHMEM_SYNC_VALUE; \
-				vSync[1] = SHMEM_SYNC_VALUE; \
+		start = 1; \
+		end = PE_size; \
+		step = PE_step; \
+		data = (T*)source; \
+	} \
+	for (r = start; r < end;) { \
+		to += step; \
+		if (to >= PE_end) to -= PE_size_stride; \
+		T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
+		long* remote_locks = (long*)shmem_ptr((void*)vSync, to); \
+		for (i = 0; i < nreduce; i += nwrk) { \
+			int nrem = nreduce - i; \
+			nrem = (nrem > nwrk) ? nwrk : nrem; \
+			__shmem_set_lock(remote_locks); \
+			for (j = 0; j < nrem; j++) { \
+				remote_work[j] = data[i+j]; \
 			} \
+			__shmem_set_lock(remote_locks+1); \
+			while (!vSync[1]); \
+			for (j = 0; j < nrem; j++) { \
+				dest[i+j] OP; \
+			} \
+			vSync[0] = SHMEM_SYNC_VALUE; \
+			vSync[1] = SHMEM_SYNC_VALUE; \
 		} \
-	} else { /* Use dissemination algorithm for powers of 2 */ \
-		for (r = (1 << logPE_stride); r < PE_size_stride; r <<= 1) { \
-			int to = __shmem.my_pe + r; \
-			if (to >= PE_end) to -= PE_size_stride; \
-			T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
-			long* remote_lock0 = (long*)shmem_ptr((void*)vSync, to); \
-			long* remote_lock1 = (long*)shmem_ptr((void*)(vSync+1), to); \
-			for (i = 0; i < nreduce; i += nwrk) { \
-				int nrem = nreduce - i; \
-				nrem = (nrem > nwrk) ? nwrk : nrem; \
-				__shmem_set_lock(remote_lock0); \
-				for (j = 0; j < nrem; j++) { \
-					remote_work[j] = dest[i+j]; \
-				} \
-				__shmem_set_lock(remote_lock1); \
-				while (!vSync[1]); \
-				for (j = 0; j < nrem; j++) { \
-					dest[i+j] OP; \
-				} \
-				vSync[0] = SHMEM_SYNC_VALUE; \
-				vSync[1] = SHMEM_SYNC_VALUE; \
-			} \
+		if ((PE_size & (PE_size - 1))) { \
+			r++; \
+		} else { \
+			r <<= 1; \
+			step += step; \
 		} \
 	} \
 }
-
+#else
+#define SHMEM_X_TO_ALL(N,T,SZ,OP) \
+SHMEM_SCOPE void \
+shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
+{ \
+	int PE_size_stride = PE_size << logPE_stride; \
+	int PE_step = 0x1 << logPE_stride; \
+	int PE_end = PE_size_stride + PE_start; \
+	int nreduced2p1 = (nreduce >> 1) + 1; \
+	int nwrk = (nreduced2p1 > (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
+	volatile long* vSync = (volatile long*)(pSync + SHMEM_REDUCE_SYNC_SIZE - 2); \
+	int i, j, r; \
+	shmemx_memcpy##SZ(dest, source, nreduce); \
+	*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
+	*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
+	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
+	int start = 1 << logPE_stride; \
+	int end = PE_size_stride; \
+	int step = start; \
+	int to = __shmem.my_pe; \
+	T* data = dest; \
+	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
+		start = 1; \
+		end = PE_size; \
+		step = PE_step; \
+		data = (T*)source; \
+	} \
+	for (r = start; r < end;) { \
+		to += step; \
+		if (to >= PE_end) to -= PE_size_stride; \
+		T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
+		long* remote_locks = (long*)shmem_ptr((void*)vSync, to); \
+		for (i = 0; i < nreduce; i += nwrk) { \
+			int nrem = nreduce - i; \
+			nrem = (nrem > nwrk) ? nwrk : nrem; \
+			__shmem_set_lock(remote_locks); \
+			shmemx_memcpy##SZ(remote_work, data + i, nrem); \
+			__shmem_set_lock(remote_locks+1); \
+			while (!vSync[1]); \
+			for (j = 0; j < nrem; j++) { \
+				dest[i+j] OP; \
+			} \
+			vSync[0] = SHMEM_SYNC_VALUE; \
+			vSync[1] = SHMEM_SYNC_VALUE; \
+		} \
+		if ((PE_size & (PE_size - 1))) { \
+			r++; \
+		} else { \
+			r <<= 1; \
+			step += step; \
+		} \
+	} \
+}
 #endif
 
+#endif
