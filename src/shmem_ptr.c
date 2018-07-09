@@ -37,10 +37,11 @@ extern "C" {
 SHMEM_SCOPE void*
 shmem_ptr(const void* dest, int pe)
 {
+	// XXX Specific to E32 microarchitecture
 	unsigned int row = pe >> SHMEM_ROW_SHIFT;
 	unsigned int col = pe & SHMEM_ROW_MASK;
-	unsigned int coreid = (row*0x40 + col) + SHMEM_BASE_COREID;
-	void* remote = (void*)((coreid << 20) | (unsigned int) dest);
+	unsigned int core_addr = ((row << 6) + col + SHMEM_BASE_COREID) << 20;
+	void* remote = (void*)(core_addr | (uintptr_t) dest);
 	return remote;
 }
 

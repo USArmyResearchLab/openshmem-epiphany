@@ -38,11 +38,19 @@
 #include "coprthr2.h"
 #include "ecore.h"
 
+#if 0
 #define SHMEM_MAX_PES_LOG2 10
 #define SHMEM_ROW_SHIFT    (_config.corenum_row_shift)
 #define SHMEM_ROW_MASK     (_config.corenum_col_mask)
 #define SHMEM_BASE_COREID  (_config.core_addr_base >> 20)
 #define SHMEM_LOW_PRIORITY __dynamic_call
+#else
+#define SHMEM_MAX_PES_LOG2 4
+#define SHMEM_ROW_SHIFT    2
+#define SHMEM_ROW_MASK     0x3
+#define SHMEM_BASE_COREID  0x808
+#define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram")))
+#endif
 #define shmemx_brk(ptr)    coprthr_tls_brk(ptr)
 #define shmemx_sbrk(size)  coprthr_tls_sbrk(size)
 
@@ -55,7 +63,7 @@
 #define SHMEM_MAX_PES_LOG2 4
 #define SHMEM_ROW_SHIFT    2
 #define SHMEM_ROW_MASK     0x3
-#define SHMEM_BASE_COREID  2056
+#define SHMEM_BASE_COREID  0x808
 #define SHMEM_LOW_PRIORITY __attribute__((section(".shared_dram")))
 #define shmemx_brk(ptr)    __shmemx_brk(ptr)
 #define shmemx_sbrk(size)  __shmemx_sbrk(size)
