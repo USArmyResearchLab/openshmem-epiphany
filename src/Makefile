@@ -1,8 +1,8 @@
 CC = coprcc
 AR = epiphany-elf-ar
 READELF = epiphany-elf-readelf
-CFLAGS = -Wall -Wno-unused-function
-DEFS = -fno-unroll-loops -mfp-mode=caller
+CFLAGS = -Wall -fno-unroll-loops -mfp-mode=caller
+DEFS =
 INCS =
 LIBS =
 
