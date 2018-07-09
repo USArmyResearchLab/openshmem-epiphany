@@ -4,7 +4,7 @@ set title "Epiphany-III OpenSHMEM Atomic Operations Performance"
 set xlabel "Number of Processing Elements"
 set ylabel "Latency (μsec)"
 set key outside
-set xrange [2:*]
+set yrange [0:*]
 set style fill solid 0.15
 plot \
  "atomic_compare_swap_neq.dat" using 1:($2/1000) title 'compare\_swap (!=)' with linespoints, \

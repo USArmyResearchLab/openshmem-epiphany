@@ -1,6 +1,6 @@
 load 'gnuplot.style'
 set border 11 back ls 11
-set format y "%0.1f"; set ytic auto
+set format y "%0.2f"; set ytic auto
 fit Tc(x) 'get.dat' using 1:2 via alpha, beta
 set title sprintf("Epiphany-III OpenSHMEM GetMem Performance\n{/*0.9 α = %.0f ± %.0f nsec, β^{-1} = %.3f ± %.3f GB/s}", alpha, alpha_err, 1/beta, beta_err/beta)
 set xlabel "Message Size (bytes)"
