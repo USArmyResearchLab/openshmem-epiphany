@@ -1,6 +1,7 @@
 CC = epiphany-elf-gcc
 AR = epiphany-elf-ar
-DEFS = -O3 -Wall -Wno-unused-function
+READELF = epiphany-elf-readelf
+DEFS = -O3 -Wall -Wno-unused-function -fno-unroll-loops -mfp-mode=caller
 INCS =
 LIBS =
 
@@ -17,6 +18,11 @@ all: $(TARGETS)
 
 .SUFFIXES:
 .SUFFIXES: .S .c .o .elf
+
+info: $(TARGETS)
+	@$(READELF) -s --wide libshmem_esdk.a | \
+	awk '/FUNC|OBJECT/{printf "%7s %-6s %s\n",$$3,$$4,$$8;sum+=$$3}; \
+	END{printf "===================\n%7s TOTAL BYTES\n", sum}'
 
 .c.elf:
 	$(CC) $(CFLAGS) $(DEFS) $(INCS) $(LIBS) -c $< -o $@

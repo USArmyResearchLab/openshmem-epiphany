@@ -1,7 +1,7 @@
 CC = coprcc
 AR = epiphany-elf-ar
 READELF = epiphany-elf-readelf
-CFLAGS = -Wall -fno-unroll-loops -mfp-mode=caller
+CFLAGS = -Wall -Wno-unused-function -fno-unroll-loops -mfp-mode=caller
 DEFS =
 INCS =
 LIBS =
@@ -18,7 +18,7 @@ all: $(TARGETS)
 run:
 
 info: $(TARGETS)
-	$(READELF) -s --wide libshmem_coprthr.a | \
+	@$(READELF) -s --wide libshmem_coprthr.a | \
 	awk '/FUNC|OBJECT/{printf "%7s %-6s %s\n",$$3,$$4,$$8;sum+=$$3}; \
 	END{printf "===================\n%7s TOTAL BYTES\n", sum}'
 
