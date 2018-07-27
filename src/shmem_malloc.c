@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,6 +37,7 @@ extern "C" {
 SHMEM_SCOPE void* __attribute__((malloc))
 shmem_malloc(size_t size)
 {
+	// XXX Barrier not required when symmetric heap always remotely accessible
 	return shmem_align(8, size);
 }
 
