@@ -35,6 +35,9 @@
 extern "C" {
 #endif
 
+#undef MIN_OP // XXX E32 performance
+#define MIN_OP = (*((int64_t*)&dest[i+j])<*((int64_t*)&pWrk[j]))?dest[i+j]:pWrk[j]
+
 SHMEM_X_TO_ALL(double_min,double,64,MIN_OP)
 
 #ifdef __cplusplus

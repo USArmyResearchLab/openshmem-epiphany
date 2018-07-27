@@ -35,82 +35,24 @@
 #define AND_OP  &= pWrk[j]
 #define OR_OP   |= pWrk[j]
 #define XOR_OP  ^= pWrk[j]
-#define MAX_OP  = (dest[i+j]>pWrk[j])?dest[i+j]:pWrk[j]
+#define MAX_OP  = (dest[i+j]<pWrk[j])?pWrk[j]:dest[i+j]
 #define MIN_OP  = (dest[i+j]<pWrk[j])?dest[i+j]:pWrk[j]
 
-#if 0
-#define SHMEM_X_TO_ALL(N,T,OP) \
-SHMEM_SCOPE void \
-shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
-{ \
-	int PE_size_stride = PE_size << logPE_stride; \
-	int PE_step = 0x1 << logPE_stride; \
-	int PE_end = PE_size_stride + PE_start; \
-	int nreduced2p1 = (nreduce >> 1) + 1; \
-	int nwrk = (nreduced2p1 > (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
-	volatile long* vSync = (volatile long*)(pSync + SHMEM_REDUCE_SYNC_SIZE - 2); \
-	int i, j, r; \
-	for (i = 0; i < nreduce; i++) { \
-		dest[i] = source[i]; \
-	} \
-	*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
-	*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
-	int start = 1 << logPE_stride; \
-	int end = PE_size_stride; \
-	int step = start; \
-	int to = __shmem.my_pe; \
-	T* data = dest; \
-	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
-		start = 1; \
-		end = PE_size; \
-		step = PE_step; \
-		data = (T*)source; \
-	} \
-	for (r = start; r < end;) { \
-		to += step; \
-		if (to >= PE_end) to -= PE_size_stride; \
-		T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
-		long* remote_locks = (long*)shmem_ptr((void*)vSync, to); \
-		for (i = 0; i < nreduce; i += nwrk) { \
-			int nrem = nreduce - i; \
-			nrem = (nrem > nwrk) ? nwrk : nrem; \
-			__shmem_set_lock(remote_locks); \
-			for (j = 0; j < nrem; j++) { \
-				remote_work[j] = data[i+j]; \
-			} \
-			__shmem_set_lock(remote_locks+1); \
-			while (!vSync[1]); \
-			for (j = 0; j < nrem; j++) { \
-				dest[i+j] OP; \
-			} \
-			vSync[0] = SHMEM_SYNC_VALUE; \
-			vSync[1] = SHMEM_SYNC_VALUE; \
-		} \
-		if ((PE_size & (PE_size - 1))) { \
-			r++; \
-		} else { \
-			r <<= 1; \
-			step += step; \
-		} \
-	} \
-}
-#else
 #define SHMEM_X_TO_ALL(N,T,SZ,OP) \
 SHMEM_SCOPE void \
 shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
 { \
 	int PE_size_stride = PE_size << logPE_stride; \
-	int PE_step = 0x1 << logPE_stride; \
+	int PE_step = 1 << logPE_stride; \
 	int PE_end = PE_size_stride + PE_start; \
 	int nreduced2p1 = (nreduce >> 1) + 1; \
-	int nwrk = (nreduced2p1 > (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : (int)SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
+	int nwrk = (nreduced2p1 > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
 	volatile long* vSync = (volatile long*)(pSync + SHMEM_REDUCE_SYNC_SIZE - 2); \
 	int i, j, r; \
 	shmemx_memcpy##SZ(dest, source, nreduce); \
-	*vSync = SHMEM_SYNC_VALUE; /* XXX */ \
-	*(vSync+1) = SHMEM_SYNC_VALUE; /* XXX */ \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
+	vSync[0] = SHMEM_SYNC_VALUE; /* XXX */ \
+	vSync[1] = SHMEM_SYNC_VALUE; /* XXX */ \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
 	int start = 1 << logPE_stride; \
 	int end = PE_size_stride; \
 	int step = start; \
@@ -125,29 +67,27 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 	for (r = start; r < end;) { \
 		to += step; \
 		if (to >= PE_end) to -= PE_size_stride; \
-		T* remote_work = (T*)shmem_ptr((void*)pWrk, to); \
-		long* remote_locks = (long*)shmem_ptr((void*)vSync, to); \
+		uintptr_t remote_ptr = (uintptr_t)shmem_ptr(0, to); \
+		T* remote_work = (T*)(remote_ptr | (uintptr_t)pWrk); \
+		long* remote_locks = (long*)(remote_ptr | (uintptr_t)vSync); \
 		for (i = 0; i < nreduce; i += nwrk) { \
 			int nrem = nreduce - i; \
-			nrem = (nrem > nwrk) ? nwrk : nrem; \
+			nrem = (nrem < nwrk) ? nrem : nwrk; \
 			__shmem_set_lock(remote_locks); \
 			shmemx_memcpy##SZ(remote_work, data + i, nrem); \
-			__shmem_set_lock(remote_locks+1); \
-			while (!vSync[1]); \
-			for (j = 0; j < nrem; j++) { \
-				dest[i+j] OP; \
-			} \
-			vSync[0] = SHMEM_SYNC_VALUE; \
+			remote_locks[1] = 1; /* XXX assumes SHMEM_SYNC_VALUE != 1 */\
+			while (vSync[1] == SHMEM_SYNC_VALUE); \
+			for (j = 0; j < nrem; j++) dest[i+j] OP; \
 			vSync[1] = SHMEM_SYNC_VALUE; \
+			vSync[0] = SHMEM_SYNC_VALUE; \
 		} \
 		if ((PE_size & (PE_size - 1))) { \
 			r++; \
 		} else { \
 			r <<= 1; \
-			step += step; \
+			step <<= 1; \
 		} \
 	} \
 }
-#endif
 
 #endif

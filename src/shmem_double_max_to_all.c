@@ -35,6 +35,9 @@
 extern "C" {
 #endif
 
+#undef MAX_OP // XXX E32 performance
+#define MAX_OP = (*((int64_t*)&dest[i+j])<*((int64_t*)&pWrk[j]))?pWrk[j]:dest[i+j]
+
 SHMEM_X_TO_ALL(double_max,double,64,MAX_OP)
 
 #ifdef __cplusplus
