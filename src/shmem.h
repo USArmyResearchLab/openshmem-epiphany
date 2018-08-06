@@ -175,6 +175,12 @@ F(int64,int64_t) \
 F(uint32,uint32_t) \
 F(uint64,uint64_t)
 
+#define DECL_P2P_DEPRECATED(F) \
+F(short,short) \
+F(int,int) \
+F(long,long) \
+F(longlong,long long) \
+
 #define DECL_P2P(F) \
 F(short,short) \
 F(ushort,unsigned short) \
@@ -231,9 +237,9 @@ DECL_ARG14((A), \
 	unsigned long long*, F(ulonglong) \
 ))
 
-#define DECL_GENERIC_P2P(A,F) \
+#define DECL_GENERIC_P2P_DEPRECATED(A,F) \
 DECL_GENERIC((A), \
-DECL_ARG8((A), \
+DECL_ARG14((A), \
 	short*, F(short), \
 	int*, F(int), \
 	long*, F(long), \
@@ -242,6 +248,25 @@ DECL_ARG8((A), \
 	unsigned int*, F(uint), \
 	unsigned long*, F(ulong), \
 	unsigned long long*, F(ulonglong) \
+))
+
+#define DECL_GENERIC_P2P(A,F) \
+DECL_GENERIC((A), \
+DECL_ARG14((A), \
+	short*, F(short), \
+	int*, F(int), \
+	long*, F(long), \
+	long long*, F(longlong), \
+	unsigned short*, F(ushort), \
+	unsigned int*, F(uint), \
+	unsigned long*, F(ulong), \
+	unsigned long long*, F(ulonglong), \
+	int32_t*, F(int32), \
+	int64_t*, F(int64), \
+	uint32_t*, F(uint32), \
+	uint64_t*, F(uint64), \
+	size_t*, F(size), \
+	ptrdiff_t*, F(ptrdiff) \
 ))
 
 #define SHMEM_ATOMIC_COMPARE_SWAP(N,T) SHMEM_SCOPE T shmem_##N##_atomic_compare_swap (T* dest, T cond, T value, int pe); \
@@ -310,7 +335,7 @@ DECL_BITWISE_AMO(SHMEM_ATOMIC_XOR)
 #define DECL_SHMEM_X_WAIT_UNTIL(N,T) SHMEM_SCOPE void shmem_##N##_wait_until (T *ivar, int cmp, T cmp_value);
 #define DECL_SHMEM_X_TEST(N,T) SHMEM_SCOPE int shmem_##N##_test (T *ivar, int cmp, T cmp_value);
 
-DECL_P2P(DECL_SHMEM_X_WAIT)
+DECL_P2P_DEPRECATED(DECL_SHMEM_X_WAIT)
 DECL_P2P(DECL_SHMEM_X_WAIT_UNTIL)
 DECL_P2P(DECL_SHMEM_X_TEST)
 
@@ -589,7 +614,7 @@ DECL_SHMEM_TYPE_RMA(ptrdiff_t,          ptrdiff,     32)
 #define shmem_atomic_fetch_xor(...)    GET_MACRO3(__VA_ARGS__, __ctx_atomic_fetch_xor,    __atomic_fetch_xor)(__VA_ARGS__);
 #define shmem_atomic_xor(...)          GET_MACRO3(__VA_ARGS__, __ctx_atomic_xor,          __atomic_xor)(__VA_ARGS__);
 
-#define shmem_wait(ivar,cmp_value)           DECL_GENERIC_P2P(ivar,SHMEM_WAIT_GENERIC)(ivar,cmp_value)
+#define shmem_wait(ivar,cmp_value)           DECL_GENERIC_P2P_DEPRECATED(ivar,SHMEM_WAIT_GENERIC)(ivar,cmp_value)
 #define shmem_wait_until(ivar,cmp,cmp_value) DECL_GENERIC_P2P(ivar,SHMEM_WAIT_UNTIL_GENERIC)(ivar,cmp,cmp_value)
 #define shmem_test(ivar,cmp,value)           DECL_GENERIC_P2P(ivar,SHMEM_TEST_GENERIC)(ivar,cmp,value)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,13 +28,13 @@
  */
 
 #include "internals.h"
-#include "def_shmem_x_wait.h"
+#include "def_shmem_x_wait_until.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SHMEM_X_WAIT(ushort,unsigned short)
+SHMEM_X_WAIT_UNTIL(ptrdiff,ptrdiff_t)
 
 #ifdef __cplusplus
 }
