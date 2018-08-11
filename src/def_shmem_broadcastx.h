@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -47,21 +47,22 @@ shmem_broadcast##N (void *dest, const void *source, size_t nelems, int PE_root, 
 	int maskx = PE_size_stride - 1; \
 	maskx |= (maskx >> 1); \
 	maskx |= (maskx >> 2); /* up to 16 PEs */ \
-	/*maskx |= (maskx >> 4);*/ /* up to 1024 PEs */ \
-	/*maskx |= (maskx >> 8);*/ /* up to 65536 PEs */ \
+	if (SHMEM_MAX_PES_LOG2 >= 10) maskx |= (maskx >> 4); /* up to 1024 PEs */ \
+	if (SHMEM_MAX_PES_LOG2 >= 16) maskx |= (maskx >> 8); /* up to 65536 PEs */ \
 	maskx += 1; /* the next largest power of 2 of the largest PE number */ \
 	maskx >>= 1; \
 	int mask2 = PEx & -PEx; /* least significant 1 bit */ \
 	if (PEx==0) mask2 = maskx; \
 	int mask1 = (mask2 << 1) - 1; \
 	__shmem.lock_receive_finished = 0; \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); \
 	do { \
 		if ((PEx & mask1) == 0) { \
 			int PE_to = (PEx | mask2) + PE_start + PE_root_stride; \
 			if (PE_to >= PE_end) PE_to -= PE_size_stride; \
-			long* remote_lock_receive_finished = (long*)shmem_ptr((void*)&__shmem.lock_receive_finished, PE_to); \
-			T* remote_dest = (T*)shmem_ptr((void*)dest, PE_to); \
+			uintptr_t remote_ptr = (uintptr_t)shmem_ptr(0, PE_to); \
+			long* remote_lock_receive_finished = (long*)(remote_ptr | (uintptr_t)&__shmem.lock_receive_finished); \
+			T* remote_dest = (T*)(remote_ptr | (uintptr_t)dest); \
 			shmemx_memcpy##N((void*)remote_dest, (void*)psrc, nelems); \
 			*remote_lock_receive_finished = 1; /* clear lock_receive_finished on receiving PE */ \
 		} \
