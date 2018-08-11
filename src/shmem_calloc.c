@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ shmem_calloc(size_t count, size_t size)
 		llp[i] = 0;
 	}
 	// unlike shmem_malloc, a barrier is required so zeroing completes
-	shmem_barrier_all();
+	shmem_sync_all();
 	return retp;
 }
 

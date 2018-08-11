@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,7 +41,7 @@ shmem_alltoalls##N(void* dest, const void* source, ptrdiff_t dst, ptrdiff_t sst,
 	int i, pe; \
 	for (i = 0, pe = PE_start; i < PE_size; i++, pe += PE_step) \
 		shmem_iput##N(pdst, (T*)((intptr_t)source + sizeof(T) * nelems * sst * i), dst, sst, nelems, pe); \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); \
 }
 
 #endif

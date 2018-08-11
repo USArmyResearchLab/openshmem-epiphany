@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -174,7 +174,7 @@ shmem_init(void)
 	int stride = SHMEM_HEAP_START - (int)__shmem.local_mem_base;
 	if (stride > 0) shmemx_sbrk(stride); // advance to SHMEM_HEAP_START address
 #if defined(__coprthr_device__)
-	shmem_barrier (0, 0, __shmem.n_pes, (long*)__shmem.barrier_sync);
+	shmem_sync_all();
 #else // linear barrier
 	if (__shmem.n_pes == 1) return;
 	if (!__shmem.my_pe) *__shmem.barrier_psync[0] = 1;
