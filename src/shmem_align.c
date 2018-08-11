@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -37,6 +37,7 @@ extern "C" {
 SHMEM_SCOPE void* __attribute__((malloc))
 shmem_align(size_t alignment, size_t size)
 {
+	if (!size) return 0;
 	unsigned int minus1 = alignment - 1;
 	unsigned int mask = ~(minus1);
 	unsigned int x = (unsigned int)shmemx_sbrk(0);
