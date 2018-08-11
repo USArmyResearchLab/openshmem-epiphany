@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,17 +36,17 @@ extern "C" {
 
 SHMEM_SCOPE void SHMEM_INLINE
 __shmem_sync_lte2(int PE_start, int logPE_stride, int PE_size, long *pSync)
-{ /* Routine for PE_size <= 2. Looping over shmem_barrier() for npes = 2 may
+{ /* Routine for PE_size <= 2. Looping over shmem_sync() for npes = 2 may
 	* not work correctly.  Solution requires using testset because only
 	* sychronization stage may not be reset before subsequent call */
 	if (PE_size == 1) return;
-	int PE_step = 0x1 << logPE_stride;
-	if (__shmem.my_pe != PE_start) PE_step *= -1;
+	int PE_step = 1 << logPE_stride;
+	if (__shmem.my_pe != PE_start) PE_step = -PE_step;
 	int to = __shmem.my_pe + PE_step;
 	volatile long* lock = (volatile long*)pSync;
 	__shmem_set_lock((long*)shmem_ptr((void*)lock, to));
 	while (*lock == SHMEM_SYNC_VALUE);
-	*lock = 0;
+	*lock = SHMEM_SYNC_VALUE;
 }
 
 SHMEM_SCOPE void
