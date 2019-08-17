@@ -3,17 +3,18 @@ AR = epiphany-elf-ar
 DEFS = -O3 -Wall -Wno-unused-function
 INCS =
 LIBS =
-
+DESTDIR = /usr/locals
 TARGETS = libshmem_esdk.a libshmem.a
 
 SRC_FILES = $(wildcard *.c)
 ASM_FILES = $(wildcard *.S)
+HDR_FILES = $(wildcard *.h)
 
 OBJS = $(SRC_FILES:.c=.elf) $(ASM_FILES:.S=.o)
 
 all: $(TARGETS)
 
-.PHONY: clean install uninstall
+.PHONY: clean uninstall
 
 .SUFFIXES:
 .SUFFIXES: .S .c .o .elf
@@ -35,3 +36,9 @@ clean:
 
 distclean: clean 
 	rm -f *.a
+
+install:
+	install -m 0644 -t "$(DESTDIR)/lib" libshmem_esdk.a
+	ln -sf libshmem_esdk.a "$(DESTDIR)/lib/libshmem.a"
+	install -m 0644 -t "$(DESTDIR)/include" $(HDR_FILES)
+
