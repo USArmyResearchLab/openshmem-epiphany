@@ -51,12 +51,12 @@ shmem_quiet(void)
 		);
 		// XXX This isn't a great way to guarantee the data has finished
 		if (__shmem.cdst0) {
-			if(*__shmem.cdst0 == __shmem.csrc0);
+			if(*__shmem.cdst0 == __shmem.csrc0)
 				*__shmem.cdst0 = ~__shmem.csrc0;
 			__shmem.cdst0 = 0;
 		}
 		if (__shmem.cdst1) {
-			if(*__shmem.cdst1 == __shmem.csrc1);
+			if(*__shmem.cdst1 == __shmem.csrc1)
 				*__shmem.cdst1 = ~__shmem.csrc1;
 			__shmem.cdst1 = 0;
 		}
