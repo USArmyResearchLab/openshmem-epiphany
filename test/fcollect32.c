@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -65,7 +65,7 @@ int main (void)
 	int* target = (int*)shmem_malloc(NELEMENT * sizeof (*target) * npes);
 
 	for (i = 0; i < NELEMENT; i++) {
-		source[i] = (i + 1) * 10 + me;
+		source[i] = ((i + 1) << 10) + me;
 	}
 
 	if (me == 0) {
@@ -100,7 +100,7 @@ int main (void)
 		int err = 0;
 		for (j = 0; j < npes; j++) {
 			for (i = 0; i < nelement; i++) {
-				if (target[j*nelement + i] != ((i + 1) * 10 + j)) err++;
+				if (target[j*nelement + i] != (((i + 1) << 10) + j)) err++;
 			}
 		}
 		if (err) host_printf("%d: %d ERRORS\n", me, err);
