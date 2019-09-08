@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,7 +36,7 @@
 #include "ctimer.h"
 
 #ifndef NLOOP
-#define NLOOP 1000
+#define NLOOP 1024
 #endif
 
 int main (void)
@@ -79,7 +79,6 @@ int main (void)
 			shmem_int_sum_to_all(&tsum, &ti, 1, 0, 0, npe, pWrk, pSync);
 		}
 
-
 		if (me == 0) {
 			unsigned int nsec = ctimer_nsec(tsum / (npe * NLOOP));
 			host_printf("%5d %7u\n", npe, nsec);
@@ -91,6 +90,7 @@ int main (void)
 			if (dest != 0) host_printf("# %d: ERROR %d\n", me, dest);
 		}
 	}
+
 	shmem_finalize();
 
 	return 0;

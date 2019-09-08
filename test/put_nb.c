@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,7 @@
 #define NELEMENT 8192
 
 #ifndef NLOOP
-#define NLOOP 1000
+#define NLOOP 1024
 #endif
 
 int main (void)
@@ -84,9 +84,8 @@ int main (void)
 
 		for (i = 0; i < NLOOP; i++) {
 			shmem_putmem_nbi(target, source, nelement, nxtpe);
+			shmem_quiet();
 		}
-
-		shmem_quiet();
 
 		t -= ctimer();
 		ti = (int)t;

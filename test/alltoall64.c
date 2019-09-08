@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 U.S. Army Research laboratory. All rights reserved.
+ * Copyright (c) 2016 U.S. Army Research laboratory. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,6 @@
 
 /*
  * Performance test for shmem_alltoall64
- *
  */
 
 #include <host_stdio.h>
@@ -39,7 +38,7 @@
 #define MAXBYTES 8192
 
 #ifndef NLOOP
-#define NLOOP 1000
+#define NLOOP 1024
 #endif
 
 int main (void)
@@ -82,10 +81,10 @@ int main (void)
 
 		ctimer_start();
 		unsigned int t = ctimer();
-		for (i = 0; i < NLOOP; i += 2) {
 
-			shmem_alltoall64 (target, source, nelement, 0, 0, npes, pSyncA);
-			shmem_alltoall64 (target, source, nelement, 0, 0, npes, pSyncB);
+		for (i = 0; i < NLOOP; i += 2) {
+			shmem_alltoall64(target, source, nelement, 0, 0, npes, pSyncA);
+			shmem_alltoall64(target, source, nelement, 0, 0, npes, pSyncB);
 		}
 
 		t -= ctimer();
@@ -97,6 +96,7 @@ int main (void)
 			unsigned int nsec = ctimer_nsec(tsum / (npes * NLOOP));
 			host_printf("%5d %7u\n", bytes, nsec);
 		}
+
 		unsigned int err = 0;
 		for (j = 0; j < npes; j++) {
 			for (i = 0; i < nelement; i++) {

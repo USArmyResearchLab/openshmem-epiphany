@@ -38,7 +38,7 @@
 #define NELEMENT 128
 
 #ifndef NLOOP
-#define NLOOP 1000
+#define NLOOP 1024
 #endif
 
 int main (void)
