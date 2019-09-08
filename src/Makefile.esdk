@@ -1,9 +1,15 @@
 CC = epiphany-elf-gcc
+CPP = epiphany-elf-cpp
 AR = epiphany-elf-ar
 READELF = epiphany-elf-readelf
-DEFS = -O3 -Wall -Wno-unused-function -fno-unroll-loops -mfp-mode=caller
+CFLAGS += -Os -Wall -Wno-unused-function
+#DEFS += -DSHMEM_USE_HEADER_ONLY # Uncomment to build header only library
 INCS =
 LIBS =
+
+ifeq ($(PREFIX),)
+PREFIX := /usr/local
+endif
 
 TARGETS = libshmem_esdk.a libshmem.a
 
@@ -12,9 +18,9 @@ ASM_FILES = $(wildcard *.S)
 
 OBJS = $(SRC_FILES:.c=.elf) $(ASM_FILES:.S=.o)
 
-all: $(TARGETS)
+all: $(TARGETS) expanded_shmem.h
 
-.PHONY: clean install uninstall
+.PHONY: clean distclean install uninstall
 
 .SUFFIXES:
 .SUFFIXES: .S .c .o .elf
@@ -34,10 +40,20 @@ libshmem.a: libshmem_esdk.a
 	ln -sf $< $@
 
 .S.o:
-	$(CC) -c $<
+	$(CC) $(DEFS) -c $<
+
+expanded_shmem.h:
+	$(CPP) $(DEFS) -E shmem.h > expanded_shmem.h
 
 clean:
 	rm -f *.elf *.o
 
-distclean: clean 
+distclean: clean
 	rm -f *.a
+	rm -f expanded_shmem.h
+
+install: all expanded_shmem.h
+	install -d $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 $(TARGETS) $(DESTDIR)$(PREFIX)/lib/
+	install -d $(DESTDIR)$(PREFIX)/include/
+	install -m 644 expanded_shmem.h $(DESTDIR)$(PREFIX)/include/shmem.h
