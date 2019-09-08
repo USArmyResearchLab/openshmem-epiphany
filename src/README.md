@@ -1,10 +1,3 @@
-# Known Issues
-
-1. Use COPRTHR host callback API for SHMEM memory routines
-2. Fix `shmem_info_get_name()`
-3. The `[f]collect[32|64]` routines are broken
-4. For the atomic fetch and set operations, do these need to use locks?
-
 # Notes on Memory Management
 
 Within the context of the Epiphany architecture, `shmem_malloc()`,
@@ -32,6 +25,7 @@ Compile-time options include:
 | Option                   | Description                                    |
 |--------------------------|------------------------------------------------|
 | `SHMEM_HEAP_START` `#`   | minimum local address of SHMEM heap            |
+| `SHMEM_USE_UNSAFE`       | use performance features at your own peril     |
 | `SHMEM_USE_WAND_BARRIER` | hardware accelerated `shmem_barrier_all()`     |
 | `SHMEM_USE_IPI_GET`      | `shmem_*_get()` use inter-processor interrupts |
 | `SHMEM_USE_HEADER_ONLY`  | feature avoids linking with -lshmem; enables \ |
@@ -39,29 +33,28 @@ Compile-time options include:
 
 # Building
 
-The ARL OpenSHMEM for Epiphany package may be extracted to any location. This
-directory contains all of the OpenSHMEM routines and other supplemental
+This directory contains all of the OpenSHMEM routines and other supplemental
 routines. Separate files for each routine are required to reduce the total
 binary size when compiling with the library. You may install the shmem.h header
-and libshmem.a library wherever you like. The test codes within the
-[../test](../test) directory will use the relative path to the header and
-library during compilation.
+and libshmem.a library wherever you like but shmem.h must be expanded first or
+take all include all code. The test codes within the [../test](../test)
+directory will use the relative path to the header and library during
+compilation.
 
-To build the library, first unpack the archive:
+Choose the makefile for the SDK you'll be developing.  The default with `make`
+targets the COPRTHR-2 SDK.  Alternatively, you can build and install for the
+native eSDK with:
 ```
-cd src
+make -f Makefile.esdk
+sudo make -f Makefile.esdk install
 ```
-Choose the makefile for the SDK you'll be developing (eSDK or COPRTHR-2).
-Alternatively, you can copy the Makefile.esdk or Makefile.coprthr file to
-Makefile and type `make`.
-```
-make -f Makefile.[esdk|coprthr]
-```
-Then test and benchmark the code. This is optional and presently works only
-with the COPRTHR-2 SDK:
-```
-cd ../test
-make run
-```
+
+The install expands shmem.h to include all code with the compile-time options
+you selected.
+
+Then test and benchmark the code in the test directory. This is optional and
+presently works only with the COPRTHR-2 SDK. You make use `make run` or `make
+check`
+
 You may also run the example codes.  The directory name prefixes of `c_` and
 `e_` are for use with the COPRTHR-2 SDK and eSDK, respectively.
