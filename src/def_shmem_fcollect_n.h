@@ -35,23 +35,23 @@ SHMEM_SCOPE void \
 shmem_fcollect##N (void* dest, const void* source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long* pSync) \
 { \
 	const int step = 1 << logPE_stride; \
-	const int pe_shift = PE_size << logPE_stride; \
-	const int pe_end = PE_start + pe_shift; \
+	const int pe_end = PE_start + (PE_size << logPE_stride); \
 	const int my_pe = __shmem.my_pe; \
 	const int nbytes = nelems << S; /* << 2 = 4 bytes, << 3 = 8 bytes */ \
 	const ptrdiff_t offset = nbytes * ((my_pe - PE_start) >> logPE_stride); \
-	const void* target = dest + offset; \
-	int pe = my_pe; \
-	do { \
-		shmemx_memcpy##N(shmem_ptr(target,pe), source, nelems); \
-		pe += step; \
-	} while (pe < pe_end); \
-	pe -= pe_shift; \
-	while (pe < my_pe) { \
-		shmemx_memcpy##N(shmem_ptr(target,pe), source, nelems); \
+	dest += offset; \
+	shmemx_memcpy##N(dest, source, nelems); \
+	int pe = my_pe + step; \
+	while (pe < pe_end) { \
+		shmemx_memcpy##N(shmem_ptr(dest,pe), source, nelems); \
 		pe += step; \
 	} \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
+	pe = PE_start; \
+	while (pe < my_pe) { \
+		shmemx_memcpy##N(shmem_ptr(dest,pe), source, nelems); \
+		pe += step; \
+	} \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); \
 }
 
 #endif

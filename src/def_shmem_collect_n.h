@@ -37,37 +37,30 @@
 SHMEM_SCOPE void \
 shmem_collect##N (void *dest, const void *source, size_t nelems, int PE_start, int logPE_stride, int PE_size, long *pSync) \
 { \
-	int PE = __shmem.my_pe; \
-	int PE_step = 0x1 << logPE_stride; \
-	int PE_end = PE_start + PE_step * (PE_size - 1); \
-	int my_offset; \
-	/* The SHMEM_COLLECT_SYNC_SIZE is padded with one extra value for \
-	 * syncronization and is not used in the shmem_barrier */ \
-	volatile long* vSync = pSync + SHMEM_COLLECT_SYNC_SIZE - 2; \
-	long* neighbor = (long*)shmem_ptr((void*)vSync, PE + PE_step); \
-	if (PE == PE_start) { \
-		my_offset = 0; \
-		neighbor[0] = nelems; /* XXX casting size_t to long */ \
-		neighbor[1] = 1; /* XXX must not be SHMEM_SYNC_VALUE */ \
-	} else { \
-		/* spin until neighbor sets offset */ \
-		while (!vSync[1]); \
-		my_offset = vSync[0]; \
-		if (PE != PE_end) { \
-			neighbor[0] = my_offset + nelems; \
-			neighbor[1] = 1; \
-		} \
+	const int my_pe = __shmem.my_pe; \
+	const int pe_step = 1 << logPE_stride; \
+	const int pe_end = PE_start + ((PE_size - 1) << logPE_stride); \
+	int my_offset = 0; \
+	/* The SHMEM_COLLECT_SYNC_SIZE is padded with two extra values for \
+	 * syncronization and are not used in the shmem_sync */ \
+	volatile long* lsync = pSync + SHMEM_COLLECT_SYNC_SIZE - 2; \
+	if (my_pe != PE_start) { /* spin until neighbor sets offset */ \
+		while (!*lsync) my_offset = lsync[1]; \
+		*lsync = SHMEM_SYNC_VALUE; \
 	} \
-	vSync[0] = SHMEM_SYNC_VALUE; \
-	vSync[1] = SHMEM_SYNC_VALUE; \
-	int i; \
-	for (i = PE_start; i <= PE_end; i += PE_step) { \
-		T* dst = (T*)dest + my_offset; \
-		if (PE != i) dst = (T*)shmem_ptr((void*)dst, i); \
-		shmemx_memcpy##N(dst, source, nelems); \
+	int pe = my_pe + pe_step; \
+	if (my_pe != pe_end) { \
+		volatile long* rsync = (volatile long*)shmem_ptr((void*)lsync, pe); \
+		rsync[1] = my_offset + nelems; /* XXX casting size_t to long */ \
+		__shmem_set_lock(rsync); /* XXX this method isn't ideal */ \
 	} \
-	shmem_barrier(PE_start, logPE_stride, PE_size, pSync); \
+	dest = (T*)dest + my_offset; \
+	shmemx_memcpy##N(dest, source, nelems); \
+	for (; pe <= pe_end; pe += pe_step) \
+		shmemx_memcpy##N(shmem_ptr(dest, pe), source, nelems); \
+	for (pe = PE_start; pe < my_pe; pe += pe_step) \
+		shmemx_memcpy##N(shmem_ptr(dest, pe), source, nelems); \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); \
 }
 
 #endif
-

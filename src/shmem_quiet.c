@@ -40,26 +40,27 @@ shmem_quiet(void)
 	if (__shmem.dma_used) { // SHMEM doesn't guarantee value is available
 		__asm__ __volatile__ (
 			"mov r0, #15             \n" // setting r0 lower 4 bits on
-			".Loop%=:                \n"
+			".LOOP%=:                \n"
 			"   movfs r1, DMA0STATUS \n" // copy DMA0STATUS to r1
 			"   and r1,r1,r0         \n" // check if DMA0STATUS != 0
 			"   movfs r2, DMA1STATUS \n" // copy DMA1STATUS to r2
 			"   and r2, r2, r0       \n" // check if DMA1STATUS != 0
 			"   orr r2, r2, r1       \n" // check if either are != 0
-			"   bne .Loop%=          \n" // spin until both complete
+			"   bne .LOOP%=          \n" // spin until both complete
 			: : : "r0", "r1", "r2", "cc"
 		);
-		// XXX This isn't a great way to guarantee the data has finished
+		// XXX Spinning isn't a great way to guarantee the data has finished
+		// XXX since another PE may have modified the value
+		// XXX Also see shmemx_memcpy_nbi.c
 		if (__shmem.cdst0) {
-			if(*__shmem.cdst0 == __shmem.csrc0);
-				*__shmem.cdst0 = ~__shmem.csrc0;
+			//while (*(__shmem.cdst0) == __shmem.csrc0);
 			__shmem.cdst0 = 0;
 		}
 		if (__shmem.cdst1) {
-			if(*__shmem.cdst1 == __shmem.csrc1);
-				*__shmem.cdst1 = ~__shmem.csrc1;
+			//while (*(__shmem.cdst1) == __shmem.csrc1);
 			__shmem.cdst1 = 0;
 		}
+		__shmem.dma_used = 0;
 	}
 }
 

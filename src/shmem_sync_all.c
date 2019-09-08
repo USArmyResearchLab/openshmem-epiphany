@@ -56,8 +56,8 @@ shmem_sync_all(void)
 	int c;
 	for (c = 0; c < __shmem.n_pes_log2; c++)
 	{
-		volatile long* lock = (volatile long*)(__shmem.barrier_sync + c);
 		*(__shmem.barrier_psync[c]) = 1;
+		volatile long* lock = (volatile long*)(__shmem.barrier_sync + c);
 		while (*lock == SHMEM_SYNC_VALUE);
 		*lock = SHMEM_SYNC_VALUE;
 	}

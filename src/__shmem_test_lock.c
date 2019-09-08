@@ -39,11 +39,11 @@ __shmem_test_lock (volatile long* x)
 {
 	long r = 1; // attempting to acquire the lock
 	__asm__ __volatile__(
-		"mov r16, #0               \n" // zero lock pointer offset
-		"testset %[r], [%[x], r16] \n" // test set
+		"mov r1, #0               \n" // zero lock pointer offset
+		"testset %[r], [%[x], r1] \n" // test set
 		: [r] "+r" (r)
 		: [x] "r" (x)
-		: "r16"
+		: "r1"
 	); // return 0 if the lock was originally cleared and call set lock
 	return (r ? 0 : 1); // return 1 of the lock had already been set.
 }

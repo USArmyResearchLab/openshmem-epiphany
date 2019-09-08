@@ -39,7 +39,6 @@ shmem_barrier_all(void)
 {
 	shmem_quiet();
 	shmem_sync_all();
-	__shmem.dma_used = 0; // reset
 }
 
 #ifdef __cplusplus

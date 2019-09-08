@@ -1,7 +1,7 @@
 CC = coprcc
 AR = epiphany-elf-ar
 READELF = epiphany-elf-readelf
-CFLAGS = -Wall -Wno-unused-function -fno-unroll-loops -mfp-mode=caller
+CFLAGS = -Os -Wall -Werror -Wno-unused-function
 DEFS =
 INCS =
 LIBS =
@@ -20,7 +20,7 @@ run:
 info: $(TARGETS)
 	@$(READELF) -s --wide libshmem_coprthr.a | \
 	awk '/FUNC|OBJECT/{printf "%7s %-6s %s\n",$$3,$$4,$$8;sum+=$$3}; \
-	END{printf "===================\n%7s TOTAL BYTES\n", sum}'
+	END{printf "===================\n%7s total bytes\n", sum}' | sort -n
 
 .PHONY: clean install uninstall
 

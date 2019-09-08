@@ -64,6 +64,7 @@ shmem_sync(int PE_start, int logPE_stride, int PE_size, long *pSync)
 		volatile long* lock = (volatile long*)(pSync + c);
 		long * remote_lock = (long*)shmem_ptr((void*)lock, to);
 		*remote_lock = 1;
+		//__shmem_set_lock(remote_lock);
 		while (*lock == SHMEM_SYNC_VALUE);
 		*lock = SHMEM_SYNC_VALUE;
 	}

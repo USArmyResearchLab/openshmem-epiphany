@@ -157,6 +157,7 @@ shmem_init(void)
 		x >>= 1;
 	}
 	__shmem.dma_start = ((int)(&__shmem.dma_desc) << 16) | 0x8;
+	__shmem.cdst0 = __shmem.cdst1 = 0;
 #ifdef SHMEM_USE_WAND_BARRIER
 	__shmem_wand_barrier_init();
 #else

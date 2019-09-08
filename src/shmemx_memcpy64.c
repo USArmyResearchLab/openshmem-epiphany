@@ -57,6 +57,7 @@ shmemx_memcpy64(void* dst, const void* src, size_t nelem)
 	__asm__ __volatile__(
 	"lsr r3, %[nelem], #2             \n" // Checking number dwords >= 4
 	"beq .LDremainder%=               \n"
+#ifdef SHMEM_USE_UNSAFE // Disabling interrupts and hardware loops might be sketchy
 	"gid                              \n"
 	"movts lc, r3                     \n"
 	"mov r3, %%low(.LDstart%=)        \n"
@@ -64,6 +65,7 @@ shmemx_memcpy64(void* dst, const void* src, size_t nelem)
 	"mov r3, %%low(.LDend%=-4)        \n"
 	"movts le, r3                     \n"
 	".balignw 8,0x01a2                \n" // If alignment is correct, no need for nops
+#endif
 	".LDstart%=:                      \n"
 	"ldrd r16, [%[src]], #1           \n"
 	"ldrd r18, [%[src]], #1           \n"
@@ -73,8 +75,13 @@ shmemx_memcpy64(void* dst, const void* src, size_t nelem)
 	"ldrd r22, [%[src]], #1           \n"
 	"strd r20, [%[dst]], #1           \n"
 	"strd r22, [%[dst]], #1           \n"
+#ifdef SHMEM_USE_UNSAFE
 	".LDend%=:                        \n"
 	"gie                              \n"
+#else
+	"sub r3, r3, #1                   \n"
+	"bne .LDstart%=                   \n"
+#endif
 	".LDremainder%=:                  \n"
 	"lsl %[nelem], %[nelem], #30      \n"
 	"lsr %[nelem], %[nelem], #30      \n"

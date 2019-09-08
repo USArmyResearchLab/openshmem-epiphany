@@ -86,6 +86,7 @@ shmemx_memcpy32(void* dst, const void* src, size_t nelem)
 	"mov %[nelem], #1                 \n" // This is here for alignment and is used below
 	"lsr r3, %[src], #3               \n" // Checking number dwords >= 4
 	"beq .LDremainder%=               \n"
+#ifdef SHMEM_USE_UNSAFE // Disabling interrupts and hardware loops might be sketchy
 	"gid                              \n"
 	"movts lc, r3                     \n"
 	"mov r3, %%low(.LDstart%=)        \n"
@@ -93,6 +94,7 @@ shmemx_memcpy32(void* dst, const void* src, size_t nelem)
 	"mov r3, %%low(.LDend%=-4)        \n"
 	"movts le, r3                     \n"
 	".balignw 8,0x01a2                \n" // If alignment is correct, no need for nops
+#endif
 	".LDstart%=:                      \n"
 	"ldrd r16, [r24], #1              \n"
 	"ldrd r18, [r24], #1              \n"
@@ -102,8 +104,13 @@ shmemx_memcpy32(void* dst, const void* src, size_t nelem)
 	"ldrd r22, [r24], #1              \n"
 	"strd r20, [%[dst]], #1           \n"
 	"strd r22, [%[dst]], #1           \n"
+#ifdef SHMEM_USE_UNSAFE
 	".LDend%=:                        \n"
 	"gie                              \n"
+#else
+	"sub r3, r3, #1                   \n"
+	"bne .LDstart%=                   \n"
+#endif
 	".LDremainder%=:                  \n"
 	"lsl r3, %[src], #29              \n"
 	"lsr r3, r3, #30                  \n"

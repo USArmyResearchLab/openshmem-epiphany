@@ -43,28 +43,20 @@ SHMEM_SCOPE void \
 shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logPE_stride, int PE_size, T *pWrk, long *pSync) \
 { \
 	int PE_size_stride = PE_size << logPE_stride; \
-	int PE_step = 1 << logPE_stride; \
 	int PE_end = PE_size_stride + PE_start; \
 	int nreduced2p1 = (nreduce >> 1) + 1; \
-	int nwrk = (nreduced2p1 > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? nreduced2p1 : SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
+	int nwrk = (nreduced2p1 > SHMEM_REDUCE_MIN_WRKDATA_SIZE) ? (nreduce >> 1) : SHMEM_REDUCE_MIN_WRKDATA_SIZE; \
 	volatile long* vSync = (volatile long*)(pSync + SHMEM_REDUCE_SYNC_SIZE - 2); \
 	int i, j, r; \
 	shmemx_memcpy##SZ(dest, source, nreduce); \
-	vSync[0] = SHMEM_SYNC_VALUE; /* XXX */ \
-	vSync[1] = SHMEM_SYNC_VALUE; /* XXX */ \
-	shmem_sync(PE_start, logPE_stride, PE_size, pSync); /* XXX */ \
-	int start = 1 << logPE_stride; \
-	int end = PE_size_stride; \
-	int step = start; \
+	vSync[0] = SHMEM_SYNC_VALUE; \
+	vSync[1] = SHMEM_SYNC_VALUE; \
+	shmem_sync(PE_start, logPE_stride, PE_size, pSync); \
+	int step = 1 << logPE_stride; \
 	int to = __shmem.my_pe; \
-	T* data = dest; \
-	if (PE_size & (PE_size - 1)) { /* Use ring algorithm for non-powers of 2 */ \
-		start = 1; \
-		end = PE_size; \
-		step = PE_step; \
-		data = (T*)source; \
-	} \
-	for (r = start; r < end;) { \
+	int ring = PE_size & (PE_size - 1); /* Use ring algorithm for non-powers of 2 */ \
+	T* data = (T*)((ring) ? source : dest); \
+	for (r = 1; r < PE_size_stride; r += step) { \
 		to += step; \
 		if (to >= PE_end) to -= PE_size_stride; \
 		uintptr_t remote_ptr = (uintptr_t)shmem_ptr(0, to); \
@@ -75,16 +67,14 @@ shmem_##N##_to_all(T *dest, const T *source, int nreduce, int PE_start, int logP
 			nrem = (nrem < nwrk) ? nrem : nwrk; \
 			__shmem_set_lock(remote_locks); \
 			shmemx_memcpy##SZ(remote_work, data + i, nrem); \
-			remote_locks[1] = 1; /* XXX assumes SHMEM_SYNC_VALUE != 1 */\
+			remote_locks[1] = 1; /* XXX signal assumes SHMEM_SYNC_VALUE != 1 */\
 			while (vSync[1] == SHMEM_SYNC_VALUE); \
 			for (j = 0; j < nrem; j++) dest[i+j] OP; \
 			vSync[1] = SHMEM_SYNC_VALUE; \
 			vSync[0] = SHMEM_SYNC_VALUE; \
 		} \
-		if ((PE_size & (PE_size - 1))) { \
-			r++; \
-		} else { \
-			r <<= 1; \
+		if (!ring) { \
+			to -= step; \
 			step <<= 1; \
 		} \
 	} \

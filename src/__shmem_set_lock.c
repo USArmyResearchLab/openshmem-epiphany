@@ -38,15 +38,15 @@ SHMEM_SCOPE void
 __shmem_set_lock (volatile long* x)
 {
 	__asm__ __volatile__(
-		"mov r16, #0                 \n" // zero lock pointer offset
-		".Loop%=:                    \n"
-		"   mov r18, #1              \n" // copying value to write to lock
-		"   testset r18, [%[x], r16] \n" // test set
-		"   sub r18, r18, #0         \n" // checking result
-		"   bne .Loop%=              \n" // if zero, loop until we acquire lock
+		"mov r1, #0                \n" // zero lock pointer offset
+		"mov r2, #1                \n" // copying value to write to lock
+		".Loop%=:                  \n"
+		"   testset r2, [%[x], r1] \n" // test set
+		"   sub r3, r2, #0         \n" // checking result
+		"   bne .Loop%=            \n" // if zero, loop until we acquire lock
 		:
 		: [x] "r" (x)
-		: "r16", "r18"
+		: "r1", "r2", "r3"
 	);
 }
 

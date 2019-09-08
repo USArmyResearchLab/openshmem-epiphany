@@ -39,7 +39,6 @@ shmem_barrier(int PE_start, int logPE_stride, int PE_size, long *pSync)
 {
 	shmem_quiet();
 	shmem_sync(PE_start, logPE_stride, PE_size, pSync);
-	__shmem.dma_used = 0; // reset
 }
 
 #ifdef __cplusplus
